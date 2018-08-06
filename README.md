@@ -73,7 +73,7 @@ The libraries and API's have minimal (as possible) library dependencies (there a
 - Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
 - Version 1.65.1 or 1.66.0 of the Boost library is required in some test scenarios (see specifics below).
 
-See [Reference](doc/references.md) for additional details on the above libraries.
+See [References](doc/references.md) for additional details on the above libraries.
 
 Specific dependencies:
 

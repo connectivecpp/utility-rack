@@ -95,6 +95,10 @@ Utility Rack has been compiled and tests run on:
 
 The Utility Rack components are header-only, so installation consists of downloading or cloning and setting compiler include paths appropriately. No compile time configuration macros are defined.
 
+# References
+
+See [References](doc/references.md) for details on dependencies and inspirations for Utility Rack.
+
 # About
 
 The primary author of Utility Rack is Cliff Green, softwarelibre at codewrangler dot net. 

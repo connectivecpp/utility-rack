@@ -1,4 +1,4 @@
-# Utility Rack - Useful and Tasty C++ Classes and Functions
+# Utility Rack - Tasty, Useful C++ Classes and Functions
 
 These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 

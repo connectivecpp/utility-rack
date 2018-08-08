@@ -1,6 +1,6 @@
 # Utility Rack - Useful and Tasty C++ Classes and Functions
 
-These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries. The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
+These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
@@ -8,7 +8,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of August 2018, awaiting CMake completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of August 2018, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -103,9 +103,9 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 The primary author of Utility Rack is Cliff Green, softwarelibre at codewrangler dot net. 
 
-Co-authors include (Yaseen?) ...
+Co-authors include (Yaaseen?) ...
 
-Contributors include (Yaseen?) ...
+Contributors include (Yaaseen?) ...
 
 Additional information including author comments is [available here](doc/about.md).
 

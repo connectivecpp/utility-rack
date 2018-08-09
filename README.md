@@ -66,12 +66,12 @@ While the main production branch will always be developed and tested with C++ 17
 
 # External Dependencies
 
-The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code. The external dependencies:
+The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
 
 - Version 1.11 (or later) of Chris Kohlhoff's `networking-ts-impl` (Networking TS) repository is required for Periodic Timer. Note that the version number is from the Asio version and may not exactly match the Networking TS version.
 - Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
 - Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
-- Version 1.65.1 or 1.66.0 of the Boost library is required in some test scenarios (see specifics below).
+- Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).
 
 See [References](doc/references.md) for additional details on the above libraries.
 

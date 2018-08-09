@@ -1,6 +1,6 @@
-# Utility Rack - Useful and Tasty C++ Classes and Functions
+# Utility Rack - Tasty, Useful C++ Classes and Functions
 
-These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries. The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
+These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
@@ -8,7 +8,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of August 2018, awaiting CMake completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of August 2018, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -66,12 +66,12 @@ While the main production branch will always be developed and tested with C++ 17
 
 # External Dependencies
 
-The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code. The external dependencies:
+The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
 
 - Version 1.11 (or later) of Chris Kohlhoff's `networking-ts-impl` (Networking TS) repository is required for Periodic Timer. Note that the version number is from the Asio version and may not exactly match the Networking TS version.
 - Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
 - Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
-- Version 1.65.1 or 1.66.0 of the Boost library is required in some test scenarios (see specifics below).
+- Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).
 
 See [References](doc/references.md) for additional details on the above libraries.
 
@@ -103,9 +103,9 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 The primary author of Utility Rack is Cliff Green, softwarelibre at codewrangler dot net. 
 
-Co-authors include (Yaseen?) ...
+Co-authors include (Yaaseen?) ...
 
-Contributors include (Yaseen?) ...
+Contributors include (Yaaseen?) ...
 
 Additional information including author comments is [available here](doc/about.md).
 

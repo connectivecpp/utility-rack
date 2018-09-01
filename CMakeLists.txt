@@ -23,7 +23,7 @@ add_library ( ${package_name} INTERFACE )
 
 target_include_directories ( ${package_name} INTERFACE "$<BUILD_INTERFACE:${include_source_dir}>" )
 
-target_compile_features ( ${package_name} PUBLIC cxx_std_17)
+target_compile_features ( ${package_name} INTERFACE cxx_std_17)
 
 enable_testing()
 

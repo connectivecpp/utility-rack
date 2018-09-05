@@ -7,6 +7,9 @@
 
 # CMake 3.8 required for cxx_std_17 target_compile_features
 
+# Cliff note, Sep 5, 2018: I'm still a CMake newbie, so there's many improvements that can
+# be made. I'm trying to use modern CMake techniques (see [References] (doc/references.md)).
+
 cmake_minimum_required ( VERSION 3.8 )
 
 option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON )
@@ -21,8 +24,7 @@ set ( include_source_dir "${PROJECT_SOURCE_DIR}/include" )
 
 add_library ( ${package_name} INTERFACE )
 
-target_include_directories ( ${package_name} INTERFACE "$<BUILD_INTERFACE:${include_source_dir}>" )
-
+target_include_directories ( ${package_name} INTERFACE ${include_source_dir} )
 target_compile_features ( ${package_name} INTERFACE cxx_std_17)
 
 enable_testing()

@@ -13,7 +13,7 @@
  *
  */
 
-#include "catch.hpp"
+#include "catch2/catch.hpp"
 
 #include "utility/make_byte_array.hpp"
 #include "utility/repeat.hpp"

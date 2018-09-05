@@ -24,5 +24,7 @@
 
 - Jonathan Müller is very active in the C++ universe and is well known as "foonathan". His blog is at https://foonathan.net/ and his article at http://foonathan.net/blog/2018/03/26/rvalue-references-api-guidelines.html is a must read for library designers.
 
+- Modern CMake references are essential, including Daniel Pfeifer's C++Now 2017 talk on Effective CMake at https://www.youtube.com/watch?v=bsXLMQ6WgIk, Manuel Binna's Github page at https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1, and the book Professional CMake, A Practical Guide, by Craig Scott, at https://crascit.com/professional-cmake/.
+
 - Diagrams in the documentation are created using the draw.io site at https://www.draw.io/.
 

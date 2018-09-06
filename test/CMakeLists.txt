@@ -7,46 +7,64 @@
 
 cmake_minimum_required ( VERSION 3.8 )
 
-project ( test LANGUAGES CXX )
+project ( utility-rack-test VERSION 1.0 LANGUAGES CXX )
 
-set ( MAIN_SRC main_test.cpp )
-set ( TEST_SOURCES 
-    queue/wait_queue_test.cpp
-    timer/periodic_timer_test.cpp
-    utility/erase_where_test.cpp
-    utility/make_byte_array_test.cpp
-    utility/repeat_test.cpp
-    utility/shared_buffer_test.cpp )
+set ( test_source_dir "${CMAKE_SOURCE_DIR}/test" )
+set ( test_main_src "${test_source_dir}/main_test.cpp" )
+# set ( test_include_dir "${test_source_dir}/include" )
+set ( tester_suffix "_runner" )
+set ( main_test_lib_name "main_test_lib" )
 
-set ( HDR_DIR
-    ${PROJECT_SOURCE_DIR}/include
-    ${BUILD_INTERFACE}/boost_1_68_0
-    ${BUILD_INTERFACE}/Catch2/include
-    ${BUILD_INTERFACE}/expected-lite/include
-    ${BUILD_INTERFACE}/networking_ts_impl/include
-    ${BUILD_INTERFACE}/ring-span-lite/include )
+set ( test_sources 
+    "${test_source_dir}/queue/wait_queue_test.cpp"
+    "${test_source_dir}/timer/periodic_timer_test.cpp"
+    "${test_source_dir}/utility/erase_where_test.cpp"
+    "${test_source_dir}/utility/make_byte_array_test.cpp"
+    "${test_source_dir}/utility/repeat_test.cpp"
+    "${test_source_dir}/utility/shared_buffer_test.cpp" )
+
+# TODO: set up find module CMake functionality instead of assuming all the dependent
+# libraries are parallel to utility-rack
+set ( header_dirs
+    "${include_source_dir}"
+#    "${test_include_dir}"
+    "${CMAKE_SOURCE_DIR}/../boost_1_68_0"
+    "${CMAKE_SOURCE_DIR}/../Catch2/single_include"
+    "${CMAKE_SOURCE_DIR}/../expected-lite/include"
+    "${CMAKE_SOURCE_DIR}/../networking-ts-impl/include"
+    "${CMAKE_SOURCE_DIR}/../ring-span-lite/include" )
 
     
 set ( OPTIONS "" )
 set ( DEFINITIONS "" )
 
-function ( make_target target src )
-    add_executable            ( ${target} ${MAIN_SRC} ${src} )
-    message ( "Test executable created: ${target}" )
+
+function ( add_target_info target )
     target_compile_features   ( ${target} PRIVATE cxx_std_17 )
     target_compile_options    ( ${target} PRIVATE ${OPTIONS} )
     target_compile_definitions( ${target} PRIVATE ${DEFINITIONS} )
-    target_include_directories( ${target} PRIVATE ${HDRDIR} )
+    target_include_directories( ${target} PRIVATE ${header_dirs} )
 endfunction()
 
-foreach ( test_src IN LISTS ${TEST_SOURCES} )
+add_library ( ${main_test_lib_name} STATIC ${test_main_src} )
+add_target_info ( ${main_test_lib_name} )
+
+function ( make_exe target src )
+    add_executable            ( ${target} ${src} )
+    add_target_info           ( ${target} )
+    target_link_libraries ( ${target} PRIVATE pthread )
+    target_link_libraries ( ${target} PRIVATE ${main_test_lib_name} )
+    message ( "Test executable to create: ${target}" )
+    add_test ( NAME ${target}${tester_suffix} COMMAND ${target} )
+endfunction()
+
+enable_testing()
+
+foreach ( test_src IN LISTS test_sources )
     get_filename_component ( targ ${test_src} NAME_WE )
-    message ( "Calling make_target with: ${targ}" )
-    make_target ( ${targ} ${test_src} )
+    message ( "Calling make_exe for: ${targ}" )
+    make_exe ( ${targ} ${test_src} )
 endforeach()
 
-# TODO testing invocation
-# enable_testing()
-
-# add_test ( something )
+# end of file
 

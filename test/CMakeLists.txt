@@ -23,35 +23,79 @@ set ( test_sources
     "${test_source_dir}/utility/repeat_test.cpp"
     "${test_source_dir}/utility/shared_buffer_test.cpp" )
 
-# TODO: set up find module CMake functionality instead of assuming all the dependent
-# libraries are parallel to utility-rack
-set ( header_dirs
-    "${include_source_dir}"
-#    "${test_include_dir}"
-    "${CMAKE_SOURCE_DIR}/../boost_1_68_0"
-    "${CMAKE_SOURCE_DIR}/../Catch2/single_include"
-    "${CMAKE_SOURCE_DIR}/../expected-lite/include"
-    "${CMAKE_SOURCE_DIR}/../networking-ts-impl/include"
-    "${CMAKE_SOURCE_DIR}/../ring-span-lite/include" )
-
-    
 set ( OPTIONS "" )
 set ( DEFINITIONS "" )
 
+set ( header_dirs
+    "${include_source_dir}"
+#    "${test_include_dir}"
+    )
+
+if (ENV{CATCH2_INCLUDE_DIR} STREQUAL "" )
+    set ( catch2_include_dir "../Catch2/single_include" )
+else ()
+    set ( catch2_include_dir ENV{CATCH2_INCLUDE_DIR} )
+endif()
+
+if (ENV{BOOST_INCLUDE_DIR} STREQUAL "" )
+    set ( boost_include_dir "../boost_1_68_0" )
+else ()
+    set ( boost_include_dir ENV{BOOST_INCLUDE_DIR} )
+endif()
+
+if (ENV{NETWORKING_TS_INCLUDE_DIR} STREQUAL "" )
+    set ( networking_ts_include_dir "../networking-ts-impl/include" )
+else ()
+    set ( networking_ts_include_dir ENV{NETWORKING_TS_INCLUDE_DIR} )
+endif()
+
+if (ENV{RING_SPAN_LITE_INCLUDE_DIR} STREQUAL "" )
+    set ( ring_span_lite_include_dir "../ring-span-lite/include" )
+else ()
+    set ( ring_span_lite_include_dir ENV{RING_SPAN_LITE_INCLUDE_DIR} )
+endif()
+
+function ( add_target_dependencies target )
+    find_package ( Catch2 REQUIRED PATHS "../Catch2")
+    if ( Catch2_FOUND )
+        target_include_directories ( ${target} PRIVATE ${Catch2_INCLUDE_DIRS} )
+    else ()
+        target_include_directories ( ${target} PRIVATE ${catch2_include_dir} )
+    endif ()
+    find_package ( Boost )
+    if ( Boost_FOUND )
+        target_include_directories ( ${target} PRIVATE ${Boost_INCLUDE_DIRS} )
+    else ()
+        target_include_directories ( ${target} PRIVATE ${boost_include_dir} )
+    endif ()
+    find_package ( networking-ts-impl )
+    if ( networking-ts-impl_FOUND )
+        target_include_directories ( ${target} PRIVATE ${networking-ts-impl_INCLUDE_DIRS} )
+    else ()
+        target_include_directories ( ${target} PRIVATE ${networking_ts_include_dir} )
+    endif ()
+    find_package ( ring-span-lite )
+    if ( ring-span-lite_FOUND )
+        target_include_directories ( ${target} PRIVATE ${ring-span-lite_INCLUDE_DIRS} )
+    else ()
+        target_include_directories ( ${target} PRIVATE ${ring_span_lite_include_dir} )
+    endif ()
+endfunction()
 
 function ( add_target_info target )
-    target_compile_features   ( ${target} PRIVATE cxx_std_17 )
-    target_compile_options    ( ${target} PRIVATE ${OPTIONS} )
-    target_compile_definitions( ${target} PRIVATE ${DEFINITIONS} )
-    target_include_directories( ${target} PRIVATE ${header_dirs} )
+    target_compile_features    ( ${target} PRIVATE cxx_std_17 )
+    target_compile_options     ( ${target} PRIVATE ${OPTIONS} )
+    target_compile_definitions ( ${target} PRIVATE ${DEFINITIONS} )
+    target_include_directories ( ${target} PRIVATE ${header_dirs} )
+    add_target_dependencies    ( ${target} )
 endfunction()
 
 add_library ( ${main_test_lib_name} STATIC ${test_main_src} )
 add_target_info ( ${main_test_lib_name} )
 
 function ( make_exe target src )
-    add_executable            ( ${target} ${src} )
-    add_target_info           ( ${target} )
+    add_executable        ( ${target} ${src} )
+    add_target_info       ( ${target} )
     target_link_libraries ( ${target} PRIVATE pthread )
     target_link_libraries ( ${target} PRIVATE ${main_test_lib_name} )
     message ( "Test executable to create: ${target}" )

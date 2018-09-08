@@ -13,7 +13,7 @@
  *
  */
 
-#include "catch.hpp"
+#include "catch2/catch.hpp"
 
 #include <utility> // std::pair, std::forward
 #include <functional> // std::ref

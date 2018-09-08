@@ -15,7 +15,7 @@
 
 #define CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER
 
-#include "catch.hpp"
+#include "catch2/catch.hpp"
 
 #include <experimental/io_context>
 #include <experimental/executor>

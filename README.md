@@ -8,7 +8,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of August 2018, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of October 2018, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -88,7 +88,7 @@ Specific dependencies:
 
 Utility Rack has been compiled and tests run on:
 
-- g++ 7.2, Linux (Ubuntu 17.10, Linux kernel 4.13)
+- g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
 
 # Installation
@@ -103,9 +103,9 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 The primary author of Utility Rack is Cliff Green, softwarelibre at codewrangler dot net. 
 
-Co-authors include (Yaaseen?) ...
+Co-authors include ...
 
-Contributors include (Yaaseen?) ...
+Contributors include ...
 
 Additional information including author comments is [available here](doc/about.md).
 

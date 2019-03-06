@@ -78,7 +78,7 @@ See [References](doc/references.md) for additional details on the above librarie
 Specific dependencies:
 
 - All test scenarios: Catch 2
-- Periodic Timer (production): `networking-ts-impl`
+- Periodic Timer (production): `asio`
 - Wait Queue (production): none
   - Ring Span Lite (test)
   - Boost.Circular (test)
@@ -88,7 +88,7 @@ Specific dependencies:
 
 Utility Rack has been compiled and tests run on:
 
-- g++ 7.2, Linux (Ubuntu 17.10, Linux kernel 4.13)
+- g++ 7.2 and 7.3, Linux (Ubuntu 17.10 / Linux kernel 4.13, Ubuntu 18.04 / kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
 
 # Installation
@@ -101,11 +101,9 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 # About
 
-The primary author of Utility Rack is Cliff Green, softwarelibre at codewrangler dot net. 
+The primary author of Utility Rack is Cliff Green, cliffg at connectivecpp dot com. The primary co-author is Thurman Gillespy, thurmang at connectivecpp dot com.
 
-Co-authors include (Yaaseen?) ...
-
-Contributors include (Yaaseen?) ...
+Contributors include Matthew Briggs, Roxanne Ageron, Daniel Muldrew, and Bob Higgins.
 
 Additional information including author comments is [available here](doc/about.md).
 

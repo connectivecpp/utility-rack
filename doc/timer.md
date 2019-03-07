@@ -1,6 +1,6 @@
 # Periodic Timer
 
-The C++ Networking TS does not directly provide periodic timers. Instead, application code using the Networking TS must chain together function object callbacks until satisfied.
+The Asio library does not directly provide periodic timers. Instead, application code using Asio must chain together function object callbacks until satisfied.
 
 The Periodic Timer class is a thin wrapper supplying the chaining, with two options for the periodicity. In addition, elapsed times are computed and provided to the application supplied callback.
 

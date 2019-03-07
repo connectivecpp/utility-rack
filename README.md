@@ -8,7 +8,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of October 2018, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of March 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -28,9 +28,9 @@ A detailed overview is [available here](doc/queue.md).
 
 ### Periodic Timer
 
-The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies C++ Networking Technical Standard (TS) timers when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
+The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio timers (see [References](doc/references.md)) when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
 
-Asynchronous timers from the C++ Networking Technical Specification (TS) are relatively easy to use. However, there are no timers that are periodic. This class simplifies the usage, using application supplied function object callbacks. When the timer is started, the application specifies whether each callback is invoked based on a duration (e.g. one second after the last callback), or on timepoints (e.g. a callback will be invoked each second according to the clock).
+Asynchronous timers from Asio are relatively easy to use. However, there are no timers that are periodic. This class simplifies the usage, using application supplied function object callbacks. When the timer is started, the application specifies whether each callback is invoked based on a duration (e.g. one second after the last callback), or on timepoints (e.g. a callback will be invoked each second according to the clock).
 
 A detailed overview is [available here](doc/timer.md).
 
@@ -68,7 +68,7 @@ While the main production branch will always be developed and tested with C++ 17
 
 The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
 
-- Version 1.11 (or later) of Chris Kohlhoff's `networking-ts-impl` (Networking TS) repository is required for Periodic Timer. Note that the version number is from the Asio version and may not exactly match the Networking TS version.
+- Version 1.12 (or later) of Chris Kohlhoff's `asio` repository is required for Periodic Timer. Note that it is the stand-alone Asio versus the Boost Asio implementation.
 - Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
 - Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
 - Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).

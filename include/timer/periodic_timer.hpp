@@ -7,10 +7,9 @@
  *  @brief An asynchronous periodic timer providing both duration and timepoint 
  *  based periods.
  *
- *  Writing code using asynchronous timers from the C++ Networking Technical 
- *  Specification (TS) is relatively easy. However, there are no timers that 
- *  are periodic. This class simplifies the task, using application supplied 
- *  function object callbacks.
+ *  Writing code using asynchronous timers from the Asio library is relatively easy. 
+ *  However, there are no timers that are periodic. This class simplifies the task, 
+ *  using application supplied function object callbacks.
  *
  *  A @c periodic_timer stops when the application supplied function object 
  *  returns @c false rather than @c true.
@@ -32,7 +31,7 @@
  *
  *  @author Cliff Green
  *
- *  Copyright (c) 2017-2018 by Cliff Green
+ *  Copyright (c) 2017-2019 by Cliff Green
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -42,8 +41,8 @@
 #ifndef PERIODIC_TIMER_HPP_INCLUDED
 #define PERIODIC_TIMER_HPP_INCLUDED
 
-#include <experimental/timer> // Networking TS include
-#include <experimental/io_context>
+#include "asio/basic_waitable_timer.hpp"
+#include "asio/io_context.hpp"
 
 #include <chrono>
 #include <system_error>
@@ -60,7 +59,7 @@ public:
 
 private:
 
-  std::experimental::net::basic_waitable_timer<Clock> m_timer;
+  asio::basic_waitable_timer<Clock> m_timer;
 
 private:
   template <typename F>
@@ -69,7 +68,7 @@ private:
     time_point now_time { Clock::now() };
     // pass err and elapsed time to app function obj
     if (!func(err, now_time - last_tp) || 
-        err == std::experimental::net::error::operation_aborted) {
+        err == asio::error::operation_aborted) {
       return; // app is finished with timer for now or timer was cancelled
     }
     m_timer.expires_after(dur);
@@ -84,7 +83,7 @@ private:
                               const std::error_code& err, F&& func) {
     // pass err and elapsed time to app function obj
     if (!func(err, (Clock::now() - last_tp)) || 
-        err == std::experimental::net::error::operation_aborted) {
+        err == asio::error::operation_aborted) {
       return; // app is finished with timer for now or timer was cancelled
     }
     m_timer.expires_at(last_tp + dur + dur);
@@ -124,7 +123,7 @@ public:
    * @param ioc @c io_context for asynchronous processing.
    *
    */
-  explicit periodic_timer(std::experimental::net::io_context& ioc) noexcept : m_timer(ioc) { }
+  explicit periodic_timer(asio::io_context& ioc) noexcept : m_timer(ioc) { }
 
   periodic_timer() = delete; // no default ctor
 

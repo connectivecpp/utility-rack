@@ -1,6 +1,6 @@
-# Copyright 2018 by Cliff Green
+# Copyright 2018-2019 by Cliff Green
 #
-# https://github.com/cliffg-softwarelibre/utility-rack
+# https://github.com/connectivecpp/utility-rack
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -42,9 +42,9 @@ set ( boost_include_dir "${CMAKE_SOURCE_DIR}/../boost_1_68_0" )
 if ( NOT $ENV{BOOST_INCLUDE_DIR} STREQUAL "" )
     set ( boost_include_dir $ENV{BOOST_INCLUDE_DIR}} )
 endif()
-set ( networking_ts_include_dir "${CMAKE_SOURCE_DIR}/../networking-ts-impl/include" )
-if ( NOT $ENV{NETWORKING_TS_INCLUDE_DIR} STREQUAL "" )
-    set ( networking_ts_include_dir $ENV{NETWORKING_TS_INCLUDE_DIR}} )
+set ( asio_include_dir "${CMAKE_SOURCE_DIR}/../asio/asio/include" )
+if ( NOT $ENV{ASIO_INCLUDE_DIR} STREQUAL "" )
+    set ( asio_include_dir $ENV{ASIO_INCLUDE_DIR}} )
 endif()
 set ( ring_span_lite_include_dir "${CMAKE_SOURCE_DIR}/../ring-span-lite/include" )
 if ( NOT $ENV{RING_SPAN_LITE_INCLUDE_DIR} STREQUAL "" )
@@ -58,9 +58,9 @@ function ( add_target_dependencies target )
 #    find_package ( Boost REQUIRED )
 #    target_include_directories ( ${target} PRIVATE ${Boost_INCLUDE_DIRS} )
     target_include_directories ( ${target} PRIVATE ${boost_include_dir} )
-#    find_package ( networking-ts-impl REQUIRED )
-#    target_include_directories ( ${target} PRIVATE ${networking-ts-impl_INCLUDE_DIRS} )
-    target_include_directories ( ${target} PRIVATE ${networking_ts_include_dir} )
+#    find_package ( asio REQUIRED )
+#    target_include_directories ( ${target} PRIVATE ${asio_INCLUDE_DIRS} )
+    target_include_directories ( ${target} PRIVATE ${asio_include_dir} )
 #    find_package ( ring-span-lite REQUIRED )
 #    target_include_directories ( ${target} PRIVATE ${ring-span-lite_INCLUDE_DIRS} )
     target_include_directories ( ${target} PRIVATE ${ring_span_lite_include_dir} )

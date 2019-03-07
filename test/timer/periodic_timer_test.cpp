@@ -17,13 +17,14 @@
 
 #include "catch2/catch.hpp"
 
-#include <experimental/io_context>
-#include <experimental/executor>
 
 #include <chrono>
 #include <thread>
 #include <optional>
 #include <system_error>
+
+#include "asio/executor_work_guard.hpp"
+#include "asio/executor.hpp"
 
 #include "timer/periodic_timer.hpp"
 #include "utility/repeat.hpp"
@@ -38,7 +39,7 @@ bool lambda_util (std::error_code err, D elap) {
   return count < Expected;
 }
 
-using wk_guard = std::experimental::net::executor_work_guard<std::experimental::net::io_context::executor_type>;
+using wk_guard = asio::executor_work_guard<asio::io_context::executor_type>;
 
 void wait_util (std::chrono::milliseconds ms, wk_guard& wg, std::thread& thr) {
   std::this_thread::sleep_for(ms);
@@ -52,9 +53,9 @@ void test_util () {
 
   GIVEN ( "A clock and a duration") {
 
-    std::experimental::net::io_context ioc;
+    asio::io_context ioc;
     chops::periodic_timer<Clock> timer {ioc};
-    wk_guard wg { std::experimental::net::make_work_guard(ioc) };
+    wk_guard wg { asio::make_work_guard(ioc) };
 
     std::thread thr([&ioc] () { ioc.run(); } );
     count = 0;

@@ -28,7 +28,7 @@ A detailed overview is [available here](doc/queue.md).
 
 ### Periodic Timer
 
-The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio (see [References](doc/references.md)) timers when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
+The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio timers (see [References](doc/references.md)) when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
 
 Asynchronous timers from Asio are relatively easy to use. However, there are no timers that are periodic. This class simplifies the usage, using application supplied function object callbacks. When the timer is started, the application specifies whether each callback is invoked based on a duration (e.g. one second after the last callback), or on timepoints (e.g. a callback will be invoked each second according to the clock).
 

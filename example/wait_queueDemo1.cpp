@@ -5,7 +5,7 @@
  *  @author Thurman Gillespy
  *  3/7/19
  * 
- *  Copyright (c)2018 by Thurman Gillespy
+ *  Copyright (c)2019 by Thurman Gillespy
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -29,7 +29,7 @@ void queueState(const chops::wait_queue<int>& wq) {
 }
 
 // tasty lambda utilities
-auto printStr = [&] (std::string s) { std::cout << s << std::endl; };
+auto printStr = [] (std::string s) { std::cout << s << std::endl; };
 auto printLn = [] () { std::cout << std::endl; };
 
 int main() {

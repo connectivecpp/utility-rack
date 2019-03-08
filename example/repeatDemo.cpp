@@ -5,11 +5,13 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
+ *  3/8/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
- *   g++ -std=c++17 -I ~/Projects/utility-rack/include/ repeatDemo.cpp
+ *  Sample make file:
+ *  g++ -std=c++17 -I ~/Projects/utility-rack/include/ repeatDemo.cpp
  */
 
 #include <iostream>
@@ -26,11 +28,13 @@ void calcFactorial(bool print) {
     static int count = 1;
     static u_int64_t fact = 1;
 
-    fact *= count++;
+    fact *= count;
     
     if (print) {
         std::cout << count << "!= " << fact <<std::endl;
     }
+
+    ++count;
 }
 
 // wrapper functions determine whether values are printed or not

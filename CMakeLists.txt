@@ -13,6 +13,7 @@
 cmake_minimum_required ( VERSION 3.8 )
 
 option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON )
+option ( UTILITY_RACK_OPT_BUILD_EXAMPLES  "Build and perform utility-rack examples" ON )
 
 project ( utility-rack VERSION 1.0 LANGUAGES CXX )
 
@@ -30,6 +31,11 @@ target_compile_features ( ${package_name} INTERFACE cxx_std_17)
 if ( UTILITY_RACK_OPT_BUILD_TESTS )
   enable_testing()
   add_subdirectory ( test )
+endif()
+
+if ( UTILITY_RACK_OPT_BUILD_EXAMPLES )
+  enable_testing()
+  add_subdirectory ( example )
 endif()
 
 # end of file

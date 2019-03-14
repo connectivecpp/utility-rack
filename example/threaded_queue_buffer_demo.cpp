@@ -5,7 +5,7 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/13/19
+ *  3/14/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,16 +17,12 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <functional> 
-#include <mutex>
-#include <condition_variable>
-#include <chrono> // std:chrono:system_clock::now()
+#include <functional> // std::for_each, std::mem_fn
 #include <atomic> // std::atomic, std::memory_order_relaxed
 
 #include "queue/wait_queue.hpp"
 #include "utility/shared_buffer.hpp"
 
-using namespace std::chrono_literals;
 
 /** Project Overview
  * 
@@ -35,10 +31,10 @@ using namespace std::chrono_literals;
  * 
  * The program can have from 1...n Device threads that each put 20 random numbers into
  * device_q, a @c chops::wait_queue. Over 100 threads can be run sucessfully (default 
- * is 10). Each Device thread generates random numbers in its' own 'centile': 
+ * is 100). Each Device thread generates random numbers in its' own 'centile': 
  * thread 0: 0..99; thread 1: 100..199; thread 2: 200-299, etc.
  * 
- * The device_q numbers are read by 1 or more (default is 2) Data threads. The numbers
+ * The device_q numbers are read by 1 or more (default is 10) Data threads. The numbers
  * are sorted by centile. When 5 numbers in the same centile are collected, a string is
  * created that is placed into data_q, another wait_queue of type @c
  * chops::wait_queue<chops::const_shared_buffer>>, ie, the string is copied into a new
@@ -53,7 +49,7 @@ using namespace std::chrono_literals;
  * data_q and appened to the proper centile string. 
  * 
  * When the DB thread is finished, a 'Data Report' is printed. Each row contains the 
- * random nubmers created by a particular thread.
+ * random nubmers created by a particular thread, in chronlogic order.
  * 
  * Data Report
  * [0]      30  71   2  99  60  74  11  70   4  41  83  90  14  72  68  68  88  51  28  78
@@ -72,7 +68,7 @@ using namespace std::chrono_literals;
 // Place numbers into a shared @c chops::wait_queue
 class Device {
 private:
-    const int INTERVAL = 200; // usec: how often to generate a random #
+    const int INTERVAL = 20; // usec: how often to generate a random #
     const int NUM_LIMIT = 20; // how many numbers to generate
     chops::wait_queue<int>& device_q;
     std::atomic<int>& num_device_threads;
@@ -128,7 +124,7 @@ public:
         }
     };
     
-    // read data from wait_queue, periodically send to shared_buffer
+    // read data from device_q (wait_queue), periodically send to data_q
     void processData() {
         //std::cerr << "thread: Process Data\n";
 
@@ -138,7 +134,7 @@ public:
             readData(count);
         }
 
-        // finish up - read until queue is empty
+        // finish up - read until device_q is empty
         while (!device_q.empty()) {
             readData(count);
         }
@@ -187,12 +183,14 @@ private:
         auto f = [&](int num) {
             s += (index == 0 ? " " : "");
             s += (num / 10 == 0 ? " " : "");
+            s += (index < 10 ? " " : "");
             s += std::to_string(num) + " ";
         };
         std::for_each(store.at(index).begin(), store.at(index).end(), f);
         // clear that vector
         store.at(index).clear();
         // put the sting into data_q, using API for @d std::const_shared_queue
+        // NOTE: data_q is of type chops::wait_queue<chops::const_shared_buffer>>
         data_q.emplace_push(s.c_str(), s.size() + 1);
     }
 
@@ -264,33 +262,33 @@ private:
 
 int main() {
     // number of Device threads
-    const unsigned int num_sources = 10; // must be > 0
+    const unsigned int NUM_SOURCES = 100; // must be > 0
     // number of Data threads
-    // BUG: keep num_data < num_sources, or you will suffer
-    const int num_data = 2;
+    // BUG: keep num_data << num_sources, or you will suffer
+    const int NUM_DATA = 10;
 
     chops::wait_queue<int> device_q;
     chops::wait_queue<chops::const_shared_buffer> data_q;
-    std::atomic<int> num_device_threads(num_sources);
-    std::atomic<int> num_data_threads(num_data);
+    std::atomic<int> num_device_threads(NUM_SOURCES);
+    std::atomic<int> num_data_threads(NUM_DATA);
     
     std::vector<std::thread> threadListDevice;
     std::vector<std::thread> threadListData;
     
     // initialize class instances to run as separate threads
     Device dev(device_q, num_device_threads);
-    Data data(device_q, data_q, num_device_threads, num_data_threads, num_sources);
-    DB db(data_q, num_data_threads, num_sources);
+    Data data(device_q, data_q, num_device_threads, num_data_threads, NUM_SOURCES);
+    DB db(data_q, num_data_threads, NUM_SOURCES);
 
     std::cout << "Processing data...\n";
     std::cout.flush();
 
     // create threads
-    for (int i = 0; i < (int)num_sources; i++) {
+    for (int i = 0; i < (int)NUM_SOURCES; i++) {
         threadListDevice.push_back(std::thread(&Device::generateData, &dev, i));
     }
 
-    for (int i = 0; i < num_data; i++) {
+    for (int i = 0; i < NUM_DATA; i++) {
         threadListData.push_back(std::thread(&Data::processData, &data));
     }
 

@@ -4,6 +4,8 @@ These C++ utility classes and functions are designed for general purpose use. In
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
+# License
+
 This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status

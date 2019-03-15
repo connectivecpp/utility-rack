@@ -5,7 +5,7 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/14/19
+ *  3/15/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,7 +18,8 @@
 #include <vector>
 #include <thread>
 #include <functional> // std::for_each, std::mem_fn
-#include <atomic> // std::atomic, std::memory_order_relaxed
+#include <atomic> // std::atomic
+#include <cstdlib> // std::srand, rand; EXIT_SUCCESS
 
 #include "queue/wait_queue.hpp"
 #include "utility/shared_buffer.hpp"
@@ -27,28 +28,31 @@
 /** Project Overview
  * 
  * This demo program shows how to use @c chops::wait_queue and @c chops::shared_buffer
- * in a multithreaded environment.
+ * in a multithreaded environment. The program simulates multiple peripheral data
+ * generators, perhaps sensors or network connections. THe data is handled by one or
+ * more data processors, which periodically format the data and sent it to a simulated
+ * database.
  * 
- * The program can have from 1...n Device threads that each put 20 random numbers into
- * device_q, a @c chops::wait_queue. Over 100 threads can be run sucessfully (default 
- * is 100). Each Device thread generates random numbers in its' own 'centile': 
+ * The program can have from 1...n DeviceDataGenerator threads that each put 20 random
+ * numbers into device_q, a @c chops::wait_queue. Over 1000 threads can be run sucessfully
+ * (default is 100). Each Device thread generates random numbers in its' own 'centile': 
  * thread 0: 0..99; thread 1: 100..199; thread 2: 200-299, etc.
  * 
- * The device_q numbers are read by 1 or more (default is 10) Data threads. The numbers
- * are sorted by centile. When 5 numbers in the same centile are collected, a string is
- * created that is placed into data_q, another wait_queue of type @c
+ * The device_q numbers are read by 1 or more (default is 10) DataProcessor threads.
+ * The numbers are sorted by centile. When 5 numbers in the same centile are collected,
+ * a string is created that is placed into data_q, another wait_queue of type @c
  * chops::wait_queue<chops::const_shared_buffer>>, ie, the string is copied into a new
  * @c chops::const_shared_buffer in the data_q. The first number in the string is the
  * 'index' that correspons to that centile, and the remaining numbers are kept in the
  * original order they were produced.
  * 
- *    0 87 17 65 5 32
+ *    0 87 17 65 5 32s
  *    8 870 813 808 827 874
  * 
- * The data_q is read by the DB (database) thread. The string is extracted from the
+ * The data_q is read by the Database thread. The string is extracted from the
  * data_q and appened to the proper centile string. 
  * 
- * When the DB thread is finished, a 'Data Report' is printed. Each row contains the 
+ * When the Database thread is finished, a 'Data Report' is printed. Each row contains the 
  * random nubmers created by a particular thread, in chronlogic order.
  * 
  * Data Report
@@ -63,243 +67,284 @@
  * 
  */
 
+using device_q_t = chops::wait_queue<int>;
+using data_q_t = chops::wait_queue<chops::const_shared_buffer>;
+
 // generate 20 random numbers in a centile based on the 'start number' passed to
 // the @c Device::processData method.
 // Place numbers into a shared @c chops::wait_queue
-class Device {
+class DeviceDataGenerator {
 private:
     const int INTERVAL = 20; // usec: how often to generate a random #
     const int NUM_LIMIT = 20; // how many numbers to generate
-    chops::wait_queue<int>& device_q;
-    std::atomic<int>& num_device_threads;
-    bool finished = false;
+    
+    device_q_t& m_device_q;
+    std::atomic<int>& m_num_device_threads;
+    const int m_start_num;
 
 public:
-    Device(chops::wait_queue<int>& wait, std::atomic<int>& ndt) : 
-            device_q(wait), num_device_threads(ndt) {};
+    DeviceDataGenerator(device_q_t& wait, std::atomic<int>& dev_threads,
+        int start_num) : m_device_q(wait), m_num_device_threads(dev_threads),
+        m_start_num(start_num) {};
     
-    // generate a random number range [start_num * 100 ... start_num * 100 + 1)
-    // every interval usec
-    void generateData(int start_num) {
-        //std::cerr << "thread: [" << start_num << "] Generate Data\n";
+    // generate a random number, range [(0...99) + start_num * 100]
+    // every INTERVAL usec
+    void operator()() {
         std::srand(time(0));
-        int num_count = 0;
-        while (!finished) {
-            // create random number every <INTERVAL> usec
+        int num_count = NUM_LIMIT;
+        // create NUM_LIMIT random numbers
+        while (num_count-- > 0) {
+            // create random number every INTERVAL usec
             std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL));
-            int val = (std::rand() % 100) + (start_num * 100);
+            int val = (std::rand() % 100) + (m_start_num * 100);
             // put it in the wait_queue
-            device_q.push(val);
-            // we only want NUM_LIMIT random numbers
-            if (num_count++ > NUM_LIMIT) {
-                finished = true;
-            } 
+            m_device_q.push(val);
         }
-        num_device_threads.fetch_sub(1);
+        
+        // cleanup: decrement atomic number of device threads
+        m_num_device_threads.fetch_sub(1);
     }
 };
 
-// Read numbers in device_q , sort by centile into @c std::vector<vector<int>>.
+// Read numbers in m_device_q, sort by centile into @c std::vector<vector<int>>.
 // When 5 numbers accumulated in a centile, create string to place
 // into data_q, then empty that vector
-class Data {
+class DataProcessor {
 private:
-    chops::wait_queue<int>& device_q;
-    chops::wait_queue<chops::const_shared_buffer>& data_q;
-    std::atomic<int>& num_device_threads;
-    std::atomic<int>& num_data_threads;
-    unsigned int num_sources = 0;
-    std::vector<std::vector<int> > store;
+    device_q_t& m_device_q;
+    data_q_t& m_data_q;
+    std::atomic<int>& m_num_device_threads;
+    std::atomic<int>& m_num_data_threads;
+    const int m_num_devices;
 
+    std::vector<std::vector<int> > m_store;
 
 public:
-    Data(chops::wait_queue<int>& devq, chops::wait_queue<chops::const_shared_buffer>& datq,
-        std::atomic<int>& ndevt, std::atomic<int>& ndatt, int num ) : 
-        device_q(devq), data_q(datq), num_device_threads(ndevt), num_data_threads(ndatt),
-        num_sources(num) {
+    DataProcessor(device_q_t& devq, data_q_t& datq,
+        std::atomic<int>& device_threads, std::atomic<int>& data_threads, int num_devices) : 
+        m_device_q(devq), m_data_q(datq), m_num_device_threads(device_threads),
+        m_num_data_threads(data_threads), m_num_devices(num_devices) {
+        
         // initialize vector
-        for (int i = 0; i < static_cast<int>(num_sources); i++) {
+        for (int i = 0; i < m_num_devices; i++) {
             std::vector<int> v;
-            store.push_back(v);
+            m_store.push_back(v);
         }
     };
     
-    // read data from device_q (wait_queue), periodically send to data_q
-    void processData() {
-        //std::cerr << "thread: Process Data\n";
-
-        int count = 1;
-        // read from the device_q while Device threads active
-        while (num_device_threads.load() > 0 ) {
-            readData(count);
+    // read data from m_device_q (wait_queue), periodically send to m_data_q
+    void operator()() {
+        // read from the m_device_q while DeviceDataGenerator threads active
+        while (m_num_device_threads.load() > 0 ) {
+            readData();
         }
 
-        // finish up - read until device_q is empty
-        while (!device_q.empty()) {
-            readData(count);
+        // finish up - read until m_device_q is empty
+        while (!m_device_q.empty()) {
+            readData();
         }
 
-        finish();
+        // make sure nothing left in m_store vector<int>
+        cleanup();
+
+        // exit: subtract 1 from atomic data processor thread count
+        m_num_data_threads.fetch_sub(1);
     }
 
 private:
-    // read number from device_q, if any present, place into store vector
+    // read number from m_device_q, if any present, place into m_store vector
     // by index number. When 5 numbers are in a centile vector, call
     // formatData()
-    void readData(int& count) {
-        //std::cerr << ".";
-        // short delay to slow the '.' down in stdout
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        
-        if (device_q.empty()) {
-            return;
-        }
-        //std::cerr << "|";
-        std::optional<int> result = device_q.try_pop().value();
-        //std::cerr << "@1";
-        if (!result.has_value()) {
-            return;
-        }
-        int val = result.value();
-        //std::cerr << "|\n";
+    void readData() {
 
-        int index =  val / 100;
+        if (m_device_q.empty()) {
+            return;
+        }
+       
+        std::optional<int> result = m_device_q.try_pop();
+        if (!result) {
+            return;
+        }
+
+        const int val = result.value();
+        const int index =  val / 100;
+
         // insert into proper vector
-        store.at(index).push_back(val);
+        m_store.at(index).push_back(val);
         // if 5 elements, create string to send to DB
-        if (store.at(index).size() >= 5) {
+        if (m_store.at(index).size() >= 5) {
             formatData(index);
         }
     }
 
-    // create a string to send to the DB thread via data_q
-    void formatData(int index) {
+    // create a string to send to the DB thread via m_data_q
+    void formatData(const int index) {
         // first number in s is the index
         std::string s = std::to_string(index) + " ";
         // convert each int into a string, and append to s
         // add spaces for formatting
         // first number is the 'index' or centile
         // example: 8 870 813 808 827 874
-        auto f = [&](int num) {
+        auto f = [&](const int num) {
             s += (index == 0 ? " " : "");
             s += (num / 10 == 0 ? " " : "");
             s += (index < 10 ? " " : "");
             s += std::to_string(num) + " ";
         };
-        std::for_each(store.at(index).begin(), store.at(index).end(), f);
+        std::for_each(m_store.at(index).begin(), m_store.at(index).end(), f);
         // clear that vector
-        store.at(index).clear();
-        // put the sting into data_q, using API for @d std::const_shared_queue
-        // NOTE: data_q is of type chops::wait_queue<chops::const_shared_buffer>>
-        data_q.emplace_push(s.c_str(), s.size() + 1);
+        m_store.at(index).clear();
+        // put the sting into m_data_q, using API for @d std::const_shared_queue
+        m_data_q.emplace_push(s.c_str(), s.size() + 1);
     }
 
-    // decrement @c num_data_threads
-    void finish() {
-        num_data_threads.fetch_sub(1);
+    // process any numbers left in m_store vector<int>
+    void cleanup() {
+        for (int index = 0; index < m_store.size(); index++) {
+            if (m_store.at(index).size() > 0) {
+                formatData(index);
+            }
+        }
     }
 };
 
-// (very) simple database that reads string from data_q and places into proper centile
+// (very) simple database that reads string from m_data_q and places into proper centile
 // generate 'Data Report' on exit
-class DB {
+class Database {
 private:
-    chops::wait_queue<chops::const_shared_buffer>& data_q;
-    std::atomic<int>& num_data_threads;
-    unsigned int num_sources = 0;
+    data_q_t& m_data_q;
+    std::atomic<int>& m_num_data_threads;
+    const unsigned int m_num_devices;
+
     std::vector<std::string> db;
 
 public:
-    DB(chops::wait_queue<chops::const_shared_buffer>& datq, std::atomic<int>& ndt, 
-        int num) : data_q(datq), num_data_threads(ndt), num_sources(num) {
+    Database(data_q_t& datq, std::atomic<int>& data_threads,
+    int num_devices) : m_data_q(datq), m_num_data_threads(data_threads),
+        m_num_devices(num_devices) {
         // initialize vector<vector<string>>
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < m_num_devices; i++) {
             std::string str = "[" + std::to_string(i) + "]\t";
             db.push_back(str);
         }
     };
     
-    void insert() {
-        //std::cerr << "thread: Database\n";
+    // read data from m_data_q
+    void operator()() {
         // read data while data_threads active
-        while (num_data_threads.load() > 0) {
+        while (m_num_data_threads.load() > 0) {
             // loop back if empty
-            if (data_q.empty()) { 
+            if (m_data_q.empty()) { 
                 continue;
             }
             processData();
         }
-        // after all data_threads closed, read any data left in data_q
-        while (!data_q.empty()) {
+        
+        // after all data_threads closed, read any data left in m_data_q
+        while (!m_data_q.empty()) {
             processData();
         }
 
         // database final report
         std::cout << "\nData Report" << std::endl;
         std::for_each(db.begin(), db.end(), 
-                [] (std::string s) { std::cout << s << std::endl; });
+                [] (const std::string s) { std::cout << s << std::endl; });
     }
 
 private:
-    // extract string from data_q, append to db vector
+    // extract string from m_data_q, append to db vector
     void processData() {
-        // get string from data_q
-        //std::cerr << "<";
-        std::optional<chops::const_shared_buffer> buf = data_q.try_pop();
-        //std::cerr << "@2";
-        if (!buf.has_value()) {
+        // get string from m_data_q
+        std::optional<chops::const_shared_buffer> buffer = m_data_q.try_pop();
+        if (!buffer) {
             return;
         }
-        const std::string str = (char *)(buf.value()).data();
-        //std::cerr << ">\n";
+        
+        const std::string str = reinterpret_cast<const char*>(buffer.value().data());
         // get the index
-        int index = std::stoi(str.substr(0, str.find_first_of(" ")));
+        const int index = std::stoi(str.substr(0, str.find_first_of(" ")));
         // append to proper vector
         db.at(index) += str.substr(str.find_first_of(" ") + 1,
                                    std::string::npos);
     }
 };
 
-int main() {
-    // number of Device threads
-    const unsigned int NUM_SOURCES = 100; // must be > 0
-    // number of Data threads
-    // BUG: keep num_data << num_sources, or you will suffer
-    const int NUM_DATA = 10;
+// thread creation and management
+class ThreadManagement {
+private:
+    const int m_num_devices;
+    const int m_num_data_proc;
 
-    chops::wait_queue<int> device_q;
-    chops::wait_queue<chops::const_shared_buffer> data_q;
-    std::atomic<int> num_device_threads(NUM_SOURCES);
-    std::atomic<int> num_data_threads(NUM_DATA);
+public:
+    ThreadManagement(const int num_devices, const int num_data_proc) :
+        m_num_devices(num_devices), m_num_data_proc(num_data_proc) {};
     
-    std::vector<std::thread> threadListDevice;
-    std::vector<std::thread> threadListData;
-    
-    // initialize class instances to run as separate threads
-    Device dev(device_q, num_device_threads);
-    Data data(device_q, data_q, num_device_threads, num_data_threads, NUM_SOURCES);
-    DB db(data_q, num_data_threads, NUM_SOURCES);
+    void operator()() {
+        // shared
+        device_q_t device_q;
+        data_q_t data_q;
+        std::atomic<int> num_device_threads(m_num_devices);
+        std::atomic<int> num_data_threads(m_num_data_proc);
+        // local
+        std::vector<std::thread> threadListDevice;
+        std::vector<std::thread> threadListData;
+
+        // create threads
+        // DeviceDataGenerator
+        for (int i = 0; i < m_num_devices; i++) {
+            threadListDevice.push_back(std::thread(DeviceDataGenerator(device_q,
+                                num_device_threads, i)));
+        }
+        // DataProcessor
+        for (int i = 0; i < m_num_data_proc; i++) {
+            threadListData.push_back(std::thread(DataProcessor(device_q, data_q,
+                                num_device_threads, num_data_threads, m_num_devices)));
+        }
+
+        // Database
+        std::thread dbThread(Database(data_q, num_data_threads, m_num_devices));
+
+        // join threads
+        std::for_each(threadListDevice.begin(), threadListDevice.end(),
+                      std::mem_fn(&std::thread::join));
+        std::for_each(threadListData.begin(), threadListData.end(),
+                      std::mem_fn(&std::thread::join));
+        dbThread.join();
+    }
+};
+
+
+/*  constants  */
+// number of DeviceDataGenerator threads
+static unsigned int NUM_DEVICES = 5; // must be > 0
+// number of DataProcessor threads
+static unsigned int NUM_DATA_PROC = 2; // must be > 0
+
+int main(int argc, char* argv[]) {
+    int num_devices = NUM_DEVICES;
+    int num_data_proc = NUM_DATA_PROC;
+
+    if (argc != 1 && argc != 3) {
+        std::cout << "usage: \n";
+        std::cout << "  0 parameters: (default values)\n";
+        std::cout << "  2 parameters: <number of devices>, ";
+        std::cout << "<number of data processors> \n";
+
+        return EXIT_FAILURE;
+    }
+
+    if (argc == 3) {
+        num_devices = std::atoi(argv[1]);
+        num_data_proc = std::atoi(argv[2]);
+    }
+
+    std::cout << "DeviceDataGenerator threads: " << num_devices << std::endl;
+    std::cout << "DataProcessor threads: " << num_data_proc << std::endl;
+    std::cout << "Database threads: " << 1 << std::endl << std::endl;
 
     std::cout << "Processing data...\n";
-    std::cout.flush();
 
-    // create threads
-    for (int i = 0; i < (int)NUM_SOURCES; i++) {
-        threadListDevice.push_back(std::thread(&Device::generateData, &dev, i));
-    }
-
-    for (int i = 0; i < NUM_DATA; i++) {
-        threadListData.push_back(std::thread(&Data::processData, &data));
-    }
-
-    std::thread dbThread(&DB::insert, &db);
-    
-    // join threads
-    std::for_each(threadListDevice.begin(), threadListDevice.end(),
-                    std::mem_fn(&std::thread::join));
-    std::for_each(threadListData.begin(), threadListData.end(),
-                    std::mem_fn(&std::thread::join));
-    dbThread.join();
+    ThreadManagement(num_devices, num_data_proc)();
 
     return EXIT_SUCCESS;
 }

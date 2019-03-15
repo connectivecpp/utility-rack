@@ -35,10 +35,10 @@
  * 
  * The program can have from 1...n DeviceDataGenerator threads that each put 20 random
  * numbers into device_q, a @c chops::wait_queue. Over 1000 threads can be run sucessfully
- * (default is 100). Each Device thread generates random numbers in its' own 'centile': 
+ * (default is 20). Each Device thread generates random numbers in its' own 'centile': 
  * thread 0: 0..99; thread 1: 100..199; thread 2: 200-299, etc.
  * 
- * The device_q numbers are read by 1 or more (default is 10) DataProcessor threads.
+ * The device_q numbers are read by 1 or more (default is 5) DataProcessor threads.
  * The numbers are sorted by centile. When 5 numbers in the same centile are collected,
  * a string is created that is placed into data_q, another wait_queue of type @c
  * chops::wait_queue<chops::const_shared_buffer>>, ie, the string is copied into a new
@@ -316,9 +316,9 @@ public:
 
 /*  constants  */
 // number of DeviceDataGenerator threads
-static unsigned int NUM_DEVICES = 5; // must be > 0
+static unsigned int NUM_DEVICES = 20; // must be > 0
 // number of DataProcessor threads
-static unsigned int NUM_DATA_PROC = 2; // must be > 0
+static unsigned int NUM_DATA_PROC = 5; // must be > 0
 
 int main(int argc, char* argv[]) {
     int num_devices = NUM_DEVICES;

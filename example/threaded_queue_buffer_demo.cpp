@@ -5,7 +5,7 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/15/19
+ *  3/16/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,6 +20,7 @@
 #include <functional> // std::for_each, std::mem_fn
 #include <atomic> // std::atomic
 #include <cstdlib> // std::srand, rand; EXIT_SUCCESS
+#include <future> // std::promise, std::future
 
 #include "queue/wait_queue.hpp"
 #include "utility/shared_buffer.hpp"
@@ -30,27 +31,27 @@
  * This demo program shows how to use @c chops::wait_queue and @c chops::shared_buffer
  * in a multithreaded environment. The program simulates multiple peripheral data
  * generators, perhaps sensors or network connections. THe data is handled by one or
- * more data processors, which periodically format the data and sent it to a simulated
- * database.
+ * more data processors, which sorts and formats the data, and periodically sends it to
+ * a simulated database.
  * 
- * The program can have from 1...n DeviceDataGenerator threads that each put 20 random
+ * The program can have from <1...n> DeviceDataGenerator threads that each put 20 random
  * numbers into device_q, a @c chops::wait_queue. Over 1000 threads can be run sucessfully
- * (default is 20). Each Device thread generates random numbers in its' own 'centile': 
- * thread 0: 0..99; thread 1: 100..199; thread 2: 200-299, etc.
+ * (default is 20). Each DeviceDataGenerator thread generates random numbers in its' own
+ * 'centile': thread 0: <0..99>; thread 1: <100..199>; thread 2: <200-299>, etc.
  * 
  * The device_q numbers are read by 1 or more (default is 5) DataProcessor threads.
  * The numbers are sorted by centile. When 5 numbers in the same centile are collected,
- * a string is created that is placed into data_q, another wait_queue of type @c
- * chops::wait_queue<chops::const_shared_buffer>>, ie, the string is copied into a new
- * @c chops::const_shared_buffer in the data_q. The first number in the string is the
- * 'index' that correspons to that centile, and the remaining numbers are kept in the
- * original order they were produced.
+ * a string with the numbers is created that is placed into data_q, another wait_queue 
+ * of type @c chops::wait_queue<chops::const_shared_buffer>>, ie, the string is copied into
+ * a new @c chops::const_shared_buffer in the data_q. The first number in the string is the
+ * 'index' that correspons to that centile, and the remaining numbers are kept in
+ * chronologic order.
  * 
  *    0 87 17 65 5 32s
  *    8 870 813 808 827 874
  * 
- * The data_q is read by the Database thread. The string is extracted from the
- * data_q and appened to the proper centile string. 
+ * The data_q is read by the single Database thread. The string is extracted from the
+ * data_q and appened to the proper centile string in the database. 
  * 
  * When the Database thread is finished, a 'Data Report' is printed. Each row contains the 
  * random nubmers created by a particular thread, in chronlogic order.
@@ -62,11 +63,12 @@
  * [3]     387 303 312 350 323 331 343 374 363 371 390 335 367 317 397 341 394 399 341 366 
  * [4]     447 415 448 464 455 489 462 446 440 452 417 426 417 446 427 433 484 431 445 468 
  * 
- * Mutex locks and conditional variable signaling is handled within the @c chops::wait_queue
- * class. 
+ * Mutex locks and conditional variable signaling is handled within the 
+ * @c chops::wait_queue class. 
  * 
  */
 
+// @c wait_queue for moving data between threads
 using device_q_t = chops::wait_queue<int>;
 using data_q_t = chops::wait_queue<chops::const_shared_buffer>;
 
@@ -75,16 +77,16 @@ using data_q_t = chops::wait_queue<chops::const_shared_buffer>;
 // Place numbers into a shared @c chops::wait_queue
 class DeviceDataGenerator {
 private:
-    const int INTERVAL = 20; // usec: how often to generate a random #
-    const int NUM_LIMIT = 20; // how many numbers to generate
+    constexpr static int INTERVAL = 20; // usec: how often to generate a random #
+    constexpr static int NUM_LIMIT = 20; // how many numbers to generate
     
     device_q_t& m_device_q;
     std::atomic<int>& m_num_device_threads;
     const int m_start_num;
 
 public:
-    DeviceDataGenerator(device_q_t& wait, std::atomic<int>& dev_threads,
-        int start_num) : m_device_q(wait), m_num_device_threads(dev_threads),
+    constexpr DeviceDataGenerator(device_q_t& wait, std::atomic<int>& dev_threads,
+        const int start_num) : m_device_q(wait), m_num_device_threads(dev_threads),
         m_start_num(start_num) {};
     
     // generate a random number, range [(0...99) + start_num * 100]
@@ -96,7 +98,7 @@ public:
         while (num_count-- > 0) {
             // create random number every INTERVAL usec
             std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL));
-            int val = (std::rand() % 100) + (m_start_num * 100);
+            const int val = (std::rand() % 100) + (m_start_num * 100);
             // put it in the wait_queue
             m_device_q.push(val);
         }
@@ -121,7 +123,7 @@ private:
 
 public:
     DataProcessor(device_q_t& devq, data_q_t& datq,
-        std::atomic<int>& device_threads, std::atomic<int>& data_threads, int num_devices) : 
+        std::atomic<int>& device_threads, std::atomic<int>& data_threads, const int num_devices) : 
         m_device_q(devq), m_data_q(datq), m_num_device_threads(device_threads),
         m_num_data_threads(data_threads), m_num_devices(num_devices) {
         
@@ -215,13 +217,14 @@ private:
     data_q_t& m_data_q;
     std::atomic<int>& m_num_data_threads;
     const unsigned int m_num_devices;
+    std::promise<std::string>& m_promise;
 
     std::vector<std::string> db;
 
 public:
     Database(data_q_t& datq, std::atomic<int>& data_threads,
-    int num_devices) : m_data_q(datq), m_num_data_threads(data_threads),
-        m_num_devices(num_devices) {
+    std::promise<std::string>& promise, int num_devices) : m_data_q(datq),  
+        m_num_data_threads(data_threads), m_promise(promise), m_num_devices(num_devices) {
         // initialize vector<vector<string>>
         for (int i = 0; i < m_num_devices; i++) {
             std::string str = "[" + std::to_string(i) + "]\t";
@@ -246,9 +249,7 @@ public:
         }
 
         // database final report
-        std::cout << "\nData Report" << std::endl;
-        std::for_each(db.begin(), db.end(), 
-                [] (const std::string s) { std::cout << s << std::endl; });
+        createReport();
     }
 
 private:
@@ -267,6 +268,18 @@ private:
         db.at(index) += str.substr(str.find_first_of(" ") + 1,
                                    std::string::npos);
     }
+
+    // create data report, place into promise object for printing
+    void createReport() const {
+        std::cout << "\nData Report" << std::endl;
+        // create report string
+        std::string s_out;
+        std::for_each(db.begin(), db.end(), 
+                [&] (const std::string s) { s_out += s + "\n"; });
+        // place into pomise object
+        m_promise.set_value(s_out);
+
+    }
 };
 
 // thread creation and management
@@ -276,7 +289,7 @@ private:
     const int m_num_data_proc;
 
 public:
-    ThreadManagement(const int num_devices, const int num_data_proc) :
+    constexpr ThreadManagement(const int num_devices, const int num_data_proc) :
         m_num_devices(num_devices), m_num_data_proc(num_data_proc) {};
     
     void operator()() {
@@ -285,7 +298,9 @@ public:
         data_q_t data_q;
         std::atomic<int> num_device_threads(m_num_devices);
         std::atomic<int> num_data_threads(m_num_data_proc);
+        std::promise<std::string> promise_obj;
         // local
+        std::future<std::string> future_obj = promise_obj.get_future();
         std::vector<std::thread> threadListDevice;
         std::vector<std::thread> threadListData;
 
@@ -302,7 +317,7 @@ public:
         }
 
         // Database
-        std::thread dbThread(Database(data_q, num_data_threads, m_num_devices));
+        std::thread dbThread(Database(data_q, num_data_threads, promise_obj, m_num_devices));
 
         // join threads
         std::for_each(threadListDevice.begin(), threadListDevice.end(),
@@ -310,15 +325,18 @@ public:
         std::for_each(threadListData.begin(), threadListData.end(),
                       std::mem_fn(&std::thread::join));
         dbThread.join();
+
+        // print Database report
+        std::cout << future_obj.get() << std::endl;
     }
 };
 
 
 /*  constants  */
 // number of DeviceDataGenerator threads
-static unsigned int NUM_DEVICES = 20; // must be > 0
+constexpr static unsigned int NUM_DEVICES = 20; // must be > 0
 // number of DataProcessor threads
-static unsigned int NUM_DATA_PROC = 5; // must be > 0
+constexpr static unsigned int NUM_DATA_PROC = 5; // must be > 0
 
 int main(int argc, char* argv[]) {
     int num_devices = NUM_DEVICES;

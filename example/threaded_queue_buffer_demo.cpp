@@ -202,7 +202,7 @@ private:
 
     // process any numbers left in m_store vector<int>
     void cleanup() {
-        for (int index = 0; index < m_store.size(); index++) {
+        for (int index = 0; index < static_cast<int> (m_store.size()); index++) {
             if (m_store.at(index).size() > 0) {
                 formatData(index);
             }
@@ -216,8 +216,8 @@ class Database {
 private:
     data_q_t& m_data_q;
     std::atomic<int>& m_num_data_threads;
-    const unsigned int m_num_devices;
     std::promise<std::string>& m_promise;
+    const unsigned int m_num_devices;
 
     std::vector<std::string> db;
 
@@ -226,7 +226,7 @@ public:
     std::promise<std::string>& promise, int num_devices) : m_data_q(datq),  
         m_num_data_threads(data_threads), m_promise(promise), m_num_devices(num_devices) {
         // initialize vector<vector<string>>
-        for (int i = 0; i < m_num_devices; i++) {
+        for (int i = 0; i < static_cast<int> (m_num_devices); i++) {
             std::string str = "[" + std::to_string(i) + "]\t";
             db.push_back(str);
         }
@@ -306,7 +306,7 @@ public:
 
         // create threads
         // DeviceDataGenerator
-        for (int i = 0; i < m_num_devices; i++) {
+        for (int i = 0; i < static_cast<int> (m_num_devices); i++) {
             threadListDevice.push_back(std::thread(DeviceDataGenerator(device_q,
                                 num_device_threads, i)));
         }

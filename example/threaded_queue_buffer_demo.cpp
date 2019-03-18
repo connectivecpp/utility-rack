@@ -261,7 +261,8 @@ private:
             return;
         }
         
-        const std::string str = reinterpret_cast<const char*>(buffer.value().data());
+        const std::string str = 
+                    reinterpret_cast<const char*>(buffer.value().data());
         // get the index
         const int index = std::stoi(str.substr(0, str.find_first_of(" ")));
         // append to proper vector

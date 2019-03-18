@@ -1,9 +1,11 @@
 /** @file
  *  
- *  @brief Example code demonstrating use of @c chops::wait_queue. 
+ *  @brief Example code demonstrating use of @c chops::wait_queue.
+ *  See @c threaded_wait_shared_demo.cpp for example in multithreaded
+ *  code. 
  * 
  *  @author Thurman Gillespy
- *  3/7/19
+ *  3/17/19
  * 
  *  Copyright (c)2019 by Thurman Gillespy
  *
@@ -11,11 +13,13 @@
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
  *  Sample make file: 
- *  g++ -std=c++17 -I ~/Projects/utility-rack/include/ wait_queueDemo1.cpp
+ *  g++ -std=c++17 -I ~/Projects/utility-rack/include/ wait_queue_demo.cpp
  * 
  */
 
 #include <iostream>
+#include <cstdlib>
+#include <optional> // std::optional
 
 #include "queue/wait_queue.hpp"
 
@@ -29,8 +33,8 @@ void queueState(const chops::wait_queue<int>& wq) {
 }
 
 // tasty lambda utilities
-auto printStr = [] (std::string s) { std::cout << s << std::endl; };
-auto printLn = [] () { std::cout << std::endl; };
+constexpr auto printStr = [] (const std::string s) { std::cout << s << std::endl; };
+constexpr auto printLn = [] () { std::cout << std::endl; };
 
 int main() {
 
@@ -55,7 +59,7 @@ int main() {
     int numVals = wq.size();
     while (numVals-- > 0) {
         auto result = wq.try_pop(); // std::optional<int>
-        if (result.has_value()) {
+        if (result) {
             std::cout << result.value() << " ";
         }
     }

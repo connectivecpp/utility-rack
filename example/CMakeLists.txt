@@ -13,8 +13,10 @@ set ( example_source_dir "${CMAKE_SOURCE_DIR}/example" )
 
 set ( example_sources 
     "${example_source_dir}/repeat_demo.cpp"
-    "${example_source_dir}/shared_buffer_demo1.cpp"
-    "${example_source_dir}/wait_queue_demo1.cpp" )
+    "${example_source_dir}/shared_buffer_demo.cpp"
+    "${example_source_dir}/wait_queue_demo.cpp"
+    "${example_source_dir}/threaded_queue_buffer_demo.cpp"
+    "${example_source_dir}/timer_demo.cpp" )
 
 set ( OPTIONS "" )
 set ( DEFINITIONS "" )

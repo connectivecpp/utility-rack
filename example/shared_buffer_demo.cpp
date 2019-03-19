@@ -45,7 +45,7 @@ int main() {
     // buf1.append(static_cast<std::byte>('A');
     // buf1.append((static_cast<std::byte>(' ');
     // buf1.append((static_cast<std::byte>('c');
-    // etc
+    // etc.
 
     std::cout << "buffer1 contains " << buf1.size() << " bytes" << std::endl;
     // print the output, one char at a time

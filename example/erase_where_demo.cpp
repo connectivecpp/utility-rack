@@ -58,7 +58,7 @@ int main() {
     printValues(arr);
 
     // remove even numbers
-    it = std::remove_if(arr.begin(), arr.end(), [] (int i) { return i % 2 == 0; });
+    it = std::remove_if(arr.begin(), arr.end(), [] (const int i) { return i % 2 == 0; });
 
     printSize(arr);
     printValues(arr);
@@ -77,7 +77,7 @@ int main() {
     printValues(arr2);
 
     chops::erase_where(arr2, 5);
-    chops::erase_where_if(arr2, [] (int i) { return i % 2 == 0 ; });
+    chops::erase_where_if(arr2, [] (const int i) { return i % 2 == 0 ; });
 
     printSize(arr2);
     printValues(arr2);

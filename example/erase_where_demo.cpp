@@ -19,6 +19,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <algorithm> // std::remove, std::remove_if
 
 #include "utility/erase_where.hpp"
 

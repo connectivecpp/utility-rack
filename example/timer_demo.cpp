@@ -36,7 +36,7 @@
  * The timer executes inside an @c std::thread. The thread and timer are linked 
  * with an @c asio::io_context. As the example shows, multiple timers can be 
  * run inside one thread. An @c asio::executor_work_guard controls ownership 
- * of= executor work within the thread. Without either the thread or the @c
+ * of executor work within the thread. Without either the thread or the @c
  * exector_work_guard, the timer will not execute.
  */
 int main() {

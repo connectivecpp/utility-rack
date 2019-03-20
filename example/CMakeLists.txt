@@ -16,7 +16,8 @@ set ( example_sources
     "${example_source_dir}/shared_buffer_demo.cpp"
     "${example_source_dir}/wait_queue_demo.cpp"
     "${example_source_dir}/threaded_queue_buffer_demo.cpp"
-    "${example_source_dir}/timer_demo.cpp" )
+    "${example_source_dir}/timer_demo.cpp"
+    "${example_source_dir}/erase_where_demo.cpp" )
 
 set ( OPTIONS "" )
 set ( DEFINITIONS "" )

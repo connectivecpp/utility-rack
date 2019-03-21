@@ -34,7 +34,7 @@
  * more data processors, which sorts and formats the data, and periodically sends it to
  * a simulated database.
  * 
- * The program can have from <1...n> DeviceDataGenerator threads that each put 20 random
+ * The program can have 1 or more DeviceDataGenerator threads that each put 20 random
  * numbers into device_q, a @c chops::wait_queue. Over 1000 threads can be run sucessfully
  * (default is 20). Each DeviceDataGenerator thread generates random numbers in its' own
  * 'centile': thread 0: <0..99>; thread 1: <100..199>; thread 2: <200-299>, etc.
@@ -110,7 +110,7 @@ public:
 
 // Read numbers in m_device_q, sort by centile into @c std::vector<vector<int>>.
 // When 5 numbers accumulated in a centile, create string to place
-// into data_q, then empty that vector
+// into data_q, then empty that vector.
 class DataProcessor {
 private:
     device_q_t& m_device_q;
@@ -277,7 +277,7 @@ private:
         std::string s_out;
         std::for_each(db.begin(), db.end(), 
                 [&] (const std::string s) { s_out += s + "\n"; });
-        // place into pomise object
+        // place into promise object
         m_promise.set_value(s_out);
 
     }

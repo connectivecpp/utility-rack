@@ -51,14 +51,14 @@ public:
     // construct with num!
     constexpr Factorial(const int num) { next(num); }
 
-    // get the current calculated factorial (default is 1!)
+    // get the current calculated factorial (default is 0!)
     constexpr u_int64_t getFact() const { return fact; }
 
     constexpr int getCount() const { return count; }
 
     // calculate the next num factorials
     constexpr u_int64_t next(const int num) {
-        chops::repeat(num,  [&] () { fact *= (count++ == 0 ? 1 : count); } );
+        chops::repeat(num, [&] () { fact *= (count++ == 0 ? 1 : count); } );
         return fact;
     }
 

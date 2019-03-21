@@ -66,7 +66,7 @@ int main() {
     timer1.start_duration_timer(std::chrono::milliseconds(dur1), f1);
     timer2.start_duration_timer(std::chrono::milliseconds(dur2), f2);
 
-    // unlock mutex
+    // release work_guard
     wg.reset();
     // reattach thread
     thr.join();

@@ -5,21 +5,23 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/16/19
+ *  3/22/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
  *  Sample make file:
- *  g++ -std=c++17 -I ~/Projects/utility-rack/include/ multithreadedDemo.cpp -lpthread 
+ *  g++ -std=c++17 -I ~/Projects/utility-rack/include/ multithreaded_demo.cpp -lpthread 
  */
 
 #include <iostream>
-#include <vector>
-#include <thread>
-#include <functional> // std::for_each, std::mem_fn
-#include <atomic> // std::atomic
 #include <cstdlib> // std::srand, rand; EXIT_SUCCESS
+#include <vector>
+#include <string>
+#include <thread> // std::thread
+#include <functional> // std::mem_fn
+#include <algorithm> // std::for_each
+#include <atomic> // std::atomic
 #include <future> // std::promise, std::future
 
 #include "queue/wait_queue.hpp"
@@ -71,6 +73,12 @@
 // @c wait_queue for moving data between threads
 using device_q_t = chops::wait_queue<int>;
 using data_q_t = chops::wait_queue<chops::const_shared_buffer>;
+
+// utility function for casting @c wait_queue.data()
+template <class C>
+const char* cast_to_char_ptr (const C buf) {
+    return static_cast<const char*> (static_cast<const void*> (buf.data()));
+}
 
 // generate 20 random numbers in a centile based on the 'start number' passed to
 // the @c Device::processData method.
@@ -128,9 +136,8 @@ public:
         m_num_data_threads(data_threads), m_num_devices(num_devices) {
         
         // initialize vector
-        for (int i = 0; i < m_num_devices; i++) {
-            std::vector<int> v;
-            m_store.push_back(v);
+        for (int i = 0; i < m_num_devices; ++i) {
+            m_store.push_back(std::vector<int>());
         }
     };
     
@@ -180,14 +187,14 @@ private:
     }
 
     // create a string to send to the DB thread via m_data_q
-    void formatData(const int index) {
+    void formatData(int index) {
         // first number in s is the index
         std::string s = std::to_string(index) + " ";
         // convert each int into a string, and append to s
         // add spaces for formatting
         // first number is the 'index' or centile
         // example: 8 870 813 808 827 874
-        auto f = [&](const int num) {
+        auto f = [&](int num) {
             s += (index == 0 ? " " : "");
             s += (num / 10 == 0 ? " " : "");
             s += (index < 10 ? " " : "");
@@ -203,7 +210,7 @@ private:
     // process any numbers left in m_store vector<int>
     void cleanup() {
         for (int index = 0; index < static_cast<int> (m_store.size()); index++) {
-            if (m_store.at(index).size() > 0) {
+            if (!m_store.at(index).empty()) {
                 formatData(index);
             }
         }
@@ -261,8 +268,7 @@ private:
             return;
         }
         
-        const std::string str = 
-                    reinterpret_cast<const char*>(buffer.value().data());
+        const std::string str = cast_to_char_ptr (buffer.value());
         // get the index
         const int index = std::stoi(str.substr(0, str.find_first_of(" ")));
         // append to proper vector

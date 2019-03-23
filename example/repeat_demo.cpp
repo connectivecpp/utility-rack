@@ -5,7 +5,7 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/17/19
+ *  3/22/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -15,17 +15,19 @@
  */
 
 #include <iostream>
-#include <cstdlib>
+#include <cstdlib> // EXIT_SUCCESS
+#include <string>
+
 #include "utility/repeat.hpp"
 
 void printHello() { std::cout << "Hello, world\n"; } // simple function
 
 void (*helloPtr)() = printHello; // pointer to simple function
 
-void printNum(const int num) { std::cout << num << " "; } // print the number passed to function
+void printNum(int num) { std::cout << num << " "; } // print the number passed to function
 
 // calculate factorial - each call calculates the next factorial
-const void calcFactorial(const bool print) {
+const void calcFactorial(bool print) {
     static int count = 1;
     static u_int64_t fact = 1;
 
@@ -39,27 +41,27 @@ const void calcFactorial(const bool print) {
 }
 
 // wrapper functions determine whether values are printed or not
-const void advanceFactorial() { calcFactorial(false); }
-const void printFactorial() { calcFactorial(true); }
+void advanceFactorial() { calcFactorial(false); }
+void printFactorial() { calcFactorial(true); }
 
 // calculate factorial
 class Factorial {
 public:
     // default constructor (with 0!)
-    constexpr Factorial() {};
+    constexpr Factorial() = default;
 
     // construct with num!
-    constexpr Factorial(const int num) { next(num); }
+    constexpr Factorial(int num) { next(num); }
 
     // get the current calculated factorial (default is 0!)
-    constexpr u_int64_t getFact() const { return fact; }
+    constexpr u_int64_t getFact() const { return m_fact; }
 
-    constexpr int getCount() const { return count; }
+    constexpr int getCount() const { return m_count; }
 
     // calculate the next num factorials
-    constexpr u_int64_t next(const int num) {
-        chops::repeat(num, [&] () { fact *= (count++ == 0 ? 1 : count); } );
-        return fact;
+    constexpr u_int64_t next(int num) {
+        chops::repeat(num, [&] () { m_fact *= (m_count++ == 0 ? 1 : m_count); } );
+        return m_fact;
     }
 
     // calculate the next factorial
@@ -68,12 +70,12 @@ public:
     }
 
     // print methods
-    void print() const { std::cout << fact <<std::endl; }
-    void print(const char end) const { std::cout << fact << end; }
+    void print() { std::cout << m_fact <<std::endl; }
+    void print(char end) { std::cout << m_fact << end; }
 
 private:
-    int count = 0;
-    u_int64_t fact = 1;
+    int m_count = 0;
+    u_int64_t m_fact = 1;
 };
 
 // tasty utility lambdas

@@ -1,12 +1,12 @@
 /** @file
  *  
  *  @brief Example code demonstrating use of @c chops::erase_where and 
- *  @x chops::erase_where_if.
+ *  @c chops::erase_where_if.
  * 
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/19/19
+ *  3/22/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,9 +17,9 @@
  */
 
 #include <iostream>
-#include <cstdlib>
+#include <cstdlib> // EXIT_SUCCESS
 #include <vector>
-#include <algorithm> // std::remove, std::remove_if
+#include <algorithm> // std::remove, std::remove_if, std::for_each
 
 #include "utility/erase_where.hpp"
 
@@ -35,10 +35,10 @@ int main() {
 
     std::vector<int> arr {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    auto printSize = [] (std::vector<int>& arr) 
+    auto printSize = [] (const std::vector<int>& arr) 
         {std::cout << "# elements in array: " << arr.size() << std::endl;};
     
-    auto printValues = [] (std::vector<int>& arr) 
+    auto printValues = [] (const std::vector<int>& arr) 
     { std::for_each(arr.begin(), arr.end(), [] (int i) { std::cout << i << " "; });
     std::cout << std::endl;};
 
@@ -58,7 +58,7 @@ int main() {
     printValues(arr);
 
     // remove even numbers
-    it = std::remove_if(arr.begin(), arr.end(), [] (const int i) { return i % 2 == 0; });
+    it = std::remove_if(arr.begin(), arr.end(), [] (int i) { return i % 2 == 0; });
 
     printSize(arr);
     printValues(arr);
@@ -77,7 +77,7 @@ int main() {
     printValues(arr2);
 
     chops::erase_where(arr2, 5);
-    chops::erase_where_if(arr2, [] (const int i) { return i % 2 == 0 ; });
+    chops::erase_where_if(arr2, [] (int i) { return i % 2 == 0 ; });
 
     printSize(arr2);
     printValues(arr2);

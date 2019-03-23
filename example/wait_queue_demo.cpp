@@ -1,13 +1,12 @@
 /** @file
  *  
  *  @brief Example code demonstrating use of @c chops::wait_queue.
- *  See @c threaded_wait_shared_demo.cpp for example in multithreaded
- *  code. 
+ *  See @c threaded_wait_shared_demo.cpp for multithreaded example. 
  * 
  *  @author Thurman Gillespy
- *  3/17/19
  * 
  *  Copyright (c)2019 by Thurman Gillespy
+ *  3/22/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,7 +17,8 @@
  */
 
 #include <iostream>
-#include <cstdlib>
+#include <cstdlib> // EXIT_SUCCESS
+#include <string>
 #include <optional> // std::optional
 
 #include "queue/wait_queue.hpp"
@@ -33,7 +33,7 @@ void queueState(const chops::wait_queue<int>& wq) {
 }
 
 // tasty lambda utilities
-constexpr auto printStr = [] (const std::string s) { std::cout << s << std::endl; };
+constexpr auto printStr = [] (const std::string& s) { std::cout << s << std::endl; };
 constexpr auto printLn = [] () { std::cout << std::endl; };
 
 int main() {
@@ -56,8 +56,8 @@ int main() {
 
     // remove the elements
     printStr("pop (and remove) each element from the queue");
-    int numVals = wq.size();
-    while (numVals-- > 0) {
+    int num_elements = wq.size();
+    while (num_elements-- > 0) {
         auto result = wq.try_pop(); // std::optional<int>
         if (result) {
             std::cout << result.value() << " ";

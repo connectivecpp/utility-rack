@@ -6,7 +6,7 @@
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy
- *  3/19/19
+ *  3/23/19
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,9 +18,9 @@
  */
 
 #include <iostream>
-#include <cstdlib>
-#include <chrono>
-#include <thread>
+#include <cstdlib> // EXIT_SUCCESS
+#include <chrono> // std::chrono
+#include <thread> // std::thread
 
 #include "asio/executor_work_guard.hpp"
 #include "asio/executor.hpp"
@@ -53,6 +53,7 @@ int main() {
     constexpr auto dur1 { 500 };
     constexpr auto dur2 { 500 };
     constexpr int num_repeats = 5;
+    
     // lambda functions called by timer every dur msec
     auto f1 = [&num_repeats] (std::error_code err, Clock::duration elap) {
         static int i = 0; std::cout << "Hello, "; std::cout.flush();

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 by Cliff Green
+# Copyright 2019 by Cliff Green
 #
 # https://github.com/connectivecpp/utility-rack
 #
@@ -7,21 +7,17 @@
 
 cmake_minimum_required ( VERSION 3.8 )
 
-project ( utility-rack-test VERSION 1.0 LANGUAGES CXX )
+project ( utility-rack-example VERSION 1.0 LANGUAGES CXX )
 
-set ( test_source_dir "${CMAKE_SOURCE_DIR}/test" )
-set ( test_main_src "${test_source_dir}/main_test.cpp" )
-# set ( test_include_dir "${test_source_dir}/include" )
-set ( tester_suffix "_runner" )
-set ( main_test_lib_name "main_test_lib" )
+set ( example_source_dir "${CMAKE_SOURCE_DIR}/example" )
 
-set ( test_sources 
-    "${test_source_dir}/queue/wait_queue_test.cpp"
-    "${test_source_dir}/timer/periodic_timer_test.cpp"
-    "${test_source_dir}/utility/erase_where_test.cpp"
-    "${test_source_dir}/utility/make_byte_array_test.cpp"
-    "${test_source_dir}/utility/repeat_test.cpp"
-    "${test_source_dir}/utility/shared_buffer_test.cpp" )
+set ( example_sources 
+    "${example_source_dir}/repeat_demo.cpp"
+    "${example_source_dir}/shared_buffer_demo.cpp"
+    "${example_source_dir}/wait_queue_demo.cpp"
+    "${example_source_dir}/threaded_queue_buffer_demo.cpp"
+    "${example_source_dir}/timer_demo.cpp"
+    "${example_source_dir}/erase_where_demo.cpp" )
 
 set ( OPTIONS "" )
 set ( DEFINITIONS "" )
@@ -34,17 +30,13 @@ set ( header_dirs
 # Still learning find_package and related ways to bring in third party dependent include directories,
 # so don't judge, instead please help.
 
-set ( catch2_include_dir "${CMAKE_SOURCE_DIR}/../Catch2/single_include" )
-if ( NOT $ENV{CATCH2_INCLUDE_DIR} STREQUAL "" )
-    set ( catch2_include_dir $ENV{CATCH2_INCLUDE_DIR}} )
+set ( asio_include_dir "${CMAKE_SOURCE_DIR}/../asio/asio/include" )
+if ( NOT $ENV{ASIO_INCLUDE_DIR} STREQUAL "" )
+    set ( asio_include_dir $ENV{ASIO_INCLUDE_DIR}} )
 endif()
 set ( boost_include_dir "${CMAKE_SOURCE_DIR}/../boost_1_69_0" )
 if ( NOT $ENV{BOOST_INCLUDE_DIR} STREQUAL "" )
     set ( boost_include_dir $ENV{BOOST_INCLUDE_DIR}} )
-endif()
-set ( asio_include_dir "${CMAKE_SOURCE_DIR}/../asio/asio/include" )
-if ( NOT $ENV{ASIO_INCLUDE_DIR} STREQUAL "" )
-    set ( asio_include_dir $ENV{ASIO_INCLUDE_DIR}} )
 endif()
 set ( ring_span_lite_include_dir "${CMAKE_SOURCE_DIR}/../ring-span-lite/include" )
 if ( NOT $ENV{RING_SPAN_LITE_INCLUDE_DIR} STREQUAL "" )
@@ -52,9 +44,6 @@ if ( NOT $ENV{RING_SPAN_LITE_INCLUDE_DIR} STREQUAL "" )
 endif()
 
 function ( add_target_dependencies target )
-#    find_package ( Catch2 REQUIRED )
-#    target_include_directories ( ${target} PRIVATE ${Catch2_INCLUDE_DIRS} )
-    target_include_directories ( ${target} PRIVATE ${catch2_include_dir} )
 #    find_package ( Boost REQUIRED )
 #    target_include_directories ( ${target} PRIVATE ${Boost_INCLUDE_DIRS} )
     target_include_directories ( ${target} PRIVATE ${boost_include_dir} )
@@ -74,24 +63,18 @@ function ( add_target_info target )
     add_target_dependencies    ( ${target} )
 endfunction()
 
-add_library ( ${main_test_lib_name} STATIC ${test_main_src} )
-add_target_info ( ${main_test_lib_name} )
-
 function ( make_exe target src )
     add_executable        ( ${target} ${src} )
     add_target_info       ( ${target} )
     target_link_libraries ( ${target} PRIVATE pthread )
-    target_link_libraries ( ${target} PRIVATE ${main_test_lib_name} )
-    message ( "Test executable to create: ${target}" )
-    add_test ( NAME ${target}${tester_suffix} COMMAND ${target} )
+    message ( "Example executable to create: ${target}" )
+    add_test ( NAME ${target} COMMAND ${target} )
 endfunction()
 
-enable_testing()
-
-foreach ( test_src IN LISTS test_sources )
-    get_filename_component ( targ ${test_src} NAME_WE )
+foreach ( example_src IN LISTS example_sources )
+    get_filename_component ( targ ${example_src} NAME_WE )
     message ( "Calling make_exe for: ${targ}" )
-    make_exe ( ${targ} ${test_src} )
+    make_exe ( ${targ} ${example_src} )
 endforeach()
 
 # end of file

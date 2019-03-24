@@ -4,6 +4,8 @@ These C++ utility classes and functions are designed for general purpose use. In
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
+# License
+
 This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
@@ -104,7 +106,7 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 The primary author of Utility Rack is Cliff Green, cliffg at connectivecpp dot com. The primary co-author is Thurman Gillespy, thurmang at connectivecpp dot com.
 
-Contributors include Matthew Briggs, Roxanne Ageron, Daniel Muldrew, and Bob Higgins.
+Contributors include Roxanne Ageron (who runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, her GitHub is https://github.com/oxenran), Matthew Briggs, Daniel Muldrew, and Bob Higgins.
 
 Additional information including author comments is [available here](doc/about.md).
 

@@ -3,6 +3,8 @@
  *  @brief Example code demonstrating use of @c chops::wait_queue.
  *  See @c threaded_wait_shared_demo.cpp for multithreaded example. 
  * 
+ *  @ingroup example_module
+ *
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy

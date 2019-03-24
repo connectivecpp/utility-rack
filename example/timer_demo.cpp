@@ -2,7 +2,8 @@
  *  
  *  @brief Example code demonstrating use of @c chops::periodic_timer
  * 
- * * 
+ *  @ingroup example_module
+ *
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy

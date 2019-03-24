@@ -2,6 +2,8 @@
  *  
  *  @brief Example code demonstrating use of @c chops::repeat. 
  * 
+ *  @ingroup example_module
+ *
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy

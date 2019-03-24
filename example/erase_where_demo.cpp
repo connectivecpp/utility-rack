@@ -3,6 +3,10 @@
  *  @brief Example code demonstrating use of @c chops::erase_where and 
  *  @c chops::erase_where_if.
  * 
+ *  @defgroup example_module Example code for the various Chops components.
+ *
+ *  @ingroup example_module
+ *
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy

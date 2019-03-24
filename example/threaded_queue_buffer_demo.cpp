@@ -2,6 +2,8 @@
  *  
  *  @brief Multithreaded demo of @c chops::shared_buffer and @c chops::wait_queue. 
  * 
+ *  @ingroup example_module
+ *
  *  @author Thurman Gillespy
  * 
  *  Copyright (c)2019 by Thurman Gillespy

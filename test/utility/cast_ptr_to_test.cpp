@@ -25,9 +25,9 @@ SCENARIO( "casting int* to std::byte*", "[cast_ptr_to]" ) {
     std::uint16_t x = 0xAABB;
 
     WHEN ("casting std::uint16_t* to std::byte*") {
-    const std::byte* p = cast_ptr_to<std::byte> (&x);
+    const std::byte* p = chops::cast_ptr_to<std::byte> (&x);
       THEN ("the first byte should be 0xBB") {
-        REQUIRE (*p == std::byte(0xBB));
+        REQUIRE (*(p + 0) == std::byte(0xBB));
       } AND_THEN ("the second byte should be 0xAA") {
         REQUIRE (*(p + 1) == std::byte(0xAA));
       }
@@ -38,9 +38,9 @@ SCENARIO( "casting int* to std::byte*", "[cast_ptr_to]" ) {
     std::uint32_t x = 0xAABBCCDD;
 
     WHEN ("casting std::uint32_t* to std::byte*") {
-    const std::byte* p = cast_ptr_to<std::byte> (&x);
+    const std::byte* p = chops::cast_ptr_to<std::byte> (&x);
       THEN ("the bytes should be 0xDD, 0xCC, 0xBB, 0xAA") {
-        REQUIRE (*p == std::byte(0xDD));
+        REQUIRE (*(p + 0) == std::byte(0xDD));
         REQUIRE (*(p + 1) == std::byte(0xCC));
         REQUIRE (*(p + 2) == std::byte(0xBB));
         REQUIRE (*(p + 3) == std::byte(0xAA));

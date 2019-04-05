@@ -24,6 +24,7 @@
 #include "utility/shared_buffer.hpp"
 #include "utility/repeat.hpp"
 #include "utility/make_byte_array.hpp"
+#include "utility/cast_ptr_to.hpp"
 
 constexpr std::byte Harhar { 42 };
 constexpr int N = 11;
@@ -38,7 +39,7 @@ void pointer_check(const T* bp, typename SB::size_type sz) {
       THEN ("the shared buffer is not empty, the size matches and the contents match") {
         REQUIRE_FALSE (sb.empty());
         REQUIRE (sb.size() == sz);
-        const std::byte* buf = static_cast<const std::byte*>(static_cast<const void*>(bp));
+        const std::byte* buf = chops::cast_ptr_to<std::byte>(bp);
         chops::repeat(sz, [&sb, buf] (const int& i) { REQUIRE(*(sb.data()+i) == *(buf+i)); } );
       }
     }

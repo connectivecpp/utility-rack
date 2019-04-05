@@ -48,6 +48,8 @@
 #include <utility> // std::move, std::swap
 #include <cstring> // std::memcpy
 
+#include "utility/cast_ptr_to.hpp"
+
 namespace chops {
 
 class const_shared_buffer;
@@ -162,7 +164,7 @@ public:
  */
   template <typename T>
   mutable_shared_buffer(const T* buf, size_type sz) : 
-    mutable_shared_buffer(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz) { }
+    mutable_shared_buffer(cast_ptr_to<std::byte>(buf), sz) { }
 
 /**
  *  @brief Construct from input iterators.
@@ -287,7 +289,7 @@ public:
  */
   template <typename T>
   mutable_shared_buffer& append(const T* buf, size_type sz) {
-    return append(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz);
+    return append(cast_ptr_to<std::byte>(buf), sz);
   }
 
 /**
@@ -454,7 +456,7 @@ public:
  */
   template <typename T>
   const_shared_buffer(const T* buf, size_type sz) : 
-    const_shared_buffer(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz) { }
+    const_shared_buffer(cast_ptr_to<std::byte>(buf), sz) { }
 
 /**
  *  @brief Construct by copying from a @c mutable_shared_buffer object.

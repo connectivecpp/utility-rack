@@ -1,20 +1,19 @@
 /** @file
  *
+ *  @defgroup marshall_module Class and functions for data marshalling (transform
+ *  objects into and out of byte streams for transmission over a network or file IO).
+ *
  *  @ingroup marshall_module
  *
- *  @brief Extract fundamental integral values in native endianness from a byte buffer;
- *  conversely, given a fundamental type, append it to a buffer of bytes in network endian
- *  order (big endian).
+ *  @brief Classes and functions to transform objects into a stream of bytes and
+ *  the converse, transform a stream of bytes into objects.
  *
- *  The functions in this file are low-level, handling fundamental integral types and 
- *  extracting or appending to @c std::byte buffers. It is meant to be the lower layer
- *  of marshalling utilities, where the next layer up provides stream facilities,
- *  sequences, overloads for specific types such as @c std::string and @c bool, and generic
- *  buffer types.
+ *  The marshalling classes and functions transform application objects into a 
+ *  @c std::byte buffer. The byte buffer is in network endian (big endian) order. 
+ *  Facilities are provided for fundamental types as well as vocabulary types 
+ *  such as @c std::string, @c bool, @c std::optional, and 
  *
- *  @note When C++ 20 @c std::endian is available, many of these functions can be made
- *  @c constexpr and evaluated at compile time. Until then, run-time endian detection and 
- *  copying is performed.
+ *  Application code is 
  *
  *  @author Cliff Green
  *
@@ -25,8 +24,8 @@
  *
  */
 
-#ifndef EXTRACT_APPEND_HPP_INCLUDED
-#define EXTRACT_APPEND_HPP_INCLUDED
+#ifndef MARSHALL_HPP_INCLUDED
+#define MARSHALL_HPP_INCLUDED
 
 #include "utility/cast_ptr_to.hpp"
 

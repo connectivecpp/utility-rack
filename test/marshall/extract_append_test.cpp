@@ -17,327 +17,89 @@
 
 
 #include <cstddef> // std::byte
-#include <list>
-#include <string_view>
+#include <cstdint> // std::uint32_t, etc
 
-#include "utility/shared_buffer.hpp"
+#include "marshall/extract_append.hpp"
 #include "utility/repeat.hpp"
 #include "utility/make_byte_array.hpp"
 #include "utility/cast_ptr_to.hpp"
 
-constexpr std::byte Harhar { 42 };
-constexpr int N = 11;
+std::uint32_t val1 = 0xDDCCBBAA;
+char val2 = 0xEE;
+std::int16_t val3 = 0x01FF;
+std::uint64_t val4 = 0x0908070605040302;
+std::int32_t val5 = 0xDEADBEEF;
 
+constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+sizeof(val4)+sizeof(val5);
 
-template <typename SB, typename T>
-void pointer_check(const T* bp, typename SB::size_type sz) {
+auto net_buf = chops::make_byte_array(0xDD, 0xCC, 0xBB, 0xAA, 0xEE, 0x01, 0xFF,
+    0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF);
 
-  GIVEN ("An arbitrary buf pointer and a size") {
-    WHEN ("A shared buffer is constructed with the buf and size") {
-      SB sb(bp, sz);
-      THEN ("the shared buffer is not empty, the size matches and the contents match") {
-        REQUIRE_FALSE (sb.empty());
-        REQUIRE (sb.size() == sz);
-        const std::byte* buf = chops::cast_ptr_to<std::byte>(bp);
-        chops::repeat(sz, [&sb, buf] (const int& i) { REQUIRE(*(sb.data()+i) == *(buf+i)); } );
+SCENARIO ( "Endian detection",
+           "[endian] [little_endian]" ) {
+
+  GIVEN ("A little-endian system") {
+
+    WHEN ("The detect_big_endian function is called") {
+      THEN ("the value is false") {
+        REQUIRE (!chops::big_endian);
       }
     }
   } // end given
 }
 
-template <typename SB>
-void shared_buffer_common(const std::byte* buf, typename SB::size_type sz) {
+SCENARIO ( "Append values into a buffer",
+           "[append_val]" ) {
 
-  REQUIRE (sz > 2);
+  GIVEN ("An empty byte buffer") {
+    std::byte buf[arr_sz];
 
-  pointer_check<SB>(buf, sz);
-  const void* vp = static_cast<const void*>(buf);
-  pointer_check<SB>(vp, sz);
-  pointer_check<SB>(static_cast<const char*>(vp), sz);
-  pointer_check<SB>(static_cast<const unsigned char*>(vp), sz);
-  pointer_check<SB>(static_cast<const signed char*>(vp), sz);
-
-  GIVEN ("A shared buffer") {
-    SB sb(buf, sz);
-    REQUIRE_FALSE (sb.empty());
-    WHEN ("A separate shared buffer is constructed with the buf and size") {
-      SB sb2(buf, sz);
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
+    WHEN ("Append_val is called with a single value") {
+      std::uint32_t v = 0x04030201;
+      chops::append_val(buf, v);
+      THEN ("the buffer will contain the single value in network endian order") {
+        REQUIRE (buf[0] == static_cast<std::byte>(0x04));
+        REQUIRE (buf[1] == static_cast<std::byte>(0x03));
+        REQUIRE (buf[2] == static_cast<std::byte>(0x02));
+        REQUIRE (buf[3] == static_cast<std::byte>(0x01));
       }
     }
-    AND_WHEN ("A second shared buffer is copy constructed") {
-      SB sb2(sb);
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("A shared buffer is constructed from another container") {
-      std::list<std::byte> lst (buf, buf+sz);
-      SB sb2(lst.cbegin(), lst.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("A separate shared buffer is constructed shorter than the first") {
-      auto ba = chops::make_byte_array(buf[0], buf[1]);
-      SB sb2(ba.cbegin(), ba.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the separate shared buffer compares less than the first") {
-        REQUIRE (sb2 < sb);
-        REQUIRE (sb2 != sb);
-      }
-    }
-    AND_WHEN ("A separate shared buffer is constructed with values less than the first") {
-      auto ba = chops::make_byte_array(0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-      SB sb2(ba.cbegin(), ba.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the separate shared buffer compares less than the first") {
-        REQUIRE (sb2 != sb);
+    AND_WHEN ("Append_val is called with multiple values") {
+      std::byte* ptr = buf;
+      chops::append_val(ptr, val1); ptr += sizeof(val1);
+      chops::append_val(ptr, val2); ptr += sizeof(val2);
+      chops::append_val(ptr, val3); ptr += sizeof(val3);
+      chops::append_val(ptr, val4); ptr += sizeof(val4);
+      chops::append_val(ptr, val5);
+      
+      THEN ("the buffer will have all of the values in network endian order") {
+        chops::repeat(arr_sz, [&buf] (int i) { REQUIRE (buf[i] == net_buf[i]); } );
       }
     }
   } // end given
 }
 
-template <typename SB>
-void shared_buffer_byte_vector_move() {
+SCENARIO ( "Extract values from a buffer",
+           "[extract_val]" ) {
 
-  auto arr = chops::make_byte_array (0x01, 0x02, 0x03, 0x04, 0x05);
+  GIVEN ("A buffer of bytes in network endian order") {
+    WHEN ("Extract_val is called for multiple values") {
 
-  GIVEN ("A vector of bytes") {
-    std::vector<std::byte> bv { arr.cbegin(), arr.cend() };
-    WHEN ("A shared buffer is constructed by moving from the byte vector") {
-      SB sb(std::move(bv));
-      THEN ("the shared buffer will contain the data and the byte vector will not") {
-        REQUIRE (sb == SB(arr.cbegin(), arr.cend()));
-        REQUIRE_FALSE (bv.size() == sb.size());
+      const std::byte* ptr = net_buf.data();
+      std::uint32_t v1 = chops::extract_val<std::uint32_t>(ptr); ptr += sizeof(v1);
+      char v2 = chops::extract_val<char>(ptr); ptr += sizeof(v2);
+      std::int16_t v3 = chops::extract_val<std::int16_t>(ptr); ptr += sizeof(v3);
+      std::uint64_t v4 = chops::extract_val<std::uint64_t>(ptr); ptr += sizeof(v4);
+      std::int32_t v5 = chops::extract_val<std::int32_t>(ptr);
+
+      THEN ("the values are all in native order") {
+        REQUIRE(v1 == val1);
+        REQUIRE(v2 == val2);
+        REQUIRE(v3 == val3);
+        REQUIRE(v4 == val4);
+        REQUIRE(v5 == val5);
       }
     }
   } // end given
-}
- 
-SCENARIO ( "Const shared buffer common test", 
-           "[const_shared_buffer] [common]" ) {
-  auto arr = chops::make_byte_array( 40, 41, 42, 43, 44, 60, 59, 58, 57, 56, 42, 42 );
-  shared_buffer_common<chops::const_shared_buffer>(arr.data(), arr.size());
-}
-
-SCENARIO ( "Mutable shared buffer common test",
-           "[mutable_shared_buffer] [common]" ) {
-  auto arr = chops::make_byte_array ( 80, 81, 82, 83, 84, 90, 91, 92 );
-  shared_buffer_common<chops::const_shared_buffer>(arr.data(), arr.size());
-}
-
-SCENARIO ( "Mutable shared buffer copy construction and assignment",
-           "[mutable_shared_buffer] [copy]" ) {
-
-  GIVEN ("A default constructed mutable shared_buffer") {
-
-    auto arr = chops::make_byte_array ( 80, 81, 82, 83, 84, 90, 91, 92 );
-
-    chops::mutable_shared_buffer sb;
-    REQUIRE (sb.empty());
-
-    WHEN ("Another mutable shared buffer is assigned into it") {
-      chops::mutable_shared_buffer sb2(arr.cbegin(), arr.cend());
-      sb = sb2;
-      THEN ("the size has changed and the two shared buffers compare equal") {
-        REQUIRE (sb.size() == arr.size());
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("Another mutable shared buffer is copy constructed") {
-      sb = chops::mutable_shared_buffer(arr.cbegin(), arr.cend());
-      chops::mutable_shared_buffer sb2(sb);
-      THEN ("the two shared buffers compare equal and a change to the first shows in the second") {
-        REQUIRE (sb == sb2);
-        *(sb.data()+0) = Harhar;
-        *(sb.data()+1) = Harhar;
-        REQUIRE (sb == sb2);
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Mutable shared buffer resize and clear",
-           "[mutable_shared_buffer] [resize_and_clear]" ) {
-
-  GIVEN ("A default constructed mutable shared_buffer") {
-    chops::mutable_shared_buffer sb;
-    WHEN ("Resize is called") {
-      sb.resize(N);
-      THEN ("the internal buffer will have all zeros") {
-        REQUIRE (sb.size() == N);
-        chops::repeat(N, [&sb] (const int& i) { REQUIRE (*(sb.data() + i) == std::byte{0} ); } );
-      }
-    }
-    AND_WHEN ("Another mutable shared buffer with a size is constructed") {
-      sb.resize(N);
-      chops::mutable_shared_buffer sb2(N);
-      THEN ("the two shared buffers compare equal, with all zeros in the buffer") {
-        REQUIRE (sb == sb2);
-        chops::repeat(N, [&sb, &sb2] (const int& i) {
-          REQUIRE (*(sb.data() + i) == std::byte{0} );
-          REQUIRE (*(sb2.data() + i) == std::byte{0} );
-        } );
-      }
-    }
-    AND_WHEN ("The mutable shared buffer is cleared") {
-      sb.resize(N);
-      sb.clear();
-      THEN ("the size will be zero and the buffer is empty") {
-        REQUIRE (sb.size() == 0);
-        REQUIRE (sb.empty());
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Mutable shared buffer swap",
-           "[mutable_shared_buffer] [swap]" ) {
-
-  GIVEN ("Two mutable shared_buffers") {
-    auto arr1 = chops::make_byte_array (0xaa, 0xbb, 0xcc);
-    auto arr2 = chops::make_byte_array (0x01, 0x02, 0x03, 0x04, 0x05);
-
-    chops::mutable_shared_buffer sb1(arr1.cbegin(), arr1.cend());
-    chops::mutable_shared_buffer sb2(arr2.cbegin(), arr2.cend());
-
-    WHEN ("The buffers are swapped") {
-      chops::swap(sb1, sb2);
-      THEN ("the sizes and contents will be swapped") {
-        REQUIRE (sb1.size() == arr2.size());
-        REQUIRE (sb2.size() == arr1.size());
-        REQUIRE (*(sb1.data()+0) == *(arr2.data()+0));
-        REQUIRE (*(sb1.data()+1) == *(arr2.data()+1));
-        REQUIRE (*(sb2.data()+0) == *(arr1.data()+0));
-        REQUIRE (*(sb2.data()+1) == *(arr1.data()+1));
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Mutable shared buffer append",
-           "[mutable_shared_buffer] [append]" ) {
-
-  auto arr = chops::make_byte_array (0xaa, 0xbb, 0xcc);
-  auto arr2 = chops::make_byte_array (0xaa, 0xbb, 0xcc, 0xaa, 0xbb, 0xcc);
-  chops::mutable_shared_buffer ta(arr.cbegin(), arr.cend());
-  chops::mutable_shared_buffer ta2(arr2.cbegin(), arr2.cend());
-
-  GIVEN ("A default constructed mutable shared_buffer") {
-    chops::mutable_shared_buffer sb;
-    WHEN ("Append with a pointer and size is called") {
-      sb.append(arr.data(), arr.size());
-      THEN ("the internal buffer will contain the appended data") {
-        REQUIRE (sb == ta);
-      }
-    }
-    AND_WHEN ("Append with a mutable shared buffer is called") {
-      sb.append(ta);
-      THEN ("the internal buffer will contain the appended data") {
-        REQUIRE (sb == ta);
-      }
-    }
-    AND_WHEN ("Append is called twice") {
-      sb.append(ta);
-      sb.append(ta);
-      THEN ("the internal buffer will contain twice the appended data") {
-        REQUIRE (sb == ta2);
-      }
-    }
-    AND_WHEN ("Appending with single bytes") {
-      sb.append(std::byte(0xaa));
-      sb.append(std::byte(0xbb));
-      sb += std::byte(0xcc);
-      THEN ("the internal buffer will contain the appended data") {
-        REQUIRE (sb == ta);
-      }
-    }
-    AND_WHEN ("Appending with a char* to test templated append") {
-      std::string_view sv("Haha, Bro!");
-      chops::mutable_shared_buffer cb(sv.data(), sv.size());
-      sb.append(sv.data(), sv.size());
-      THEN ("the internal buffer will contain the appended data") {
-        REQUIRE (sb == cb);
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Compare a mutable shared_buffer with a const shared buffer",
-           "[mutable_shared_buffer] [const_shared_buffer] [compare]" ) {
-
-  GIVEN ("An array of bytes") {
-    auto arr = chops::make_byte_array (0xaa, 0xbb, 0xcc);
-    WHEN ("A mutable_shared_buffer and a const_shared_buffer are created from the bytes") {
-      chops::mutable_shared_buffer msb(arr.cbegin(), arr.cend());
-      chops::const_shared_buffer csb(arr.cbegin(), arr.cend());
-      THEN ("the shared buffers will compare equal") {
-        REQUIRE (msb == csb);
-        REQUIRE (csb == msb);
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Mutable shared buffer move into const shared buffer",
-           "[mutable_shared_buffer] [const_shared_buffer] [move]" ) {
-
-  auto arr1 = chops::make_byte_array (0xaa, 0xbb, 0xcc);
-  auto arr2 = chops::make_byte_array (0x01, 0x02, 0x03, 0x04, 0x05);
-
-  GIVEN ("A mutable_shared_buffer") {
-    chops::mutable_shared_buffer msb(arr1.cbegin(), arr1.cend());
-    WHEN ("A const_shared_buffer is move constructed from the mutable_shared_buffer") {
-      chops::const_shared_buffer csb(std::move(msb));
-      THEN ("the const_shared_buffer will contain the data and the mutable_shared_buffer will not") {
-        REQUIRE (csb == chops::const_shared_buffer(arr1.cbegin(), arr1.cend()));
-        REQUIRE_FALSE (msb == csb);
-        msb.clear();
-        msb.resize(arr2.size());
-        msb.append(arr2.cbegin(), arr2.size());
-        REQUIRE_FALSE (msb == csb);
-      }
-    }
-  } // end given
-}
-
-SCENARIO ( "Move a vector of bytes into a mutable shared buffer",
-           "[mutable_shared_buffer] [move_byte_vec]" ) {
-
-  shared_buffer_byte_vector_move<chops::mutable_shared_buffer>();
-
-}
-
-SCENARIO ( "Move a vector of bytes into a const shared buffer",
-           "[const_shared_buffer] [move_byte_vec]" ) {
-
-  shared_buffer_byte_vector_move<chops::const_shared_buffer>();
-
-}
-
-SCENARIO ( "Use get_byte_vec for external modification of buffer",
-           "[mutable_shared_buffer] [get_byte_vec]" ) {
-
-  auto arr = chops::make_byte_array (0xaa, 0xbb, 0xcc);
-  chops::mutable_shared_buffer::byte_vec bv (arr.cbegin(), arr.cend());
-
-  GIVEN ("A mutable_shared_buffer") {
-    chops::mutable_shared_buffer msb(bv.cbegin(), bv.cend());
-
-    WHEN ("get_byte_vec is called") {
-      auto r = msb.get_byte_vec();
-      THEN ("the refererence can be used to access and modify data") {
-        REQUIRE (r == bv);
-        r[0] = std::byte(0xdd);
-        REQUIRE_FALSE (r == bv);
-      }
-    }
-  } // end given
-
 }
 

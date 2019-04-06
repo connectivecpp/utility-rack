@@ -5,12 +5,19 @@
  *
  *  @ingroup marshall_module
  *
- *  @brief Byte Extract fundamental integral values in native endianness from a byte buffer;
+ *  @brief Extract fundamental integral values in native endianness from a byte buffer;
  *  conversely, given a fundamental type, append it to a buffer of bytes in network endian
  *  order (big endian).
  *
+ *  The functions in this file are low-level, handling fundamental integral types and 
+ *  extracting or appending to @c std::byte buffers. It is meant to be the lower layer
+ *  of marshalling utilities, where the next layer up provides stream facilities,
+ *  sequences, overloads for specific types such as @c std::string and @c bool, and generic
+ *  buffer types.
+ *
  *  @note When C++ 20 @c std::endian is available, many of these functions can be made
- *  @c constexpr. Until then, run-time endian detection and copying is performed.
+ *  @c constexpr and evaluated at compile time. Until then, run-time endian detection and 
+ *  copying is performed.
  *
  *  @author Cliff Green
  *
@@ -45,11 +52,11 @@ struct size_tag { };
 // if char / byte, no swap needed
 template <typename T>
 T extract_val_swap(const std::byte* buf, const size_tag<1u>*) noexcept {
-  return static_cast<T>{*buf}; // static_cast needed to convert std::byte to char type
+  return static_cast<T>(*buf); // static_cast needed to convert std::byte to char type
 }
 template <typename T>
 T extract_val_noswap(const std::byte* buf, const size_tag<1u>*) noexcept {
-  return static_cast<T>{*buf}; // see note above
+  return static_cast<T>(*buf); // see note above
 }
 
 template <typename T>
@@ -135,59 +142,59 @@ void append_val_noswap(std::byte* buf, const T& val, const size_tag<1u>*) noexce
 template <typename T>
 void append_val_swap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+1);
-  *(buf+1) = *(val+0);
+  *(buf+0) = *(p+1);
+  *(buf+1) = *(p+0);
 }
 
 template <typename T>
 void append_val_noswap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+0);
-  *(buf+1) = *(val+1);
+  *(buf+0) = *(p+0);
+  *(buf+1) = *(p+1);
 }
 
 template <typename T>
 void append_val_swap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+3);
-  *(buf+1) = *(val+2);
-  *(buf+2) = *(val+1);
-  *(buf+3) = *(val+0);
+  *(buf+0) = *(p+3);
+  *(buf+1) = *(p+2);
+  *(buf+2) = *(p+1);
+  *(buf+3) = *(p+0);
 }
 
 template <typename T>
 void append_val_noswap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+0);
-  *(buf+1) = *(val+1);
-  *(buf+2) = *(val+2);
-  *(buf+3) = *(val+3);
+  *(buf+0) = *(p+0);
+  *(buf+1) = *(p+1);
+  *(buf+2) = *(p+2);
+  *(buf+3) = *(p+3);
 }
 
 template <typename T>
 void append_val_swap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+7);
-  *(buf+1) = *(val+6);
-  *(buf+2) = *(val+5);
-  *(buf+3) = *(val+4);
-  *(buf+4) = *(val+3);
-  *(buf+5) = *(val+2);
-  *(buf+6) = *(val+1);
-  *(buf+7) = *(val+0);
+  *(buf+0) = *(p+7);
+  *(buf+1) = *(p+6);
+  *(buf+2) = *(p+5);
+  *(buf+3) = *(p+4);
+  *(buf+4) = *(p+3);
+  *(buf+5) = *(p+2);
+  *(buf+6) = *(p+1);
+  *(buf+7) = *(p+0);
 }
 
 template <typename T>
 void append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(val+0);
-  *(buf+1) = *(val+1);
-  *(buf+2) = *(val+2);
-  *(buf+3) = *(val+3);
-  *(buf+4) = *(val+4);
-  *(buf+5) = *(val+5);
-  *(buf+6) = *(val+6);
-  *(buf+7) = *(val+7);
+  *(buf+0) = *(p+0);
+  *(buf+1) = *(p+1);
+  *(buf+2) = *(p+2);
+  *(buf+3) = *(p+3);
+  *(buf+4) = *(p+4);
+  *(buf+5) = *(p+5);
+  *(buf+6) = *(p+6);
+  *(buf+7) = *(p+7);
 }
 
 } // end namespace detail
@@ -228,12 +235,12 @@ const bool big_endian = detect_big_endian();
 template <typename T>
 T extract_val(const std::byte* buf) noexcept {
 
-  static_assert(sizeof(val) == 1u || sizeof(val) == 2u || sizeof(val) == 4u || sizeof(val) == 8u,
+  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
     "Size for value extraction is not supported.");
   static_assert(std::is_integral<T>::value, "Value extraction is only supported for integral types.");
 
-  return big_endian ? detail::extract_val_noswap(buf, const detail::size_tag<sizeof(T)>*(nullptr)),
-                      detail::extract_val_swap(buf, const detail::size_tag<sizeof(T)>*(nullptr));
+  return big_endian ? detail::extract_val_noswap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
+                      detail::extract_val_swap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
 
 /**
@@ -255,15 +262,15 @@ T extract_val(const std::byte* buf) noexcept {
 template <typename T>
 void append_val(std::byte* buf, const T& val) noexcept {
 
-  static_assert(sizeof(val) == 1u || sizeof(val) == 2u || sizeof(val) == 4u || sizeof(val) == 8u,
+  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
     "Size for value appending is not supported.");
   static_assert(std::is_integral<T>::value, "Value appending is only supported for integral types.");
 
   if (big_endian) {
-    detail::append_val_noswap(buf, val, const detail::size_tag<sizeof(T)>*(nullptr));
+    detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
   }
   else {
-    detail::append_val_swap(buf, val, const detail::size_tag<sizeof(T)>*(nullptr));
+    detail::append_val_swap(buf, val, static_cast<const detail::size_tag<sizeof(T)>* >(nullptr));
   }
 }
 

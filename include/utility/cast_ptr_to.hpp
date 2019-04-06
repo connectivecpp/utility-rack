@@ -4,16 +4,17 @@
  *
  *  @ingroup utility_module
  * 
- *  @brief Utility functions for safely casting a pointer between types, primarily 
+ *  @brief Utility functions for conveniently casting a pointer between types, primarily 
  *  from some type T to either a @c char* or @c std::byte*.
  * 
  *  C++ @c reinterpret_cast can cast any pointer to another pointer type, but
- *  the behaviour can be undefined. C++ guarentees that a pointer can be safely
- *  cast to either @c void* or @c char* (or @c std::byte*, which is a form of @c char*), 
- *  and that pointer can be cast back to the original pointer type. Casting between
- *  two unrelated types (outside of the @c void* and @c char* conversions already 
- *  mentioned) results in undefined behavior (even if functionally the memory layout is 
- *  the same and execution is successful on a given platform).
+ *  the behaviour can be undefined, depending on the access and usage. C++ guarantees 
+ *  that a pointer can be safely cast to @c void* and then to a @c char* (or 
+ *  @c std::byte*, which is one of the @c char* types), and that pointer can be cast 
+ *  back to the original pointer type. Casting between two unrelated types (outside of 
+ *  the @c void* and @c char* conversions already mentioned) results in undefined behavior 
+ *  (even if functionally the memory layout is the same and execution is successful on a 
+ *  given platform).
  *  
  *  Both const and non-const overloads are available.
  * 

@@ -16,6 +16,10 @@ Release notes and upcoming development plans are [available here](doc/release.md
 
 # Utility Rack Components
 
+## Marshall Utilities
+
+(Fill in text.)
+
 ## Queue Utilities
 
 ### Wait Queue
@@ -53,6 +57,14 @@ A common mistake in C++ is to forget to call `std::erase` after calling `std::re
 ### Make Byte Array
 
 Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](doc/references.md)) is useful to simplify creation of byte buffers, specially for testing purposes.
+
+### Cast Pointer To
+
+Using `reinterpret_cast` in C++ may mean undefined (even if well understood and executionally correct) behavior. In networking and other types of I/O processing it is a common need to convert a pointer to a `char *`, or in C++ 17 (and later) a `std::byte *`.
+
+The `cast_ptr_to` utility conveniently combines a static cast to `void *` with a static cast to a specified (via function template parameter) type. Typically the destination type is a `std::byte` pointer.
+
+If the destination type is unrelated to the original type (and is not a `void *` or some form of `char *` such as `std::byte *`) undefined behavior will still occur. However, if converting the pointer to a `std::byte` pointer and then back to the original pointer type, the behavior is well defined and safe.
 
 A detailed overview of the utility classes is [available here](doc/utility.md).
 

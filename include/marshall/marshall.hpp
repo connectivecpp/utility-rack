@@ -1,19 +1,55 @@
 /** @file
  *
- *  @defgroup marshall_module Class and functions for data marshalling (transform
+ *  @defgroup marshall_module Class and functions for binary data marshalling (transform
  *  objects into and out of byte streams for transmission over a network or file IO).
  *
  *  @ingroup marshall_module
  *
- *  @brief Classes and functions to transform objects into a stream of bytes and
+ *  @brief Classes and functions to transform objects into a binary stream of bytes and
  *  the converse, transform a stream of bytes into objects.
  *
- *  The marshalling classes and functions transform application objects into a 
- *  @c std::byte buffer. The byte buffer is in network endian (big endian) order. 
- *  Facilities are provided for fundamental types as well as vocabulary types 
- *  such as @c std::string, @c bool, @c std::optional, and 
+ *  Wire protocols that are in full text mode do not need to deal with binary endian
+ *  swapping. However, sending or receiving data in a binary form is often desired 
+ *  for size efficiency (e.g. sending images or video or large data sets).
  *
- *  Application code is 
+ *  These marshalling classes and functions transform application objects into a 
+ *  @c std::byte buffer (and the converse), keeping the binary representation. The byte 
+ *  buffer binary elements are in network (big endian) order. 
+ *
+ *  For example, a 32-bit binary number (either a signed or unsigned integer) in native
+ *  endian order will be transformed into four 8-bit bytes in network (big) endian order
+ *  for sending over a network (or for file I/O). Conversely, the four 8-bit bytes in
+ *  network endian order will be transformed back into the original 32-bit binary number
+ *  when received (or read as file I/O).
+ *
+ *  Facilities are provided for fundamental types, including @c bool, as well as vocabulary 
+ *  types such as @c std::string and @c std::optional.
+ *
+ *  Facilities are also provided for sequences, where the number of elements is placed
+ *  before the element sequence. The number of bits for the element count is a template
+ *  parameter. The same type of size specification is also provided for @c bool (i.e. the
+ *  size of the bool value can be specified as 8-bit, 16-bit, etc). @c bool values 
+ *  are converted into a 0 or 1 value as appropriate.
+ *
+ *  @note No support is directly provided for higher level abstractions such as inheritance
+ *  hierarchies, version numbers, type flags, or object relations. Pointers are also not 
+ *  directly supported (which would typically be part of an object relation).
+ *
+ *  @note No support is provided for little-endian in the byte buffer. No support is provided
+ *  for mixed endian (big-endian with little-endian) or where the endianness is specified as a 
+ *  type parameter. No support is provided for "in-place" swapping of values. All of these
+ *  use cases can be implemented using other libraries such as Boost.Endian.
+ *
+ *  @note No direct support is provided for bit fields. A dynamic bit buffer (i.e. where 
+ *  individual bits can be appended or extracted) would need to be accessible as a buffer of 
+ *  bytes, which can then be directly sent and received.
+ * 
+ *  @note Floating point types are not supported, only integral types. Character types
+ *  are integral types, with no endian swapping needed. Swapping floating point types can 
+ *  easily result in NaN representations, which can generate hardware traps, either causing 
+ *  runtime crashes or silently changing bits within the floating point number. For this
+ *  reason, floating point numbers must either be converted to a string representation, or
+ *  converted into an integral type (e.g. an integer with an implicit scale factor).
  *
  *  @author Cliff Green
  *
@@ -38,175 +74,7 @@ namespace chops {
 
 namespace detail {
 
-// since function template partial specialization is not supported (yet) in C++, overload the 
-// extract_val_swap and noswap function templates with a parameter corresponding to the 
-// sizeof the value; no data is passed in the second parameter, only using the type for overloading
-
-template <unsigned int>
-struct size_tag { };
-
-// if char / byte, no swap needed
-template <typename T>
-T extract_val_swap(const std::byte* buf, const size_tag<1u>*) noexcept {
-  return static_cast<T>(*buf); // static_cast needed to convert std::byte to char type
-}
-template <typename T>
-T extract_val_noswap(const std::byte* buf, const size_tag<1u>*) noexcept {
-  return static_cast<T>(*buf); // see note above
-}
-
-template <typename T>
-T extract_val_swap(const std::byte* buf, const size_tag<2u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+1);
-  *(p+1) = *(buf+0);
-  return tmp;
-}
-
-template <typename T>
-T extract_val_noswap(const std::byte* buf, const size_tag<2u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+0);
-  *(p+1) = *(buf+1);
-  return tmp;
-}
-
-template <typename T>
-T extract_val_swap(const std::byte* buf, const size_tag<4u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+3);
-  *(p+1) = *(buf+2);
-  *(p+2) = *(buf+1);
-  *(p+3) = *(buf+0);
-  return tmp;
-}
-
-template <typename T>
-T extract_val_noswap(const std::byte* buf, const size_tag<4u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+0);
-  *(p+1) = *(buf+1);
-  *(p+2) = *(buf+2);
-  *(p+3) = *(buf+3);
-  return tmp;
-}
-
-template <typename T>
-T extract_val_swap(const std::byte* buf, const size_tag<8u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+7);
-  *(p+1) = *(buf+6);
-  *(p+2) = *(buf+5);
-  *(p+3) = *(buf+4);
-  *(p+4) = *(buf+3);
-  *(p+5) = *(buf+2);
-  *(p+6) = *(buf+1);
-  *(p+7) = *(buf+0);
-  return tmp;
-}
-
-template <typename T>
-T extract_val_noswap(const std::byte* buf, const size_tag<8u>*) noexcept {
-  T tmp{};
-  std::byte* p = cast_ptr_to<std::byte>(&tmp);
-  *(p+0) = *(buf+0);
-  *(p+1) = *(buf+1);
-  *(p+2) = *(buf+2);
-  *(p+3) = *(buf+3);
-  *(p+4) = *(buf+4);
-  *(p+5) = *(buf+5);
-  *(p+6) = *(buf+6);
-  *(p+7) = *(buf+7);
-  return tmp;
-}
-
-template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
-  *buf = static_cast<std::byte>(val); // static_cast needed to convert char to std::byte
-}
-
-template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
-  *buf = static_cast<std::byte>(val); // see note above
-}
-
-template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+1);
-  *(buf+1) = *(p+0);
-}
-
-template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+0);
-  *(buf+1) = *(p+1);
-}
-
-template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+3);
-  *(buf+1) = *(p+2);
-  *(buf+2) = *(p+1);
-  *(buf+3) = *(p+0);
-}
-
-template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+0);
-  *(buf+1) = *(p+1);
-  *(buf+2) = *(p+2);
-  *(buf+3) = *(p+3);
-}
-
-template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+7);
-  *(buf+1) = *(p+6);
-  *(buf+2) = *(p+5);
-  *(buf+3) = *(p+4);
-  *(buf+4) = *(p+3);
-  *(buf+5) = *(p+2);
-  *(buf+6) = *(p+1);
-  *(buf+7) = *(p+0);
-}
-
-template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
-  const std::byte* p = cast_ptr_to<std::byte>(&val);
-  *(buf+0) = *(p+0);
-  *(buf+1) = *(p+1);
-  *(buf+2) = *(p+2);
-  *(buf+3) = *(p+3);
-  *(buf+4) = *(p+4);
-  *(buf+5) = *(p+5);
-  *(buf+6) = *(p+6);
-  *(buf+7) = *(p+7);
-}
-
 } // end namespace detail
-
-// C++ 20 will contain std::endian, which allows full compile time endian detection;
-// until then, the endian detection and branching will be runtime, although it
-// can be computed at global initialization instead of each time it is called
-
-inline bool detect_big_endian () noexcept {
-  const std::uint32_t tmp {0xDDCCBBAA};
-  return *(cast_ptr_to<std::byte>(&tmp) + 3) == static_cast<std::byte>(0xAA);
-}
-
-// should be computed at global initialization time
-
-const bool big_endian = detect_big_endian();
 
 /**
  * @brief Extract a value in network byte order (big endian) from a @c std::byte buffer 

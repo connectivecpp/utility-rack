@@ -33,12 +33,12 @@
 namespace chops {
 
 template <typename Dst, typename Src>
-const Dst* cast_ptr_to (const Src* p) {
+const Dst* cast_ptr_to (const Src* p) noexcept {
     return static_cast<const Dst*> (static_cast<const void*> (p));
 }
 
 template <typename Dst, typename Src>
-Dst* cast_ptr_to (Src* p) {
+Dst* cast_ptr_to (Src* p) noexcept {
     return static_cast<Dst*> (static_cast<void*> (p));
 }
 

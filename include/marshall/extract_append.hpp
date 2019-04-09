@@ -33,7 +33,7 @@
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
 #include <utility> // std::swap
-#include <type_traits> // std::is_integral
+#include <type_traits> // std::is_integral, std::declval
 
 namespace chops {
 
@@ -247,7 +247,7 @@ T extract_val(const std::byte* buf) noexcept {
  * This function template dispatches on specific sizes. If an unsupported size is attempted
  * to be swapped, a static error is generated.
  *
- * @param buf Buffer of @c std::bytes already allocated to hold the bytes of val.
+ * @param buf Buffer of @c std::bytes already allocated to hold the bytes of the value.
  *
  * @param val Value in native endian order to append to buf.
  *

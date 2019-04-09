@@ -22,13 +22,13 @@
  *  network endian order will be transformed back into the original 32-bit binary number
  *  when received (or read as file I/O).
  *
- *  Facilities are provided for fundamental types, including @c bool, as well as vocabulary 
+ *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
  *  types such as @c std::string and @c std::optional.
  *
- *  Facilities are also provided for sequences, where the number of elements is placed
+ *  Functionality is also provided for sequences, where the number of elements is placed
  *  before the element sequence. The number of bits for the element count is a template
  *  parameter. The same type of size specification is also provided for @c bool (i.e. the
- *  size of the bool value can be specified as 8-bit, 16-bit, etc). @c bool values 
+ *  size of the bool value can be specified as 8-bit, 16-bit, etc). Native @c bool values 
  *  are converted into a 0 or 1 value as appropriate.
  *
  *  @note No support is directly provided for higher level abstractions such as inheritance
@@ -77,66 +77,67 @@ namespace detail {
 } // end namespace detail
 
 /**
- * @brief Extract a value in network byte order (big endian) from a @c std::byte buffer 
- * into a fundamental integral type in native endianness, swapping bytes as needed.
+ * @brief Extract a sequence in network byte order from a @c std::byte buffer into the
+ * provided container.
  *
- * This function template dispatches on specific sizes. If an unsupported size is attempted
- * to be swapped, a compile time error is generated.
+ * Fill a container with a sequence of elements. See @c append_sequence for additional
+ * comments on sequence.
  *
- * @param buf Buffer of @c std::bytes containing an object of type T in network byte order.
+ * @param buf Buffer of @c std::bytes containing a sequence of objects to be extracted,
+ * with the count in front.
  *
- * @return A value in native endian order.
+ * @tparam Cnt Type of the count value, which prepends the sequence of elements. The type
+ * determines the size (in bytes) of the count value (e.g. @c std::uint16_t would specify
+ * a 16-bit unsigned count).
+ *
+ * @tparam Container Container type, which must provide a @c value_type declaration, a
+ * default constructor, an @c emplace_back method, and a copy or move constructor.
+ *
+ * @return A container with the element sequence.
  *
  * @pre The buffer must contain at least @c sizeof(T) bytes.
  *
- * @note Floating point swapping is not supported, only integral types. Swapping floating
- * point types can easily result in NaN representations, which can generate hardware traps,
- * either causing runtime crashes or silently changing bits within the floating point number.
- * In particular, returning a byte swapped floating point type by value will result in
- * bad things happening.
- *
  */
-template <typename T>
-T extract_val(const std::byte* buf) noexcept {
+template <typename Cnt, typename Container>
+Container extract_sequence(const std::byte* buf) noexcept(fill in) {
+  Cnt c = extract_val<Cnt>(buf);
 
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
-    "Size for value extraction is not supported.");
-  static_assert(std::is_integral<T>::value, "Value extraction is only supported for integral types.");
-
-  return big_endian ? detail::extract_val_noswap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
-                      detail::extract_val_swap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
+
 
 /**
- * @brief Append a fundamental integral value to a @c std::byte buffer, swapping into network
- * endian order (big endian) as needed.
+ * @brief Append a sequence of elements, including the count, into a @c std::byte buffer using 
+ * the lower level @c append_val function.
  *
- * This function template dispatches on specific sizes. If an unsupported size is attempted
- * to be swapped, a static error is generated.
+ * A sequence is defined as an array of elements of type T, along with the number of 
+ * elements. When appending to a stream of @c std::bytes, the count is first converted
+ * into network byte order and then appended, then the same performed for each element.
+ * The number of bits in the count is specified as the type of the count. For example a 
+ * @c std::vector of 16-bit @c ints with an 8-bit count can be appended to the buffer as
+ * an 8-bit integer, and then successive 16-bit integers.
  *
- * @param buf Buffer of @c std::bytes already allocated to hold the bytes of val.
+ * @param buf Buffer of @c std::bytes containing an object of type T in network byte order.
  *
- * @param val Value in native endian order to append to buf.
+ * @param cnt Number of elements in the sequence.
  *
- * @pre The buffer must already be allocated to hold @c sizeof(T) bytes.
+ * @param start Iterator pointing to the start of the sequence.
  *
- * @note See note above about floating point values, which are not supported.
+ * @param end Iterator pointing to the end of the sequence.
+ *
+ * @pre The buffer must be large enough to contain the size of the count, plus all of 
+ * the elements in the sequence.
  *
  */
-template <typename T>
-void append_val(std::byte* buf, const T& val) noexcept {
-
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
-    "Size for value appending is not supported.");
-  static_assert(std::is_integral<T>::value, "Value appending is only supported for integral types.");
-
-  if (big_endian) {
-    detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
-  }
-  else {
-    detail::append_val_swap(buf, val, static_cast<const detail::size_tag<sizeof(T)>* >(nullptr));
+template <typename Cnt, typename Iter>
+void append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexcept {
+  append_val(buf, cnt);
+  while (start != end) {
+    append_val(buf, *start);
+    ++start;
   }
 }
+
+
 
 } // end namespace
 

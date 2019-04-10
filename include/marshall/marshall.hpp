@@ -33,7 +33,9 @@
  *
  *  @note No support is directly provided for higher level abstractions such as inheritance
  *  hierarchies, version numbers, type flags, or object relations. Pointers are also not 
- *  directly supported (which would typically be part of an object relation).
+ *  directly supported (which would typically be part of an object relation). These higher
+ *  level abstraction I/O as well as "saving and later restoring a full application state" 
+*   is better served by a library such as Boost.Serialization.
  *
  *  @note No support is provided for little-endian in the byte buffer. No support is provided
  *  for mixed endian (big-endian with little-endian) or where the endianness is specified as a 
@@ -67,8 +69,7 @@
 
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
-#include <utility> // std::swap
-#include <type_traits> // std::is_integral
+#include <optional>
 
 namespace chops {
 
@@ -124,20 +125,68 @@ Container extract_sequence(const std::byte* buf) noexcept(fill in) {
  *
  * @param end Iterator pointing to the end of the sequence.
  *
+ * @return Total number of bytes appended to the @c std::byte buffer.
+ *
  * @pre The buffer must be large enough to contain the size of the count, plus all of 
  * the elements in the sequence.
  *
  */
 template <typename Cnt, typename Iter>
-void append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexcept {
+std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexcept {
+  std::size_t num = 0;
   append_val(buf, cnt);
+  num += cnt;
   while (start != end) {
-    append_val(buf, *start);
+    num += append_val(buf, *start);
     ++start;
   }
 }
 
+template <typename Buf>
+class marshall_out {
+public:
 
+  marshall_out (Buf& buf) : m_buf(buf), m_start(m_buf.data()), m_offset(0u) { }
+
+  template <typename Cast, typename T>
+  void append(const T& val) {
+    m_buf.resize(sizeof(Cast));
+    m_offset += append_val(m_start+m_offset, static_cast<Cast>(val));
+  }
+
+  template <typename Cast>
+  void append_bool(bool b) {
+    m_buf.resize(sizeof(Cast));
+    m_offset += append_val(m_start+m_offset, static_cast<Cast>(b ? 1 : 0));
+  }
+  
+  template <typename CastBool, typename CastVal, typename T>
+  void append_optional(const std::optional<T>& val) {
+    bool has_val = val.has_value();
+    append<CastBool>(has_value);
+    if (has_value) {
+      append<CastVal>(*val);
+    }
+  }
+
+
+  void reset() {
+    m_start = buf.data();
+    m_offset = 0u;
+  }
+
+private:
+  Buf& m_buf;
+  std::byte* m_start;
+  std::size_t m_offset;
+};
+
+// I don't think the following will work
+template <typename Buf, typename Cast, typename T>
+marshall<Buf>& operator<< (marshall_out<Buf>& mo, const T&) {
+  
+
+}
 
 } // end namespace
 

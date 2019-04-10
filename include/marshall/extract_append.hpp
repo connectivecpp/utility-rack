@@ -32,8 +32,7 @@
 
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
-#include <utility> // std::swap
-#include <type_traits> // std::is_integral, std::declval
+#include <type_traits> // std::is_integral
 
 namespace chops {
 
@@ -127,49 +126,55 @@ T extract_val_noswap(const std::byte* buf, const size_tag<8u>*) noexcept {
 }
 
 template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
+std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
   *buf = static_cast<std::byte>(val); // static_cast needed to convert char to std::byte
+  return 1u;
 }
 
 template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
+std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
   *buf = static_cast<std::byte>(val); // see note above
+  return 1u;
 }
 
 template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
+std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+1);
   *(buf+1) = *(p+0);
+  return 2u;
 }
 
 template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
+std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<2u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+0);
   *(buf+1) = *(p+1);
+  return 2u;
 }
 
 template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
+std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+3);
   *(buf+1) = *(p+2);
   *(buf+2) = *(p+1);
   *(buf+3) = *(p+0);
+  return 4u;
 }
 
 template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
+std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<4u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+0);
   *(buf+1) = *(p+1);
   *(buf+2) = *(p+2);
   *(buf+3) = *(p+3);
+  return 4u;
 }
 
 template <typename T>
-void append_val_swap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
+std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+7);
   *(buf+1) = *(p+6);
@@ -179,10 +184,11 @@ void append_val_swap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept
   *(buf+5) = *(p+2);
   *(buf+6) = *(p+1);
   *(buf+7) = *(p+0);
+  return 8u;
 }
 
 template <typename T>
-void append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
+std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*) noexcept {
   const std::byte* p = cast_ptr_to<std::byte>(&val);
   *(buf+0) = *(p+0);
   *(buf+1) = *(p+1);
@@ -192,6 +198,7 @@ void append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*) noexce
   *(buf+5) = *(p+5);
   *(buf+6) = *(p+6);
   *(buf+7) = *(p+7);
+  return 8u;
 }
 
 } // end namespace detail
@@ -251,24 +258,22 @@ T extract_val(const std::byte* buf) noexcept {
  *
  * @param val Value in native endian order to append to buf.
  *
- * @pre The buffer must already be allocated to hold @c sizeof(T) bytes.
+ * @return Number of bytes copied into the @c std::byte buffer.
+ *
+ * @pre The buffer must already be allocated to hold at least @c sizeof(T) bytes.
  *
  * @note See note above about floating point values, which are not supported.
  *
  */
 template <typename T>
-void append_val(std::byte* buf, const T& val) noexcept {
+std::size_t append_val(std::byte* buf, const T& val) noexcept {
 
   static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
     "Size for value appending is not supported.");
   static_assert(std::is_integral<T>::value, "Value appending is only supported for integral types.");
 
-  if (big_endian) {
-    detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
-  }
-  else {
-    detail::append_val_swap(buf, val, static_cast<const detail::size_tag<sizeof(T)>* >(nullptr));
-  }
+  return big_endian ? detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
+                      detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
 
 } // end namespace

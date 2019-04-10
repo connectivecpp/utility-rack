@@ -24,11 +24,11 @@
 #include "utility/make_byte_array.hpp"
 #include "utility/cast_ptr_to.hpp"
 
-std::uint32_t val1 = 0xDDCCBBAA;
-char val2 = 0xEE;
-std::int16_t val3 = 0x01FF;
-std::uint64_t val4 = 0x0908070605040302;
-std::int32_t val5 = 0xDEADBEEF;
+constexpr std::uint32_t val1 = 0xDDCCBBAA;
+constexpr char val2 = 0xEE;
+constexpr std::int16_t val3 = 0x01FF;
+constexpr std::uint64_t val4 = 0x0908070605040302;
+constexpr std::int32_t val5 = 0xDEADBEEF;
 
 constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+sizeof(val4)+sizeof(val5);
 
@@ -55,8 +55,8 @@ SCENARIO ( "Append values into a buffer",
     std::byte buf[arr_sz];
 
     WHEN ("Append_val is called with a single value") {
-      std::uint32_t v = 0x04030201;
-      chops::append_val(buf, v);
+      constexpr std::uint32_t v = 0x04030201;
+      REQUIRE(chops::append_val(buf, v) == 4u);
       THEN ("the buffer will contain the single value in network endian order") {
         REQUIRE (buf[0] == static_cast<std::byte>(0x04));
         REQUIRE (buf[1] == static_cast<std::byte>(0x03));
@@ -66,11 +66,11 @@ SCENARIO ( "Append values into a buffer",
     }
     AND_WHEN ("Append_val is called with multiple values") {
       std::byte* ptr = buf;
-      chops::append_val(ptr, val1); ptr += sizeof(val1);
-      chops::append_val(ptr, val2); ptr += sizeof(val2);
-      chops::append_val(ptr, val3); ptr += sizeof(val3);
-      chops::append_val(ptr, val4); ptr += sizeof(val4);
-      chops::append_val(ptr, val5);
+      REQUIRE(chops::append_val(ptr, val1) == 4u); ptr += sizeof(val1);
+      REQUIRE(chops::append_val(ptr, val2) == 1u); ptr += sizeof(val2);
+      REQUIRE(chops::append_val(ptr, val3) == 2u); ptr += sizeof(val3);
+      REQUIRE(chops::append_val(ptr, val4) == 8u); ptr += sizeof(val4);
+      REQUIRE(chops::append_val(ptr, val5) == 4u);
       
       THEN ("the buffer will have all of the values in network endian order") {
         chops::repeat(arr_sz, [&buf] (int i) { REQUIRE (buf[i] == net_buf[i]); } );

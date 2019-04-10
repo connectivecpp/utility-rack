@@ -150,25 +150,26 @@ public:
 
   template <typename Cast, typename T>
   void append(const T& val) {
-    m_buf.resize(sizeof(Cast));
+    m_buf.resize(m_buf.size() + sizeof(Cast));
     m_offset += append_val(m_start+m_offset, static_cast<Cast>(val));
   }
 
   template <typename Cast>
   void append_bool(bool b) {
-    m_buf.resize(sizeof(Cast));
-    m_offset += append_val(m_start+m_offset, static_cast<Cast>(b ? 1 : 0));
+    append(static_cast<Cast>(b ? 1 : 0));
   }
   
   template <typename CastBool, typename CastVal, typename T>
   void append_optional(const std::optional<T>& val) {
-    bool has_val = val.has_value();
-    append<CastBool>(has_value);
-    if (has_value) {
+    append<CastBool>(val.has_value());
+    if (val.has_value()) {
       append<CastVal>(*val);
     }
   }
 
+  std::size_t size() const {
+    return m_offset;
+  }
 
   void reset() {
     m_start = buf.data();

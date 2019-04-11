@@ -1,18 +1,23 @@
 /** @file
  *
- *  @defgroup marshall_module Class and functions for binary data marshalling (transform
- *  objects into and out of byte streams for transmission over a network or file IO).
+ *  @defgroup marshall_module Classes and functions for binary data marshalling and
+ *  unmarshalling (transform objects into and out of byte streams for transmission over 
+ *  a network or file IO).
  *
  *  @ingroup marshall_module
  *
  *  @brief Classes and functions to transform objects into a binary stream of bytes and
- *  the converse, transform a stream of bytes into objects.
+ *  the converse - transform a stream of bytes into objects.
+ *
+ *  The @c marshall class and related functions transform application objects into a
+ *  buffer of @c std::bytes. The @c unmarshall class and related functions allow 
+ *  application objects to be extraced from a buffer of @c std::bytes.
  *
  *  Wire protocols that are in full text mode do not need to deal with binary endian
  *  swapping. However, sending or receiving data in a binary form is often desired 
  *  for size efficiency (e.g. sending images or video or large data sets).
  *
- *  These marshalling classes and functions transform application objects into a 
+ *  The marshalling and unmarshalling functionality transforms application objects into a 
  *  @c std::byte buffer (and the converse), keeping the binary representation. The byte 
  *  buffer binary elements are in network (big endian) order. 
  *
@@ -23,7 +28,9 @@
  *  when received (or read as file I/O).
  *
  *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
- *  types such as @c std::string and @c std::optional.
+ *  types such as @c std::string and @c std::optional. Other vocabulary types such as
+ *  @c std::any or @c std::variant will need application handling (to specify the type and 
+ *  copy the value).
  *
  *  Functionality is also provided for sequences, where the number of elements is placed
  *  before the element sequence. The number of bits for the element count is a template
@@ -34,7 +41,7 @@
  *  @note No support is directly provided for higher level abstractions such as inheritance
  *  hierarchies, version numbers, type flags, or object relations. Pointers are also not 
  *  directly supported (which would typically be part of an object relation). These higher
- *  level abstraction I/O as well as "saving and later restoring a full application state" 
+ *  level abstractions as well as "saving and later restoring a full application state" 
 *   is better served by a library such as Boost.Serialization.
  *
  *  @note No support is provided for little-endian in the byte buffer. No support is provided
@@ -44,7 +51,8 @@
  *
  *  @note No direct support is provided for bit fields. A dynamic bit buffer (i.e. where 
  *  individual bits can be appended or extracted) would need to be accessible as a buffer of 
- *  bytes, which can then be directly sent and received.
+ *  bytes, which can then be directly sent and received. Fixed size bit fields can be handled
+ *  through the usual process of extracting or appending the enclosing integer object.
  * 
  *  @note Floating point types are not supported, only integral types. Character types
  *  are integral types, with no endian swapping needed. Swapping floating point types can 

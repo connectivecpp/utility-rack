@@ -6,43 +6,59 @@
  *
  *  @ingroup marshall_module
  *
- *  @brief Classes and functions to transform objects into a binary stream of bytes and
- *  the converse - transform a stream of bytes into objects.
+ *  @brief Classes and functions to transform objects into a binary stream of bytes 
+ *  (marshall) and the converse (unmarshall), transform a stream of bytes into objects.
  *
- *  The @c marshall class and related functions transform application objects into a
- *  buffer of @c std::bytes. The @c unmarshall class and related functions allow 
- *  application objects to be extraced from a buffer of @c std::bytes.
- *
- *  Wire protocols that are in full text mode do not need to deal with binary endian
- *  swapping. However, sending or receiving data in a binary form is often desired 
- *  for size efficiency (e.g. sending images or video or large data sets).
- *
- *  The marshalling and unmarshalling functionality transforms application objects into a 
- *  @c std::byte buffer (and the converse), keeping the binary representation. The byte 
- *  buffer binary elements are in network (big endian) order. 
+ *  The marshalling classes and functions are designed for networking (or file I/O), 
+ *  where binary data marshalling and unmarshalling is needed to send and receive 
+ *  messages (or to write or read defined portions of a file). Application code using 
+ *  this library has full control of every byte that is sent or received. Application 
+ *  objects are transformed into a @c std::byte buffer (and the converse) keeping a 
+ *  binary representation in network (big endian) order.
  *
  *  For example, a 32-bit binary number (either a signed or unsigned integer) in native
  *  endian order will be transformed into four 8-bit bytes in network (big) endian order
  *  for sending over a network (or for file I/O). Conversely, the four 8-bit bytes in
  *  network endian order will be transformed back into the original 32-bit binary number
- *  when received (or read as file I/O).
+ *  when received (or read as file I/O). A @c bool can be transformed into either a 8-bit,
+ *  16-bit, 32-bit, or 64-bit number of either 1 or 0 (and back). A sequence 
+ *  (@c std::vector or array or other container) can be transformed into a count (8-bit, 
+ *  16-bit, et al) followed by each element of the sequence. A @c std::optional can be 
+ *  transformed into a @c bool (8-bit, 16-bit, et al) followed by the value (if present).
  *
- *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
- *  types such as @c std::string and @c std::optional. Other vocabulary types such as
- *  @c std::any or @c std::variant will need application handling (to specify the type and 
- *  copy the value).
- *
- *  Functionality is also provided for sequences, where the number of elements is placed
- *  before the element sequence. The number of bits for the element count is a template
- *  parameter. The same type of size specification is also provided for @c bool (i.e. the
- *  size of the bool value can be specified as 8-bit, 16-bit, etc). Native @c bool values 
- *  are converted into a 0 or 1 value as appropriate.
- *
- *  @note No support is directly provided for higher level abstractions such as inheritance
+ *  No support is directly provided for higher level abstractions such as inheritance
  *  hierarchies, version numbers, type flags, or object relations. Pointers are also not 
  *  directly supported (which would typically be part of an object relation). These higher
  *  level abstractions as well as "saving and later restoring a full application state" 
-*   is better served by a library such as Boost.Serialization.
+ *  are better served by a library such as Boost.Serialization.
+ *
+ *  There is not any automatic generation of message processing code, such as Google 
+ *  Protocol Buffers (a language neutral message definition process that generates 
+ *  marshalling and unmarshalling code). Future C++ standards supporting reflection 
+ *  may allow higher abstractions and more automation of marshalling code, but this
+ *  library provides a modern C++ API (post C++ 11) for direct control of the 
+ *  byte buffers. In particular, all of the build process complications required for
+ *  code generation are not present in this (header only) library.
+ *
+ *  Wire protocols that are in full text mode do not need to deal with binary endian
+ *  swapping. However, sending or receiving data in a binary form is often desired 
+ *  for size efficiency (e.g. sending images or video or large data sets).
+ *
+ *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
+ *  types such as @c std::string and @c std::optional. @c std::variant and @c std::any
+ *  require value extraction by the application and are not directly supported by this
+ *  library. (This might be a future enhancement if a good design is proposed.) Support is 
+ *  also provided for sequences, where the number of elements is placed before the element 
+ *  sequence. 
+ *
+ *  Central to the design of these marshalling and unmarshalling functions is a mapping of 
+ *  two types to a single value. For marshalling, the two types are the native type (e.g. 
+ *  @c int, @c short, @c bool), and the type to be used for the marshalling, typically
+ *  a fixed width integer type, as specified in the @c <cstdint> header (e.g. 
+ *  @c std::uint32_t, @c std::int16_t, @c std::int8_t). For unmarshalling, the same
+ *  concept is used, a fixed width integer type that specifies the size in the byte
+ *  buffer, and the native type, thus the application would specify that a @c std::int16_t
+ *  in the byte buffer will be unmarshalled into an application @c int value.
  *
  *  @note No support is provided for little-endian in the byte buffer. No support is provided
  *  for mixed endian (big-endian with little-endian) or where the endianness is specified as a 
@@ -51,8 +67,8 @@
  *
  *  @note No direct support is provided for bit fields. A dynamic bit buffer (i.e. where 
  *  individual bits can be appended or extracted) would need to be accessible as a buffer of 
- *  bytes, which can then be directly sent and received. Fixed size bit fields can be handled
- *  through the usual process of extracting or appending the enclosing integer object.
+ *  bytes, which can then be directly sent and received. Fixed-size bit fields are
+ *  supported by marshalling the underlying 8-bit, 16-bit, 32-bit, or 64-bit values.
  * 
  *  @note Floating point types are not supported, only integral types. Character types
  *  are integral types, with no endian swapping needed. Swapping floating point types can 
@@ -74,6 +90,7 @@
 #define MARSHALL_HPP_INCLUDED
 
 #include "utility/cast_ptr_to.hpp"
+#include "utility/shared_buffer.hpp"
 
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
@@ -150,16 +167,111 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
   }
 }
 
-template <typename Buf>
-class marshall_out {
+/**
+ * @brief Adapt a C-style array or @c std::array so that it can be used with the
+ * @c chops::marshaller class template.
+ *
+ * This class provides four methods (@c size, @c resize, @c data, @c clear) as required by the
+ * @c chops::marshaller buf parameter. This adapter can only be used where the array or @c std::array
+ * object lifetime is the same or greater than the @c buf_adapter object, and where the 
+ * array address never changes. In other words, a @c std::vector<std::byte> cannot be used with
+ * this adapter, as the underlying array may be reallocated and the buffer address changed 
+ * (instead, a @c std::vector<std::byte> can be directly used with the @c chops::marshaller class 
+ * template).
+ *
+ */
+class buf_adapter {
+public:
+/**
+ * @brief Construct the @ buf_adapter given a @c std::byte pointer to the beginning of an array.
+ *
+ * @pre The @c std::byte pointer passed in to the constructor must point to a buffer large enough
+ * to contain the full size of the marshalled data. No "end of buffer" checks are performed in the 
+ * @c chops::marshaller class template.
+ */
+  buf_adapter(std::byte* buf) : m_buf(buf), m_size(0u) noexcept { }
+
+/**
+ * @brief Return the size of the data which has been written into the buffer.
+ *
+ * @return The size of the data which has been written into the buffer, which is modified through
+ * the @c resize method.
+ *
+ */
+  std::size_t size() const noexcept {
+    return m_size;
+  }
+/**
+ * @brief Track how many bytes have been written into the buffer.
+ */
+  void resize(std::size_t sz) noexcept {
+    m_size = sz;
+  }
+/**
+ * @brief Return a pointer to the beginning of the buffer.
+ *
+ * @return Return a pointer to the beginning of the buffer.
+ */
+  std::byte* data() noexcept {
+    return m_buf;
+  }
+/**
+ * @brief Logically reset so that new data can be written into the buffer.
+ */
+  void clear() noexcept {
+    m_size = 0u;
+  }
+  
+private:
+  std::byte* m_buf;
+  std::size_t m_size;
+};
+
+/**
+ * @brief Blah
+ *
+ * @tparam Buf A container storing a contiguous @c std::byte buffer. The container must 
+ * support the following methods: @c resize, @c size, @c data, and @c clear. A 
+ * @c std::vector<std::byte> is supported, as well as the @c chops::mutable_shared_buffer
+ * class. A C-style array or @c std::array is supported by using the @c chops::buf_adapter
+ * class. While @c std::basic_string supports the four needed methods, it is unknown if
+ * it is defined behavior to instantiate a @c std::basic_string with @c std::byte (and is
+ * not recommended according to Arne Metz at https://arne-mertz.de/2018/11/string-not-for-raw-data/).
+ *
+ * @param cnt Number of elements in the sequence.
+ *
+ * @param start Iterator pointing to the start of the sequence.
+ *
+ * @param end Iterator pointing to the end of the sequence.
+ *
+ * @pre The @c std::byte buffer passed in to the constructor must be able to contain the full size 
+ * of the marshalled data, whether through expansion of the buffer or a buffer already pre-allocated.
+ */
+template <typename Buf = mutable_shared_buffer>
+class marshaller {
 public:
 
-  marshall_out (Buf& buf) : m_buf(buf), m_start(m_buf.data()), m_offset(0u) { }
+/**
+ * @brief blah
+ * the lower level @c append_val function.
+ *
+ * @param buf blah
+ *
+ * @param cnt Number of elements in the sequence.
+ *
+ * @param start Iterator pointing to the start of the sequence.
+ *
+ * @param end Iterator pointing to the end of the sequence.
+ *
+ * @pre The @c std::byte buffer passed in to the constructor must be able to contain the full size 
+ * of the marshalled data, whether through expansion of the buffer or a buffer already pre-allocated.
+ */
+  marshaller (Buf& buf) : m_buf(buf), m_offset(0u) { }
 
   template <typename Cast, typename T>
   void append(const T& val) {
     m_buf.resize(m_buf.size() + sizeof(Cast));
-    m_offset += append_val(m_start+m_offset, static_cast<Cast>(val));
+    m_offset += append_val(m_buf.data()+m_offset, static_cast<Cast>(val));
   }
 
   template <typename Cast>
@@ -179,20 +291,19 @@ public:
     return m_offset;
   }
 
-  void reset() {
-    m_start = buf.data();
+  void clear() {
+    m_buf.clear();
     m_offset = 0u;
   }
 
 private:
   Buf& m_buf;
-  std::byte* m_start;
   std::size_t m_offset;
 };
 
 // I don't think the following will work
 template <typename Buf, typename Cast, typename T>
-marshall<Buf>& operator<< (marshall_out<Buf>& mo, const T&) {
+marshall<Buf>& operator<< (marshaller<Buf>& mo, const T&) {
   
 
 }

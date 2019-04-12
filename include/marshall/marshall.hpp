@@ -65,11 +65,6 @@
  *  type parameter. No support is provided for "in-place" swapping of values. All of these
  *  use cases can be implemented using other libraries such as Boost.Endian.
  *
- *  @note No direct support is provided for bit fields. A dynamic bit buffer (i.e. where 
- *  individual bits can be appended or extracted) would need to be accessible as a buffer of 
- *  bytes, which can then be directly sent and received. Fixed-size bit fields are
- *  supported by marshalling the underlying 8-bit, 16-bit, 32-bit, or 64-bit values.
- * 
  *  @note Floating point types are not supported, only integral types. Character types
  *  are integral types, with no endian swapping needed. Swapping floating point types can 
  *  easily result in NaN representations, which can generate hardware traps, either causing 
@@ -251,6 +246,7 @@ template <typename Buf = mutable_shared_buffer>
 class marshaller {
 public:
 
+
 /**
  * @brief blah
  * the lower level @c append_val function.
@@ -266,28 +262,21 @@ public:
  * @pre The @c std::byte buffer passed in to the constructor must be able to contain the full size 
  * of the marshalled data, whether through expansion of the buffer or a buffer already pre-allocated.
  */
-  marshaller (Buf& buf) : m_buf(buf), m_offset(0u) { }
+  marshaller (Buf& buf) : m_buf(buf), m_offset(0u) noexcept { }
+
+/**
+ * @brief Copy construction is not allowed.
+ */
+  marshaller(const marshaller&) = delete;
 
   template <typename Cast, typename T>
-  void append(const T& val) {
+  marshaller<Buf>& marshall(const T& val) {
     m_buf.resize(m_buf.size() + sizeof(Cast));
     m_offset += append_val(m_buf.data()+m_offset, static_cast<Cast>(val));
+    return *this;
   }
 
-  template <typename Cast>
-  void append_bool(bool b) {
-    append(static_cast<Cast>(b ? 1 : 0));
-  }
-  
-  template <typename CastBool, typename CastVal, typename T>
-  void append_optional(const std::optional<T>& val) {
-    append<CastBool>(val.has_value());
-    if (val.has_value()) {
-      append<CastVal>(*val);
-    }
-  }
-
-  std::size_t size() const {
+  std::size_t size() const noexcept {
     return m_offset;
   }
 
@@ -298,14 +287,39 @@ public:
 
 private:
   Buf& m_buf;
-  std::size_t m_offset;
+  std::size_t m_offset; // offset is used instead of pointer since a buffer resize or clear may 
+                        // reallocate memory, invalidating the pointer
 };
 
-// I don't think the following will work
-template <typename Buf, typename Cast, typename T>
-marshall<Buf>& operator<< (marshaller<Buf>& mo, const T&) {
-  
+// various overloaded marshall functions, each taking a marshaller object
 
+template <typename Cast, typename T, typename Buf = mutable_shared_buffer>
+marshaller<Buf>& marshall(marshaller<Buf>& mler, const T& val) {
+  return mler.marshall<Cast>(val);
+}
+
+template <typename Cast, typename Buf = mutable_shared_buffer>
+marshaller<Buf>& marshall(marshaller<Buf>& mler, bool b) {
+  return mler.marshall<Cast>(static_cast<Cast>(b ? 1 : 0));
+}
+
+template <typename CastBool, typename CastVal, typename T, typename Buf = mutable_shared_buffer>
+marshaller<Buf>& marshall(marshaller<Buf>& mler, const std::optional<T>& val) {
+  marshall<CastBool>(mler, val.has_value());
+  if (val.has_value()) {
+    marshall<CastVal>(*val);
+  }
+  return mler;
+}
+
+template <typename CntCast, typename Iter, typename Buf = mutable_shared_buffer>
+marshaller<Buf>& marshall(marshaller<Buf>& mler, std::size_t num, Iter start) {
+  marshall<CntCast>(num);
+  repeat(num, [&mler] { marshall
+  if (val.has_value()) {
+    marshall<CastVal>(*val);
+  }
+  return mler;
 }
 
 } // end namespace

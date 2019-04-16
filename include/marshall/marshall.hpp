@@ -86,6 +86,7 @@
 
 #include "utility/cast_ptr_to.hpp"
 #include "utility/shared_buffer.hpp"
+#include "marshall/extract_append.hpp"
 
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
@@ -316,9 +317,6 @@ template <typename CntCast, typename Iter, typename Buf = mutable_shared_buffer>
 marshaller<Buf>& marshall(marshaller<Buf>& mler, std::size_t num, Iter start) {
   marshall<CntCast>(num);
   repeat(num, [&mler] { marshall
-  if (val.has_value()) {
-    marshall<CastVal>(*val);
-  }
   return mler;
 }
 

@@ -2,16 +2,18 @@
 
 ## Marshall
 
-- Has been tested with 
 
-- Does not throw or catch exceptions anywhere in its code base. Elements passed through the queue may throw exceptions, which must be handled at an application level. Exceptions may be thrown by C++ std library concurrency calls (`std::mutex` locks, etc), although this usually indicates an application design issue or issues at the operating system level.
+## Shared Buffer
 
-- If the C++ std library concurrency calls become `noexcept`, every Wait Queue method will become `noexcept` or conditionally `noexcept` (depending on the type of the data passed through the Wait Queue).
+There are two concrete classes:
+- `mutable_shared_buffer`, a reference counted modifiable buffer class with convenience methods for appending data.
+- `const_shared_buffer`, a reference counted non-modifiable buffer class. Once the object is constructed, it cannot be modified. This class is used by the Chops Net IP library for asynchronous send buffer processing.
 
-The only requirement on the type passed through a Wait Queue is that it supports either copy construction or move construction. In particular, a default constructor is not required (this is enabled by using `std::optional`, which does not require a default constructor).
+Internally all data is stored in a `std::vector` of `std::byte`. There are ordering methods so that shared buffer objects can be stored in sequential or associative containers.
 
-The implementation is adapted from the book Concurrency in Action, Practical Multithreading, by Anthony Williams (see [References Section](../README.md#references)). 
+Efficient moving of data (versus copying) is enabled in multiple ways, including:
+- Allowing a `const_shared_buffer` to be move constructed from a `mutable_shared_buffer`.
+- Allowing a `std::vector` of `std::byte` to be moved into either shared buffer type.
 
-The core logic in this library is the same as provided by Anthony in his book, but the API has changed and additional features added. The name of the utility class template in Anthony's book is `threadsafe_queue`.
-
+The implementation is adapted from Chris Kohlhoff's reference counted buffer examples (see [References](references.md)). 
 

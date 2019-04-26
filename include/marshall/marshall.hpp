@@ -85,7 +85,7 @@
 #define MARSHALL_HPP_INCLUDED
 
 #include "utility/cast_ptr_to.hpp"
-#include "utility/shared_buffer.hpp"
+#include "marshall/shared_buffer.hpp"
 #include "marshall/extract_append.hpp"
 
 #include <cstddef> // std::byte, std::size_t

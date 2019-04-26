@@ -21,7 +21,8 @@
 #include <list>
 #include <string_view>
 
-#include "utility/shared_buffer.hpp"
+#include "marshall/shared_buffer.hpp"
+
 #include "utility/repeat.hpp"
 #include "utility/make_byte_array.hpp"
 #include "utility/cast_ptr_to.hpp"

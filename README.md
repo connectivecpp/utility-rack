@@ -1,6 +1,6 @@
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 
-These C++ utility classes and functions are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
+Th C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
@@ -10,7 +10,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of March 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of April 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -18,7 +18,15 @@ Release notes and upcoming development plans are [available here](doc/release.md
 
 ## Marshall Utilities
 
+### Marshall
+
 (Fill in text.)
+
+### Shared Buffer
+
+Reference counted byte buffer classes used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
+
+A detailed overview of the marshall classes is [available here](doc/marshall.md).
 
 ## Queue Utilities
 
@@ -42,10 +50,6 @@ A detailed overview is [available here](doc/timer.md).
 
 ## General Utilities
 
-### Shared Buffer
-
-Reference counted byte buffer classes are a direct dependency in the API of the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
-
 ### Repeat
 
 Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo (see [References](doc/references.md)). The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap.
@@ -66,7 +70,9 @@ The `cast_ptr_to` utility conveniently combines a static cast to `void *` with a
 
 If the destination type is unrelated to the original type (and is not a `void *` or some form of `char *` such as `std::byte *`) undefined behavior will still occur. However, if converting the pointer to a `std::byte` pointer and then back to the original pointer type, the behavior is well defined and safe.
 
-A detailed overview of the utility classes is [available here](doc/utility.md).
+### Overloaded
+
+Create a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
 
 # C++ Language Requirements and Alternatives
 

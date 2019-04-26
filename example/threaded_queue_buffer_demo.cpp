@@ -27,7 +27,7 @@
 #include <future> // std::promise, std::future
 
 #include "queue/wait_queue.hpp"
-#include "utility/shared_buffer.hpp"
+#include "marshall/shared_buffer.hpp"
 
 
 /** Project Overview

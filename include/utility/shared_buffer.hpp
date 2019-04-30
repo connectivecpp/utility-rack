@@ -601,6 +601,7 @@ inline bool operator== (const mutable_shared_buffer& lhs, const const_shared_buf
 
 } // end namespace
 
+/*
 // swap idiom
 namespace std {
 
@@ -610,6 +611,7 @@ inline void swap(chops::mutable_shared_buffer& lhs, chops::mutable_shared_buffer
 }
 
 }
+*/
 
 
 #endif

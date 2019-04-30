@@ -1,6 +1,6 @@
 /** @file
  *
- *  @defgroup queue_module Class and functions for Chops thread queue functionality.
+ *  @defgroup queue_module Class and functions for various queue functionality.
  *
  *  @ingroup queue_module
  *

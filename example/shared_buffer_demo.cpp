@@ -29,7 +29,7 @@
 #include <string>
 
 #include <boost/endian/conversion.hpp> // boost::endian
-#include "utility/shared_buffer.hpp"
+#include "marshall/shared_buffer.hpp"
 #include "utility/repeat.hpp"
 
 // tasty utility lambda function

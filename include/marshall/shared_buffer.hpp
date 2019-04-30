@@ -1,6 +1,6 @@
 /** @file
  *
- *  @ingroup utility_module
+ *  @ingroup marshall_module
  *
  *  @brief Reference counted byte buffer classes, both const and mutable versions.
  *
@@ -31,7 +31,7 @@
  *
  *  @authors Cliff Green, Chris Kohlhoff
  *
- *  Copyright (c) 2017-2018 by Cliff Green
+ *  Copyright (c) 2017-2019 by Cliff Green
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -47,6 +47,8 @@
 
 #include <utility> // std::move, std::swap
 #include <cstring> // std::memcpy
+
+#include "utility/cast_ptr_to.hpp"
 
 namespace chops {
 
@@ -162,7 +164,7 @@ public:
  */
   template <typename T>
   mutable_shared_buffer(const T* buf, size_type sz) : 
-    mutable_shared_buffer(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz) { }
+    mutable_shared_buffer(cast_ptr_to<std::byte>(buf), sz) { }
 
 /**
  *  @brief Construct from input iterators.
@@ -287,7 +289,7 @@ public:
  */
   template <typename T>
   mutable_shared_buffer& append(const T* buf, size_type sz) {
-    return append(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz);
+    return append(cast_ptr_to<std::byte>(buf), sz);
   }
 
 /**
@@ -454,7 +456,7 @@ public:
  */
   template <typename T>
   const_shared_buffer(const T* buf, size_type sz) : 
-    const_shared_buffer(static_cast<const std::byte*>(static_cast<const void*>(buf)), sz) { }
+    const_shared_buffer(cast_ptr_to<std::byte>(buf), sz) { }
 
 /**
  *  @brief Construct by copying from a @c mutable_shared_buffer object.
@@ -601,6 +603,9 @@ inline bool operator== (const mutable_shared_buffer& lhs, const const_shared_buf
 
 } // end namespace
 
+/*
+// the following code appears to be the older, if legal, way to implement swap for a 
+// user-defined class type, but is generating errors on VC++, possibly because of the noexcept
 // swap idiom
 namespace std {
 
@@ -610,6 +615,7 @@ inline void swap(chops::mutable_shared_buffer& lhs, chops::mutable_shared_buffer
 }
 
 }
+*/
 
 
 #endif

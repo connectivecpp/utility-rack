@@ -1,6 +1,6 @@
 /** @file
  *
- *  @defgroup timer_module Classes and functions for Chops timer functionality.
+ *  @defgroup timer_module Classes and functions for timer functionality.
  *
  *  @ingroup timer_module
  *

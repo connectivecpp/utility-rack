@@ -604,7 +604,7 @@ inline bool operator== (const mutable_shared_buffer& lhs, const const_shared_buf
 } // end namespace
 
 /*
-// the following code appears to be the older way, if legal, way to implement swap for a 
+// the following code appears to be the older, if legal, way to implement swap for a 
 // user-defined class type, but is generating errors on VC++, possibly because of the noexcept
 // swap idiom
 namespace std {

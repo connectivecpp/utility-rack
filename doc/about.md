@@ -14,7 +14,10 @@ Roxanne Agerone, roxanne at connectivecpp dot com, is a co-author of Utility Rac
 
 Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Thursday evenings, 6 pm, at Ballard Coffee Works.
 
+Nathan Deutsch: Hi! My name is Nathan Deutsch and I'm the newest member of the Chops Net team. I'm a software engineer located in Bellevue, Washington. Outside of work I like to play jazz guitar and go camping. I'm also the best pool player in the state - I'm accepting all challengers if anyone thinks they're good.
+
+My personal GitHub site is https://github.com/n-deutsch/ and my personal website is http://www.nathandeutsch.com.
+
 ## A Cliff Note on Behavior Driven Development
 
 >I'm dipping my toe (for the first time) into BDD (Behavior Driven Development), using the Catch 2 testing facilities. It's an interesting way to specify and test behavior of the interfaces, and so far I'm liking it.
-

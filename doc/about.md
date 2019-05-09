@@ -12,9 +12,10 @@ Thurman's personal GitHub site is https://github.com/tgill880.
 
 Roxanne Agerone, roxanne at connectivecpp dot com, is a co-author of Utility Rack. Roxanne ... (fill in info)
 
-Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Thursday evenings, 6 pm, at Ballard Coffee Works.
+Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Monday evenings, 6 pm, at Ballard Coffee Works.
 
 Nathan Deutsch, nathand at connectivecpp dot com, is a co-author of Utility Rack. Nathan ... (fill in info)
+
 ## A Cliff Note on Behavior Driven Development
 
 >I'm dipping my toe (for the first time) into BDD (Behavior Driven Development), using the Catch 2 testing facilities. It's an interesting way to specify and test behavior of the interfaces, and so far I'm liking it.

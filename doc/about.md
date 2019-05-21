@@ -10,7 +10,7 @@ Thurman Gillespy, thurmang at connectivecpp dot com, is a co-author of Utility R
 
 Thurman's personal GitHub site is https://github.com/tgill880.
 
-Roxanne Agerone, roxanne at connectivecpp dot com, is a co-author of Utility Rack. Roxanne ... (fill in info)
+Roxanne Agerone, roxanne at connectivecpp dot com, is a co-author of Utility Rack. Roxanne is based in Seattle and 
 
 Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Thursday evenings, 6 pm, at Ballard Coffee Works.
 

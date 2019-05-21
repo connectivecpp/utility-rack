@@ -12,7 +12,9 @@ Thurman's personal GitHub site is https://github.com/tgill880.
 
 Roxanne Agerone, roxanne at connectivecpp dot com, is a co-author of Utility Rack. Roxanne is based in Seattle and 
 
-Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Thursday evenings, 6 pm, at Ballard Coffee Works.
+Roxanne's personal GitHub site is https://github.com/oxenran. Roxanne also runs a Seattle C++ Meetup at https://www.meetup.com/Seattle-C-Meetup, typically meeting on Monday evenings, 6 pm, at Ballard Coffee Works.
+
+Nathan Deutsch, nathand at connectivecpp dot com, is a co-author of Utility Rack. Nathan ... (fill in info)
 
 Nathan Deutsch: Hi! My name is Nathan Deutsch and I'm the newest member of the Chops Net team. I'm a software engineer located in Bellevue, Washington. Outside of work I like to play jazz guitar and go camping. I'm also the best pool player in the state - I'm accepting all challengers if anyone thinks they're good.
 

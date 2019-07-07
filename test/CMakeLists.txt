@@ -25,6 +25,7 @@ set ( test_sources
     "${test_source_dir}/utility/erase_where_test.cpp"
     "${test_source_dir}/utility/make_byte_array_test.cpp"
     "${test_source_dir}/utility/overloaded_test.cpp"
+    "${test_source_dir}/utility/forward_capture_test.cpp"
     "${test_source_dir}/utility/repeat_test.cpp" )
 
 set ( OPTIONS "" )

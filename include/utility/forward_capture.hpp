@@ -12,8 +12,8 @@
  *  particular, a function object passed through a forwarding reference should be passed as either 
  *  an rvalue or lvalue reference, depending on what was passed in (which of course is what a
  *  forwarding reference is all about). Capturing and preserving the forwarding reference in a lambda
- *  is not easy. This utility provides a wrapper class, which (as in so many software problems)
- *  solves the problem with a layer of indirection.
+ *  is complicated (more so than it should be). This utility provides a wrapper class, which (as in 
+ *  so many software design problems) solves the problem with a layer of indirection.
  * 
  *  @authors Vittorio Romeo, Cliff Green
  *

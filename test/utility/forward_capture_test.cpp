@@ -19,104 +19,74 @@
 
 #include "utility/forward_capture.hpp"
 
+constexpr int base = 3;
+
 struct copyable_foo {
-  int val{42};
+  int val{base};
+  int operator()(int i) { val += i; return val; }
 };
 
 struct movable_foo {
-  std::unique_ptr<int> val{std::make_unique(43)};
+  std::unique_ptr<int> val{std::make_unique<int>(base)};
+  int operator()(int i) { *val += i; return *val; }
 };
 
 
 template <typename F>
-void func(F&&
-
-auto foo = [](auto&& a)
-{
-    return [a = CHOPS_FWD_CAPTURE(a)]() mutable 
-    { 
-        ++access(a)._value;
-        std::cout << access(a)._value << "\n";
-    };
-};
-
-int main()
-{
-    {
-        auto l_inner = foo(A{});
-        l_inner(); // Prints `1`.
-        l_inner(); // Prints `2`.
-        l_inner(); // Prints `3`.
-    }
-    
-    {
-        A my_a;
-        auto l_inner = foo(my_a);
-        l_inner(); // Prints `1`.
-        l_inner(); // Prints `2`.
-        l_inner(); // Prints `3`.
-
-        // Prints '3', yay!
-        std::cout << my_a._value << "\n";
-    }
+auto test_func(F&& f_obj, int val1, int val2) {
+  return [func = CHOPS_FWD_CAPTURE(f_obj), val1, val2] () mutable {
+    return chops::access(func)(val1) + chops::access(func)(val2);
+  };
 }
 
-int gSum = 0;
 
-void myfunc_a () {
-  gSum += 1;
-}
-
-void myfunc_b ( int i ) {
-  REQUIRE (gSum == i);
-  gSum += 1;
-}
-
-SCENARIO( "Vittorio Romeo's perfect forward parameters for lambda capture utility",
+TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utility",
           "[forward_capture]" ) {
-  constexpr int N = 50;
-  GIVEN ("A global counter set to 0 and an iteration count set to N") {
-    WHEN ("A function that doesn't care about the passed in index is invoked") {
-      gSum = 0;
-      chops::repeat(N, myfunc_a);
-      THEN ("the global counter should now equal N") {
-        REQUIRE (gSum == N);
-      }
-    }
-    AND_WHEN ("A function that does care about the passed in index is invoked") {
-      gSum = 0;
-      chops::repeat(N, myfunc_b);
-      THEN ("the global counter should now equal N") {
-        REQUIRE (gSum == N);
-      }
-    }
-    AND_WHEN ("A lambda func that doesn't care about the passed in index is invoked") {
-      gSum = 0;
-      chops::repeat(N, [] { myfunc_a(); } );
-      THEN ("the global counter should now equal N") {
-        REQUIRE (gSum == N);
-      }
-    }
-    AND_WHEN ("A lambda func that does care about the passed in index is invoked") {
-      gSum = 0;
-      chops::repeat(N, [] (int i) { myfunc_b(i); } );
-      THEN ("the global counter should now equal N") {
-        REQUIRE (gSum == N);
-      }
-    }
-    AND_WHEN ("A lambda func that doesn't care about the index but has a local var is invoked") {
-      int lSum = 0;
-      chops::repeat(N, [&lSum] { lSum += 1; } );
-      THEN ("the local counter should now equal N") {
-        REQUIRE (lSum == N);
-      }
-    }
-    AND_WHEN ("A lambda func that does care about the index and has a local var is invoked") {
-      int lSum = 0;
-      chops::repeat(N, [&lSum] (int i) { REQUIRE (lSum == i); lSum += 1; } );
-      THEN ("the local counter should now equal N") {
-        REQUIRE (lSum == N);
-      }
-    }
-  } // end given
+
+  // lvalue reference captured, will modify original object
+  {
+    copyable_foo a{};
+    auto lam = test_func(a, 1, 2);
+    int i = lam();
+    REQUIRE (i == 10);
+    REQUIRE (a.val == 6);
+    i = lam();
+    REQUIRE (i == 16);
+    REQUIRE (a.val == 9);
+    i = lam();
+    REQUIRE (i == 22);
+    REQUIRE (a.val == 12);
+  }
+  // rvalue, copy made and stored in lambda
+  {
+    auto lam = test_func(copyable_foo{}, 1, 2);
+    int i = lam();
+    REQUIRE (i == 10);
+    i = lam();
+    REQUIRE (i == 16);
+    i = lam();
+    REQUIRE (i == 22);
+  }
+  // rvalue move captured
+  {
+    movable_foo a{};
+    auto lam = test_func(a, 1, 2);
+    int i = lam();
+    REQUIRE (i == 10);
+    i = lam();
+    REQUIRE (i == 16);
+    i = lam();
+    REQUIRE (i == 22);
+  }
+  // rvalue move captured
+  {
+    auto lam = test_func(movable_foo{}, 1, 2);
+    int i = lam();
+    REQUIRE (i == 10);
+    i = lam();
+    REQUIRE (i == 16);
+    i = lam();
+    REQUIRE (i == 22);
+  }
 }
+

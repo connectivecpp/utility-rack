@@ -22,12 +22,39 @@
 constexpr int base = 3;
 
 struct copyable_foo {
+  copyable_foo() = default;
+  copyable_foo(const copyable_foo& rhs) {
+    ++copy_count;
+    val = rhs.val;
+  }
+  copyable_foo(copyable_foo&& rhs) {
+    ++move_count;
+    val = rhs.val;
+  }
+  copyable_foo& operator= (const copyable_foo&) = delete;
+  copyable_foo& operator= (copyable_foo&&) = delete;
+
+  inline static int copy_count = 0;
+  inline static int move_count = 0;
   int val{base};
+
   int operator()(int i) { val += i; return val; }
 };
 
 struct movable_foo {
+  movable_foo() = default;
+  movable_foo(const movable_foo&) = delete;
+  movable_foo(movable_foo&& rhs) {
+    ++move_count;
+    val = std::move(rhs.val);
+  }
+  movable_foo& operator= (const movable_foo&) = delete;
+  movable_foo& operator= (movable_foo&&) = delete;
+
+  inline static int copy_count = 0;
+  inline static int move_count = 0;
   std::unique_ptr<int> val{std::make_unique<int>(base)};
+
   int operator()(int i) { *val += i; return *val; }
 };
 
@@ -50,12 +77,18 @@ TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utili
     int i = lam();
     REQUIRE (i == 10);
     REQUIRE (a.val == 6);
+    REQUIRE (a.copy_count == 0);
+    REQUIRE (a.move_count == 0);
     i = lam();
     REQUIRE (i == 16);
     REQUIRE (a.val == 9);
+    REQUIRE (a.copy_count == 0);
+    REQUIRE (a.move_count == 0);
     i = lam();
     REQUIRE (i == 22);
     REQUIRE (a.val == 12);
+    REQUIRE (a.copy_count == 0);
+    REQUIRE (a.move_count == 0);
   }
   // rvalue, copy made and stored in lambda
   {

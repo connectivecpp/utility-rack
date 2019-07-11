@@ -16,6 +16,7 @@
 #include "catch2/catch.hpp"
 
 #include <memory> // std::unique_ptr
+#include <utility> // std::move
 
 #include "utility/forward_capture.hpp"
 
@@ -74,10 +75,20 @@ template <typename F>
 void invoke_non_const (F&& func) {
   int i = func();
   REQUIRE (i == 10);
-  i = lam();
+  i = func();
   REQUIRE (i == 16);
-  i = lam();
+  i = func();
   REQUIRE (i == 22);
+}
+
+template <typename F>
+void invoke_const (F&& func) {
+  int i = func();
+  REQUIRE (i == 3);
+  i = func();
+  REQUIRE (i == 3);
+  i = func();
+  REQUIRE (i == 3);
 }
 
 TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utility",
@@ -85,6 +96,9 @@ TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utili
 
   // lvalue reference captured, will modify original object
   {
+    copyable_foo::copy_count = 0;
+    copyable_foo::move_count = 0;
+
     copyable_foo a{};
     auto lam = test_func(a, 1, 2);
 
@@ -98,17 +112,11 @@ TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utili
   {
     copyable_foo::copy_count = 0;
     copyable_foo::move_count = 0;
+
     auto lam = test_func(copyable_foo{}, 1, 2);
-    int i = lam();
-    REQUIRE (i == 10);
-    REQUIRE (copyable_foo::copy_count == 0);
-    REQUIRE (copyable_foo::move_count == 1);
-    i = lam();
-    REQUIRE (i == 16);
-    REQUIRE (copyable_foo::copy_count == 0);
-    REQUIRE (copyable_foo::move_count == 1);
-    i = lam();
-    REQUIRE (i == 22);
+
+    invoke_non_const(lam);
+
     REQUIRE (copyable_foo::copy_count == 0);
     REQUIRE (copyable_foo::move_count == 1);
   }
@@ -116,16 +124,13 @@ TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utili
   {
     movable_foo::copy_count = 0;
     movable_foo::move_count = 0;
+
     movable_foo a{};
     auto lam = test_func(a, 1, 2);
-    int i = lam();
-    REQUIRE (i == 10);
-    REQUIRE (*(a.val) == 6);
-    REQUIRE (a.copy_count == 0);
-    REQUIRE (a.move_count == 0);
-    i = lam();
-    REQUIRE (i == 16);
-    REQUIRE (*(a.val) == 9);
+
+    invoke_non_const(lam);
+
+    REQUIRE (*(a.val) == 12);
     REQUIRE (a.copy_count == 0);
     REQUIRE (a.move_count == 0);
   }
@@ -133,37 +138,52 @@ TEST_CASE( "Vittorio Romeo's perfect forward parameters for lambda capture utili
   {
     movable_foo::copy_count = 0;
     movable_foo::move_count = 0;
+
     auto lam = test_func(movable_foo{}, 1, 2);
-    int i = lam();
-    REQUIRE (i == 10);
-    REQUIRE (movable_foo::copy_count == 0);
-    REQUIRE (movable_foo::move_count == 1);
-    i = lam();
-    REQUIRE (i == 16);
-    REQUIRE (movable_foo::copy_count == 0);
-    REQUIRE (movable_foo::move_count == 1);
-    i = lam();
-    REQUIRE (i == 22);
+
+    invoke_non_const(lam);
+
     REQUIRE (movable_foo::copy_count == 0);
     REQUIRE (movable_foo::move_count == 1);
   }
-  // lvalue, but copy forced by const
+  // lvalue, const ref passed in
   {
+    copyable_foo::copy_count = 0;
+    copyable_foo::move_count = 0;
+
     const copyable_foo a{};
     auto lam = test_func(a, 1, 2);
-    int i = lam();
-    REQUIRE (i == 10);
-    REQUIRE (a.val == 6);
+
+    invoke_const(lam);
+
+    REQUIRE (a.val == 3);
     REQUIRE (a.copy_count == 0);
     REQUIRE (a.move_count == 0);
-    i = lam();
-    REQUIRE (i == 16);
-    REQUIRE (a.val == 9);
-    REQUIRE (a.copy_count == 0);
+  }
+  // rvalue, const copy
+  {
+    copyable_foo::copy_count = 0;
+    copyable_foo::move_count = 0;
+
+    const copyable_foo a{};
+    auto lam = test_func(std::move(a), 1, 2);
+
+    invoke_const(lam);
+
+    REQUIRE (a.copy_count == 1);
     REQUIRE (a.move_count == 0);
-    i = lam();
-    REQUIRE (i == 22);
-    REQUIRE (a.val == 12);
+  }
+  // lvalue, const ref passed in
+  {
+    movable_foo::copy_count = 0;
+    movable_foo::move_count = 0;
+
+    const movable_foo a{};
+    auto lam = test_func(a, 1, 2);
+
+    invoke_const(lam);
+
+    REQUIRE (*(a.val) == 3);
     REQUIRE (a.copy_count == 0);
     REQUIRE (a.move_count == 0);
   }

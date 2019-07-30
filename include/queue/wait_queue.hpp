@@ -336,6 +336,13 @@ public:
    * such as to print the elements, or copy them to another container, or 
    * to interrogate values of the elements.
    *
+   * @param func Function object to be invoked on each element. The function
+   * object should have the signature:
+   * @code
+   * void (const T&);
+   * @endcode
+   * where @c T is the type of element in the queue.
+   *
    * @note The entire @c wait_queue is locked while @c apply is in process, 
    * so passing in a function object that blocks or takes a lot of processing 
    * time may result in slow performance.
@@ -344,10 +351,10 @@ public:
    * same @c wait_queue since it results in recursive mutex locks.
    */
   template <typename F>
-  void apply(F&& f) const /* noexcept(std::is_nothrow_invocable<F&&, const T&>::value) */ {
+  void apply(F&& func) const /* noexcept(std::is_nothrow_invocable<F&&, const T&>::value) */ {
     lock_guard lk{m_mut};
     for (const T& elem : m_data_queue) {
-      f(elem);
+      func(elem);
     }
   }
 

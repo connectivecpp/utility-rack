@@ -10,7 +10,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of April 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of July 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -72,7 +72,11 @@ If the destination type is unrelated to the original type (and is not a `void *`
 
 ### Overloaded
 
-Create a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
+This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
+
+### Forward Capture
+
+Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](doc/references.md)).
 
 # C++ Language Requirements and Alternatives
 

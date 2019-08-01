@@ -6,7 +6,7 @@
  *
  *  @author Cliff Green
  *
- *  Copyright (c) 2019 by Cliff Green
+ *  Copyright (c) 2019 by Cliff Green, Roxanne Agerone
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -47,7 +47,7 @@ SCENARIO ( "Endian detection",
     }
   } // end given
 }
-
+// 0, 1, 2, 127, 128, transform back an forth bw functions
 SCENARIO ( "Append values into a buffer",
            "[append_val]" ) {
 
@@ -103,3 +103,69 @@ SCENARIO ( "Extract values from a buffer",
   } // end given
 }
 
+
+TEST_CASE ( "Append and extract variable length integers","[append_var_int]" ) {
+
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<int>(test_buf, 0xCAFE);
+    REQUIRE(static_cast<int> (test_buf[0]) == 254);
+    INFO("test buf [0]" << static_cast<int> (test_buf[0]))
+    REQUIRE(static_cast<int> (test_buf[1]) == 149);
+    INFO("test buf [1]" << static_cast<int> (test_buf[1]))
+    REQUIRE(static_cast<int> (test_buf[2]) == 3);
+    INFO("test buf [2]" << static_cast<int> (test_buf[2]))
+
+    auto output = chops::extract_var_int<int>(test_buf, outsize);
+    
+    REQUIRE(output == 51966);
+    REQUIRE(outsize == 3);
+    }
+
+TEST_CASE ( "Append var len integer of 127","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<int>(test_buf, 0x7F);
+    REQUIRE(static_cast<int> (test_buf[0]) == 127);
+    REQUIRE(outsize == 1);
+}
+TEST_CASE ( "Append var len integer of 128","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<int>(test_buf, 0x80);
+    REQUIRE(static_cast<int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<int> (test_buf[1]) == 1);
+    REQUIRE(outsize == 2);
+}
+TEST_CASE ( "Append var len integer larger than 4 bytes","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<int>(test_buf, 0x10000000);
+    REQUIRE(static_cast<int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<int> (test_buf[4]) == 1);
+    REQUIRE(outsize == 5);
+}
+
+TEST_CASE( "Extracting variable integer larger than two bytes", "[extract_var_int]" ) {
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0xFE); // encodes to 126 with byte flag set
+    test_buf[1] = static_cast<std::byte>(0xCA); // encodes to 9472
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 2u);
+    // 126 + 9472 = 9598
+    REQUIRE( val1 == 9598 );
+}
+
+TEST_CASE("Extracting variable integer smaller than a byte", "[extract_var_int]"){
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0x7F); // encodes to 127
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 1u);
+    REQUIRE( val1 == 127 );
+}
+
+TEST_CASE("Extracting variable integer of 128", "[extract_var_int]"){
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0x80); // encodes to 0 with byte flag set
+    test_buf[1] = static_cast<std::byte>(0x01); // encodes to 128
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 2u);
+    // 127 + 1 = 128
+    REQUIRE( val1 == 128 );
+}

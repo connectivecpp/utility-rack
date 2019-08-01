@@ -16,7 +16,7 @@
  *  @c constexpr and evaluated at compile time. Until then, run-time endian detection and 
  *  copying is performed.
  *
- *  @author Cliff Green
+ *  @author Cliff Green, Roxanne Agerone
  *
  *  Copyright (c) 2019 by Cliff Green
  *
@@ -33,7 +33,7 @@
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
 #include <type_traits> // std::is_integral
-
+#include <iostream>
 namespace chops {
 
 namespace detail {
@@ -201,6 +201,7 @@ std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*)
   return 8u;
 }
 
+
 } // end namespace detail
 
 // C++ 20 will contain std::endian, which allows full compile time endian detection;
@@ -276,6 +277,60 @@ std::size_t append_val(std::byte* buf, const T& val) noexcept {
                       detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
 
+/**
+ Adapted from the following code:
+ * * License: CC0 1.0 Universal
+ * Originally published on http://techoverflow.net
+ https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
+ * Encodes an unsigned variable-length integer using the MSB algorithm.
+ * This function assumes that the value is stored as little endian.
+ * @param value The input value. Any standard integer type is allowed.
+ * @param output A pointer to a piece of reserved memory. Must have a minimum size dependent on the input size (32 bit = 5 bytes, 64 bit = 10 bytes).
+ * @return The number of bytes used in the output memory.
+ * 
+ */
+
+template<typename T>
+std::size_t append_var_int(std::byte* output, T val) {
+    std::uint8_t* output_ptr = cast_ptr_to<std::uint8_t>(output);
+    
+    std::size_t outputSize = 0;
+    
+    // While more than 7 bits of data are left, occupy the last output byte
+    // and set the next byte flag
+    while (val > 127) {
+
+        output_ptr[outputSize] = (static_cast<std::uint8_t> (val & 127)) | 128;
+        //Remove the seven bits we just wrote
+        val >>= 7;
+        ++outputSize;
+    }
+    output_ptr[outputSize++] = static_cast<std::uint8_t> (val) & 127;
+    return outputSize;
+}
+/**
+ Adapted from the following code:
+ * * License: CC0 1.0 Universal
+ * Originally published on http://techoverflow.net
+ * Copyright (c) 2015 Uli Koehler
+ * Decodes an unsigned variable-length integer using the MSB algorithm.
+ * @param input A variable-length encoded integer of arbitrary size.
+ * @param inputSize How many bytes are in the array
+ */
+template<typename T>
+T extract_var_int(const std::byte* input, std::size_t inputSize) {
+    const std::uint8_t* input_ptr = cast_ptr_to<std::uint8_t> (input);
+    
+    T ret = 0;
+    for (std::size_t i = 0; i < inputSize; i++) {
+        ret |= (input_ptr[i] & 127) << (7 * i);
+        //If the next-byte flag is set
+        if(!(input_ptr[i] & 128)) {
+            break;
+        }
+    }
+    return ret;
+}
 } // end namespace
 
 #endif

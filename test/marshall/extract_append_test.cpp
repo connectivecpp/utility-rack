@@ -4,7 +4,7 @@
  *
  *  @brief Test scenarios for @c extract_val and @c append_val functions.
  *
- *  @author Cliff Green
+ *  @author Cliff Green, Roxanne Agerone
  *
  *  Copyright (c) 2019 by Cliff Green, Roxanne Agerone
  *
@@ -47,7 +47,7 @@ SCENARIO ( "Endian detection",
     }
   } // end given
 }
-// 0, 1, 2, 127, 128, transform back an forth bw functions
+
 SCENARIO ( "Append values into a buffer",
            "[append_val]" ) {
 
@@ -103,45 +103,70 @@ SCENARIO ( "Extract values from a buffer",
   } // end given
 }
 
+template <typename Dest, typename Src>
+void test_round_trip_var_int (Src src, std::size_t exp_sz) {
+  std::byte test_buf [10];
+  auto outsize = chops::append_var_int<Src>(test_buf, src);
+  auto output = chops::extract_var_int<Dest>(test_buf, outsize);
+  REQUIRE(output == src);
+  REQUIRE(outsize == exp_sz);
+}
 
 TEST_CASE ( "Append and extract variable length integers","[append_var_int]" ) {
 
-    std::byte test_buf [7];
-    auto outsize = chops::append_var_int<int>(test_buf, 0xCAFE);
-    REQUIRE(static_cast<int> (test_buf[0]) == 254);
-    INFO("test buf [0]" << static_cast<int> (test_buf[0]))
-    REQUIRE(static_cast<int> (test_buf[1]) == 149);
-    INFO("test buf [1]" << static_cast<int> (test_buf[1]))
-    REQUIRE(static_cast<int> (test_buf[2]) == 3);
-    INFO("test buf [2]" << static_cast<int> (test_buf[2]))
+    std::byte test_buf [10];
 
-    auto output = chops::extract_var_int<int>(test_buf, outsize);
+  {
+    auto outsize = chops::append_var_int<std::uint32_t>(test_buf, 0xCAFE);
+    REQUIRE(static_cast<int> (test_buf[0]) == 254);
+    REQUIRE(static_cast<int> (test_buf[1]) == 149);
+    REQUIRE(static_cast<int> (test_buf[2]) == 3);
+
+    auto output = chops::extract_var_int<unsigned int>(test_buf, outsize);
     
-    REQUIRE(output == 51966);
-    REQUIRE(outsize == 3);
-    }
+    REQUIRE(output == 51966u); // 0xCAFE is 51966
+    REQUIRE(outsize == 3u);
+  }
+}
+
+TEST_CASE ( "Append and extract variable length integers, round trip testing",
+            "[append_var_int]" ) {
+
+  test_round_trip_var_int<unsigned int> (static_cast<std::uint32_t>(0xFFFFFFFF),
+                                         5u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(40001u),
+                                         3u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(0xFFFF),
+                                         3u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(7u),
+                                         1u);
+  test_round_trip_var_int<unsigned long long> (static_cast<std::uint64_t>(0xFFFFFFFFFFFFFFFF),
+                                         10u);
+  test_round_trip_var_int<unsigned int> (static_cast<std::uint32_t>(42u),
+                                         1u);
+}
 
 TEST_CASE ( "Append var len integer of 127","[append_var_int]" ) {
     
     std::byte test_buf [7];
-    auto outsize = chops::append_var_int<int>(test_buf, 0x7F);
-    REQUIRE(static_cast<int> (test_buf[0]) == 127);
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x7F);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 127);
     REQUIRE(outsize == 1);
 }
 TEST_CASE ( "Append var len integer of 128","[append_var_int]" ) {
     
     std::byte test_buf [7];
-    auto outsize = chops::append_var_int<int>(test_buf, 0x80);
-    REQUIRE(static_cast<int> (test_buf[0]) == 128); //byte flag set
-    REQUIRE(static_cast<int> (test_buf[1]) == 1);
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x80);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<unsigned int> (test_buf[1]) == 1);
     REQUIRE(outsize == 2);
 }
 TEST_CASE ( "Append var len integer larger than 4 bytes","[append_var_int]" ) {
     
     std::byte test_buf [7];
-    auto outsize = chops::append_var_int<int>(test_buf, 0x10000000);
-    REQUIRE(static_cast<int> (test_buf[0]) == 128); //byte flag set
-    REQUIRE(static_cast<int> (test_buf[4]) == 1);
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x10000000);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<unsigned int> (test_buf[4]) == 1);
     REQUIRE(outsize == 5);
 }
 
@@ -169,3 +194,4 @@ TEST_CASE("Extracting variable integer of 128", "[extract_var_int]"){
     // 127 + 1 = 128
     REQUIRE( val1 == 128 );
 }
+

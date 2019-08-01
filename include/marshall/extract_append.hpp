@@ -296,23 +296,15 @@ std::size_t append_var_int(std::byte* output, T val) {
     
     std::size_t outputSize = 0;
     
-    //While more than 7 bits of data are left, occupy the last output byte
+    // While more than 7 bits of data are left, occupy the last output byte
     // and set the next byte flag
-//    while (val > max_byte_val) {
     while (val > 127) {
-        //|128: Set the next byte flag
-//        std::byte tmp {val & max_byte_val};
-//        output[outputSize] = tmp | flag_bit_value;
-        
-        // do a static cast  ########### that's new
-        // static_cast<T>
+
         output_ptr[outputSize] = (static_cast<std::uint8_t> (val & 127)) | 128;
         //Remove the seven bits we just wrote
         val >>= 7;
         ++outputSize;
     }
-    //std::byte tmp {val};
-//    output[outputSize++] = tmp & max_byte_val;
     output_ptr[outputSize++] = static_cast<std::uint8_t> (val) & 127;
     return outputSize;
 }
@@ -327,14 +319,12 @@ std::size_t append_var_int(std::byte* output, T val) {
  */
 template<typename T>
 T extract_var_int(const std::byte* input, std::size_t inputSize) {
-//T decode_var_int(const uint8_t* input, std::size_t inputSize) {
     const std::uint8_t* input_ptr = cast_ptr_to<std::uint8_t> (input);
     
     T ret = 0;
     for (std::size_t i = 0; i < inputSize; i++) {
         ret |= (input_ptr[i] & 127) << (7 * i);
         //If the next-byte flag is set
-
         if(!(input_ptr[i] & 128)) {
             break;
         }

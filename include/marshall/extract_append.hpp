@@ -16,7 +16,7 @@
  *  @c constexpr and evaluated at compile time. Until then, run-time endian detection and 
  *  copying is performed.
  *
- *  @author Cliff Green
+ *  @author Cliff Green, Roxanne Agerone
  *
  *  Copyright (c) 2019 by Cliff Green
  *
@@ -277,36 +277,11 @@ std::size_t append_val(std::byte* buf, const T& val) noexcept {
                       detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
 
-// template <typename T>
-// T extract_variable_len_val(const std::byte* buf) noexcept{
-// // T variable_temp
-// // return variable_temp
-// }
-
-
-// template <typename T>
-// std::size_t append_variable_len_val(const T& val) noexcept{
-//   std::size_t count = 0 
-
-//     while (val > 127) {
-//       //|128: Set the next byte flag
-//       output[count] = ((T)(val & 127)) | 128;
-//       //Remove the seven bits we just wrote
-//       val >>= 7;
-//       count++;
-//     }
-//     count++;
-//     return count;
-// // return std_size_t
-// }
-constexpr std::byte flag_bit_value {128};
-constexpr std::byte max_byte_val {127};
-
 /**
  Adapted from the following code:
  * * License: CC0 1.0 Universal
  * Originally published on http://techoverflow.net
- * Copyright (c) 2015 Uli Koehler
+ https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
  * Encodes an unsigned variable-length integer using the MSB algorithm.
  * This function assumes that the value is stored as little endian.
  * @param value The input value. Any standard integer type is allowed.
@@ -317,8 +292,6 @@ constexpr std::byte max_byte_val {127};
 
 template<typename T>
 std::size_t append_var_int(std::byte* output, T val) {
-//    std::size_t encode_var_int(uint8_t* output, T val) {
-    // ################
     std::uint8_t* output_ptr = cast_ptr_to<std::uint8_t>(output);
     
     std::size_t outputSize = 0;
@@ -358,9 +331,7 @@ T extract_var_int(const std::byte* input, std::size_t inputSize) {
     const std::uint8_t* input_ptr = cast_ptr_to<std::uint8_t> (input);
     
     T ret = 0;
-//    constexpr std::byte byte_zero {0};
     for (std::size_t i = 0; i < inputSize; i++) {
-//        ret |= (input[i] & max_byte_val) << (7 * i);
         ret |= (input_ptr[i] & 127) << (7 * i);
         //If the next-byte flag is set
 

@@ -45,11 +45,14 @@
  *  for size efficiency (e.g. sending images or video or large data sets).
  *
  *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
- *  types such as @c std::string and @c std::optional. @c std::variant and @c std::any
- *  require value extraction by the application and are not directly supported by this
- *  library. (This might be a future enhancement if a good design is proposed.) Support is 
- *  also provided for sequences, where the number of elements is placed before the element 
- *  sequence. 
+ *  types such as @c std::string and @c std::optional. Support is also provided for sequences, 
+ *  where the number of elements is placed before the element sequence in the stream of
+ *  bytes. 
+ * 
+ *  @c std::variant and @c std::any are not directly supported and require value extraction 
+ *  by the application. (This might be a future enhancement if a good design is proposed.) 
+ *  @c std::wstring and other non-char strings are also not directly supported, and 
+ *  require additional calls from the application.
  *
  *  Central to the design of these marshalling and unmarshalling functions is a mapping of 
  *  two types to a single value. For marshalling, the two types are the native type (e.g. 
@@ -72,6 +75,19 @@
  *  reason, floating point numbers must either be converted to a string representation, or
  *  converted into an integral type (e.g. an integer with an implicit scale factor).
  *
+ *  @note Design and implementation comments - there is likely a more sophisticated C++
+ *  design struggling to emerge (outside of the capabilities provided by reflection), maybe
+ *  involving parameter packs or the like. For now, the design uses C++11 (or maybe even
+ *  earlier) features for basic and simple marshalling / unmarshalling.
+ *
+ *  @note Performance considerations - for marshalling, iterative resizing of the output
+ *  buffer is a fundamental operation. @c std::vector and @c mutable_shared_buffer 
+ *  @c resize methods use efficient logic for internal buffer allocations (@c mutable_shared_buffer
+ *  uses @c std::vector internally). Custom containers used as the buffer parameter should
+ *  have similar efficient @c resize method logic. Calling @c reserve at appropriate places may 
+ *  provide a small performance increase, at the cost of additional requirements on the buffer
+ *  type.
+ *
  *  @author Cliff Green
  *
  *  Copyright (c) 2019 by Cliff Green
@@ -91,6 +107,8 @@
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
 #include <optional>
+#include <string>
+#include <string_view>
 
 namespace chops {
 
@@ -120,11 +138,13 @@ namespace detail {
  * @pre The buffer must contain at least @c sizeof(T) bytes.
  *
  */
+/*
 template <typename Cnt, typename Container>
 Container extract_sequence(const std::byte* buf) noexcept(fill in) {
   Cnt c = extract_val<Cnt>(buf);
 
 }
+*/
 
 
 /**
@@ -152,6 +172,7 @@ Container extract_sequence(const std::byte* buf) noexcept(fill in) {
  * the elements in the sequence.
  *
  */
+/*
 template <typename Cnt, typename Iter>
 std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexcept {
   std::size_t num = 0;
@@ -162,18 +183,19 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
     ++start;
   }
 }
+*/
 
 /**
  * @brief Adapt a C-style array or @c std::array so that it can be used with the
- * @c chops::marshaller class template.
+ * @c chops::marshall function templates.
  *
- * This class provides four methods (@c size, @c resize, @c data, @c clear) as required by the
- * @c chops::marshaller buf parameter. This adapter can only be used where the array or @c std::array
- * object lifetime is the same or greater than the @c buf_adapter object, and where the 
- * array address never changes. In other words, a @c std::vector<std::byte> cannot be used with
- * this adapter, as the underlying array may be reallocated and the buffer address changed 
- * (instead, a @c std::vector<std::byte> can be directly used with the @c chops::marshaller class 
- * template).
+ * This class provides three methods (@c size, @c resize, @c data) as required by the
+ * @c Buf parameter type in the @c chops::marshall functions. This adapter can only be 
+ * used where the array or @c std::array object lifetime is the same or greater than 
+ * the @c buf_adapter object, and where the array address never changes. In other words, 
+ * a @c std::vector<std::byte> cannot be used with this adapter, as the underlying array 
+ * may be reallocated and the buffer address changed. However, a @c std::vector<std::byte> 
+ * can be directly used with the @c chops::marshall function templates.
  *
  */
 class buf_adapter {
@@ -183,9 +205,9 @@ public:
  *
  * @pre The @c std::byte pointer passed in to the constructor must point to a buffer large enough
  * to contain the full size of the marshalled data. No "end of buffer" checks are performed in the 
- * @c chops::marshaller class template.
+ * @c chops::marshall function templates.
  */
-  buf_adapter(std::byte* buf) : m_buf(buf), m_size(0u) noexcept { }
+  buf_adapter(std::byte* buf) noexcept : m_buf(buf), m_size(0u) { }
 
 /**
  * @brief Return the size of the data which has been written into the buffer.
@@ -223,101 +245,46 @@ private:
   std::size_t m_size;
 };
 
-/**
- * @brief Blah
- *
- * @tparam Buf A container storing a contiguous @c std::byte buffer. The container must 
- * support the following methods: @c resize, @c size, @c data, and @c clear. A 
- * @c std::vector<std::byte> is supported, as well as the @c chops::mutable_shared_buffer
- * class. A C-style array or @c std::array is supported by using the @c chops::buf_adapter
- * class. While @c std::basic_string supports the four needed methods, it is unknown if
- * it is defined behavior to instantiate a @c std::basic_string with @c std::byte (and is
- * not recommended according to Arne Metz at https://arne-mertz.de/2018/11/string-not-for-raw-data/).
- *
- * @param cnt Number of elements in the sequence.
- *
- * @param start Iterator pointing to the start of the sequence.
- *
- * @param end Iterator pointing to the end of the sequence.
- *
- * @pre The @c std::byte buffer passed in to the constructor must be able to contain the full size 
- * of the marshalled data, whether through expansion of the buffer or a buffer already pre-allocated.
- */
-template <typename Buf = mutable_shared_buffer>
-class marshaller {
-public:
-
-
-/**
- * @brief blah
- * the lower level @c append_val function.
- *
- * @param buf blah
- *
- * @param cnt Number of elements in the sequence.
- *
- * @param start Iterator pointing to the start of the sequence.
- *
- * @param end Iterator pointing to the end of the sequence.
- *
- * @pre The @c std::byte buffer passed in to the constructor must be able to contain the full size 
- * of the marshalled data, whether through expansion of the buffer or a buffer already pre-allocated.
- */
-  marshaller (Buf& buf) : m_buf(buf), m_offset(0u) noexcept { }
-
-/**
- * @brief Copy construction is not allowed.
- */
-  marshaller(const marshaller&) = delete;
-
-  template <typename Cast, typename T>
-  marshaller<Buf>& marshall(const T& val) {
-    m_buf.resize(m_buf.size() + sizeof(Cast));
-    m_offset += append_val(m_buf.data()+m_offset, static_cast<Cast>(val));
-    return *this;
-  }
-
-  std::size_t size() const noexcept {
-    return m_offset;
-  }
-
-  void clear() {
-    m_buf.clear();
-    m_offset = 0u;
-  }
-
-private:
-  Buf& m_buf;
-  std::size_t m_offset; // offset is used instead of pointer since a buffer resize or clear may 
-                        // reallocate memory, invalidating the pointer
-};
-
-// various overloaded marshall functions, each taking a marshaller object
-
-template <typename Cast, typename T, typename Buf = mutable_shared_buffer>
-marshaller<Buf>& marshall(marshaller<Buf>& mler, const T& val) {
-  return mler.marshall<Cast>(val);
+template <typename CastVal, typename T, typename Buf>
+Buf& marshall(Buf& buf, const T& val) {
+  auto old_sz = buf.size();
+  buf.resize(old_sz + sizeof(CastVal));
+  append_val(buf.data()+old_sz, static_cast<CastVal>(val));
+  return buf;
 }
 
-template <typename Cast, typename Buf = mutable_shared_buffer>
-marshaller<Buf>& marshall(marshaller<Buf>& mler, bool b) {
-  return mler.marshall<Cast>(static_cast<Cast>(b ? 1 : 0));
+template <typename CastBool, typename Buf>
+Buf& marshall(Buf& buf, bool b) {
+  return marshall<CastBool>(buf, static_cast<CastBool>(b ? 1 : 0));
 }
 
-template <typename CastBool, typename CastVal, typename T, typename Buf = mutable_shared_buffer>
-marshaller<Buf>& marshall(marshaller<Buf>& mler, const std::optional<T>& val) {
-  marshall<CastBool>(mler, val.has_value());
+template <typename CastBool, typename CastVal, typename T, typename Buf>
+Buf& marshall(Buf& buf, const std::optional<T>& val) {
+  marshall<CastBool>(buf, val.has_value());
   if (val.has_value()) {
-    marshall<CastVal>(*val);
+    marshall<CastVal>(buf, *val);
   }
-  return mler;
+  return buf;
 }
 
-template <typename CntCast, typename Iter, typename Buf = mutable_shared_buffer>
-marshaller<Buf>& marshall(marshaller<Buf>& mler, std::size_t num, Iter start) {
-  marshall<CntCast>(num);
-  repeat(num, [&mler] { marshall
-  return mler;
+template <typename CastCnt, typename CastVal, typename Iter, typename Buf>
+Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
+  marshall<CastCnt>(buf, num);
+  for (std::size_t i = 0u; i < num; ++i) {
+    marshall<CastVal>(buf, *iter);
+    ++iter;
+  }
+  return buf;
+}
+
+template <typename CastCnt, typename Buf>
+Buf& marshall(Buf& buf, const std::string& str) {
+  marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
+}
+
+template <typename CastCnt, typename Buf>
+Buf& marshall(Buf& buf, std::string_view str) {
+  marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
 } // end namespace

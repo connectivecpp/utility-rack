@@ -42,9 +42,8 @@ namespace chops {
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const location& loc) {
-  marshall<std::int32_t>(buf, loc.latitude);
-  marshall<std::int32_t>(buf, loc.longitude);
-  return marshall<std::int16_t>(buf, loc.altitude);
+  return marshall<std::int16_t>(loc.altitude, marshall<std::int32_t>(loc.longitude, 
+                                marshall<std::int32_t>(loc.latitude, buf)));
 }
 
 /*

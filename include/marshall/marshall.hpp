@@ -246,7 +246,7 @@ private:
 };
 
 template <typename CastVal, typename T, typename Buf>
-Buf& marshall(Buf& buf, const T& val) {
+Buf& marshall(const T& val, Buf& buf) {
   auto old_sz = buf.size();
   buf.resize(old_sz + sizeof(CastVal));
   append_val(buf.data()+old_sz, static_cast<CastVal>(val));
@@ -254,12 +254,12 @@ Buf& marshall(Buf& buf, const T& val) {
 }
 
 template <typename CastBool, typename Buf>
-Buf& marshall(Buf& buf, bool b) {
+Buf& marshall(bool b, Buf& buf) {
   return marshall<CastBool>(buf, static_cast<CastBool>(b ? 1 : 0));
 }
 
 template <typename CastBool, typename CastVal, typename T, typename Buf>
-Buf& marshall(Buf& buf, const std::optional<T>& val) {
+Buf& marshall(const std::optional<T>& val, Buf& buf) {
   marshall<CastBool>(buf, val.has_value());
   if (val.has_value()) {
     marshall<CastVal>(buf, *val);
@@ -268,7 +268,7 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 }
 
 template <typename CastCnt, typename CastVal, typename Iter, typename Buf>
-Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
+Buf& marshall_sequence(std::size_t num, Iter iter, Buf& buf) {
   marshall<CastCnt>(buf, num);
   for (std::size_t i = 0u; i < num; ++i) {
     marshall<CastVal>(buf, *iter);
@@ -278,12 +278,12 @@ Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
 }
 
 template <typename CastCnt, typename Buf>
-Buf& marshall(Buf& buf, const std::string& str) {
+Buf& marshall(const std::string& str, Buf& buf) {
   marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
 template <typename CastCnt, typename Buf>
-Buf& marshall(Buf& buf, std::string_view str) {
+Buf& marshall(std::string_view str, Buf& buf) {
   marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 

@@ -75,11 +75,6 @@
  *  reason, floating point numbers must either be converted to a string representation, or
  *  converted into an integral type (e.g. an integer with an implicit scale factor).
  *
- *  @note Design and implementation comments - there is likely a more sophisticated C++
- *  design struggling to emerge (outside of the capabilities provided by reflection), maybe
- *  involving parameter packs or the like. For now, the design uses C++11 (or maybe even
- *  earlier) features for basic and simple marshalling / unmarshalling.
- *
  *  @note Performance considerations - for marshalling, iterative resizing of the output
  *  buffer is a fundamental operation. @c std::vector and @c mutable_shared_buffer 
  *  @c resize methods use efficient logic for internal buffer allocations (@c mutable_shared_buffer
@@ -204,8 +199,8 @@ public:
  * @brief Construct the @ buf_adapter given a @c std::byte pointer to the beginning of an array.
  *
  * @pre The @c std::byte pointer passed in to the constructor must point to a buffer large enough
- * to contain the full size of the marshalled data. No "end of buffer" checks are performed in the 
- * @c chops::marshall function templates.
+ * to contain the full final size of the marshalled data. No "end of buffer" checks are performed 
+ * in the @c chops::marshall function templates.
  */
   buf_adapter(std::byte* buf) noexcept : m_buf(buf), m_size(0u) { }
 
@@ -245,46 +240,77 @@ private:
   std::size_t m_size;
 };
 
+
+/**
+ * @brief Marshall a single value into a buffer of bytes.
+ *
+ * @tparam CastVal The destination type in the byte buffer for the marshalled
+ * type, typically a sized type such as @c std::int32_t; this type must
+ * always be supplied in the function call. 
+ *
+ * @tparam T The native type of the value, typically deduced by the function
+ * argument type.
+ *
+ * @tparam Buf The buffer type, which must support @c size, @c resize, and
+ * @c data methods, typically deduced by the function argument type.
+ *
+ * @param buf Buffer to hold the marshalled value; the buffer will be resized.
+ *
+ * @param val Value to be marshalled.
+ *
+ * @return Reference to the buffer parameter.
+ *
+ * Example usage, which marshalls an @int as an unsigned 16 bit into a byte 
+ * buffer:
+ * @code
+ *   marshall_val<std::uint16_t>(buf, my_int);
+ * @endcode
+ */
 template <typename CastVal, typename T, typename Buf>
-Buf& marshall(const T& val, Buf& buf) {
+Buf& marshall_val(Buf& buf, const T& val) {
   auto old_sz = buf.size();
   buf.resize(old_sz + sizeof(CastVal));
   append_val(buf.data()+old_sz, static_cast<CastVal>(val));
   return buf;
 }
 
+template <typename Buf, typename ...Ts>
+Buf& marshall(Buf& buf, Ts... ts) {
+  return (marshall_val<Ts>(ts), ...);
+}
+
 template <typename CastBool, typename Buf>
-Buf& marshall(bool b, Buf& buf) {
-  return marshall<CastBool>(buf, static_cast<CastBool>(b ? 1 : 0));
+Buf& marshall(Buf& buf, bool b) {
+  return marshall_val<CastBool>(buf, static_cast<CastBool>(b ? 1 : 0));
 }
 
 template <typename CastBool, typename CastVal, typename T, typename Buf>
-Buf& marshall(const std::optional<T>& val, Buf& buf) {
-  marshall<CastBool>(buf, val.has_value());
+Buf& marshall_optional(Buf& buf, const std::optional<T>& val) {
+  marshall_val<CastBool>(buf, val.has_value());
   if (val.has_value()) {
-    marshall<CastVal>(buf, *val);
+    marshall_val<CastVal>(buf, *val);
   }
   return buf;
 }
 
 template <typename CastCnt, typename CastVal, typename Iter, typename Buf>
-Buf& marshall_sequence(std::size_t num, Iter iter, Buf& buf) {
-  marshall<CastCnt>(buf, num);
+Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
+  marshall_val<CastCnt>(buf, num);
   for (std::size_t i = 0u; i < num; ++i) {
-    marshall<CastVal>(buf, *iter);
+    marshall_val<CastVal>(buf, *iter);
     ++iter;
   }
   return buf;
 }
 
 template <typename CastCnt, typename Buf>
-Buf& marshall(const std::string& str, Buf& buf) {
-  marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
+Buf& marshall(Buf& buf, const std::string& str) {
+  return marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
 template <typename CastCnt, typename Buf>
-Buf& marshall(std::string_view str, Buf& buf) {
-  marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
+Buf& marshall(Buf& buf, std::string_view str) {
+  return marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
 } // end namespace

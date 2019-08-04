@@ -19,6 +19,7 @@
 #include <cstddef> // std::byte
 #include <cstdint> // std::uint32_t, etc
 #include <list>
+#include <optional>
 
 #include "marshall/marshall.hpp"
 
@@ -36,6 +37,7 @@ struct boundary {
   std::string          name;
   bool                 government;
   std::list<location>  points;
+  std::optional<something> something;
 };
 
 namespace chops {

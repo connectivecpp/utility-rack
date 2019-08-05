@@ -242,11 +242,17 @@ private:
 
 
 /**
- * @brief Marshall a single value into a buffer of bytes.
+ * @brief Marshall a single integral value into a buffer of bytes.
  *
- * @tparam CastVal The destination type in the byte buffer for the marshalled
- * type, typically a sized type such as @c std::int32_t; this type must
- * always be supplied in the function call. 
+ * This is the lowest level @c marshall function, and only works on fundamental
+ * integral values. It expands the buffer and appends the value to the buffer,
+ * performing byte swapping into big endian format as needed. @c char and
+ * @c std::byte values will not be byte swapped.
+ *
+ * @tparam CastVal The destination sized type in the byte buffer for the marshalled
+ * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
+ * etc; this type must always be supplied in the function call, since it is not
+ * deduced from the function argument. 
  *
  * @tparam T The native type of the value, typically deduced by the function
  * argument type.
@@ -288,7 +294,7 @@ template <typename CastBool, typename CastVal, typename T, typename Buf>
 Buf& marshall_optional(Buf& buf, const std::optional<T>& val) {
   marshall_val<CastBool>(buf, val.has_value());
   if (val.has_value()) {
-    marshall_val<CastVal>(buf, *val);
+    marshall<CastVal>(buf, *val);
   }
   return buf;
 }
@@ -297,7 +303,7 @@ template <typename CastCnt, typename CastVal, typename Iter, typename Buf>
 Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
   marshall_val<CastCnt>(buf, num);
   for (std::size_t i = 0u; i < num; ++i) {
-    marshall_val<CastVal>(buf, *iter);
+    marshall<CastVal>(buf, *iter);
     ++iter;
   }
   return buf;

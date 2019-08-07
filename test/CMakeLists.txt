@@ -19,7 +19,7 @@ set ( test_sources
     "${test_source_dir}/queue/wait_queue_test.cpp"
     "${test_source_dir}/timer/periodic_timer_test.cpp"
     "${test_source_dir}/marshall/extract_append_test.cpp"
-    "${test_source_dir}/marshall/marshall_test.cpp"
+#    "${test_source_dir}/marshall/marshall_test.cpp"
     "${test_source_dir}/marshall/shared_buffer_test.cpp"
     "${test_source_dir}/utility/cast_ptr_to_test.cpp"
     "${test_source_dir}/utility/erase_where_test.cpp"

@@ -29,11 +29,13 @@ constexpr char val2 = 0xEE;
 constexpr std::int16_t val3 = 0x01FF;
 constexpr std::uint64_t val4 = 0x0908070605040302;
 constexpr std::int32_t val5 = 0xDEADBEEF;
+constexpr std::byte val6 = static_cast<std::byte>(0xAA);
 
-constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+sizeof(val4)+sizeof(val5);
+constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+
+                       sizeof(val4)+sizeof(val5)+sizeof(val6);
 
 auto net_buf = chops::make_byte_array(0xDD, 0xCC, 0xBB, 0xAA, 0xEE, 0x01, 0xFF,
-    0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF);
+    0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF, 0xAA);
 
 SCENARIO ( "Endian detection",
            "[endian] [little_endian]" ) {
@@ -70,7 +72,8 @@ SCENARIO ( "Append values into a buffer",
       REQUIRE(chops::append_val(ptr, val2) == 1u); ptr += sizeof(val2);
       REQUIRE(chops::append_val(ptr, val3) == 2u); ptr += sizeof(val3);
       REQUIRE(chops::append_val(ptr, val4) == 8u); ptr += sizeof(val4);
-      REQUIRE(chops::append_val(ptr, val5) == 4u);
+      REQUIRE(chops::append_val(ptr, val5) == 4u); ptr += sizeof(val5);
+      REQUIRE(chops::append_val(ptr, val6) == 1u);
       
       THEN ("the buffer will have all of the values in network endian order") {
         chops::repeat(arr_sz, [&buf] (int i) { REQUIRE (buf[i] == net_buf[i]); } );
@@ -90,7 +93,8 @@ SCENARIO ( "Extract values from a buffer",
       char v2 = chops::extract_val<char>(ptr); ptr += sizeof(v2);
       std::int16_t v3 = chops::extract_val<std::int16_t>(ptr); ptr += sizeof(v3);
       std::uint64_t v4 = chops::extract_val<std::uint64_t>(ptr); ptr += sizeof(v4);
-      std::int32_t v5 = chops::extract_val<std::int32_t>(ptr);
+      std::int32_t v5 = chops::extract_val<std::int32_t>(ptr); ptr += sizeof(v5);
+      std::byte v6 = chops::extract_val<std::byte>(ptr);
 
       THEN ("the values are all in native order") {
         REQUIRE(v1 == val1);
@@ -98,6 +102,7 @@ SCENARIO ( "Extract values from a buffer",
         REQUIRE(v3 == val3);
         REQUIRE(v4 == val4);
         REQUIRE(v5 == val5);
+        REQUIRE(v6 == val6);
       }
     }
   } // end given

@@ -2,15 +2,15 @@
  *
  *  @ingroup marshall_module
  *
- *  @brief Extract fundamental integral values in native endianness from a byte buffer;
- *  conversely, given a fundamental type, append it to a buffer of bytes in network endian
- *  order (big endian).
+ *  @brief Extract integral (non floating point) values from a byte buffer (in big endian) to 
+ *  native format; conversely, given an integral type value, append it to a buffer of bytes in 
+ *  network endian order (big endian).
  *
  *  The functions in this file are low-level, handling fundamental integral types and 
  *  extracting or appending to @c std::byte buffers. It is meant to be the lower layer
- *  of marshalling utilities, where the next layer up provides stream facilities,
- *  sequences, overloads for specific types such as @c std::string and @c bool, and generic
- *  buffer types.
+ *  of marshalling utilities, where the next layer up provides buffer management,
+ *  sequences, and overloads for specific types such as @c std::string, @c bool, and 
+ *  @c std::optional.
  *
  *  @note When C++ 20 @c std::endian is available, many of these functions can be made
  *  @c constexpr and evaluated at compile time. Until then, run-time endian detection and 
@@ -22,6 +22,10 @@
  *  Techoverflow.net article by Uli Koehler and published under the CC0 1.0 Universal 
  *  license:
  *  https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
+ *
+ *  @note This implementation has manual generated unrolled loops for the byte moving and
+ *  swapping. This can be improved in the future by using a compile-time unrolling utility, such 
+ *  as the @c repeat function (compile time unrolling version) by Vittorio Romeo.
  *
  *  @author Cliff Green, Roxanne Agerone, Uli Koehler
  *
@@ -133,6 +137,52 @@ T extract_val_noswap(const std::byte* buf, const size_tag<8u>*) noexcept {
 }
 
 template <typename T>
+T extract_val_swap(const std::byte* buf, const size_tag<16u>*) noexcept {
+  T tmp{};
+  std::byte* p = cast_ptr_to<std::byte>(&tmp);
+  *(p+0) = *(buf+15);
+  *(p+1) = *(buf+14);
+  *(p+2) = *(buf+13);
+  *(p+3) = *(buf+12);
+  *(p+4) = *(buf+11);
+  *(p+5) = *(buf+10);
+  *(p+6) = *(buf+9);
+  *(p+7) = *(buf+8);
+  *(p+8) = *(buf+7);
+  *(p+9) = *(buf+6);
+  *(p+10) = *(buf+5);
+  *(p+11) = *(buf+4);
+  *(p+12) = *(buf+3);
+  *(p+13) = *(buf+2);
+  *(p+14) = *(buf+1);
+  *(p+15) = *(buf+0);
+  return tmp;
+}
+
+template <typename T>
+T extract_val_noswap(const std::byte* buf, const size_tag<16u>*) noexcept {
+  T tmp{};
+  std::byte* p = cast_ptr_to<std::byte>(&tmp);
+  *(p+0) = *(buf+0);
+  *(p+1) = *(buf+1);
+  *(p+2) = *(buf+2);
+  *(p+3) = *(buf+3);
+  *(p+4) = *(buf+4);
+  *(p+5) = *(buf+5);
+  *(p+6) = *(buf+6);
+  *(p+7) = *(buf+7);
+  *(p+8) = *(buf+8);
+  *(p+9) = *(buf+9);
+  *(p+10) = *(buf+10);
+  *(p+11) = *(buf+11);
+  *(p+12) = *(buf+12);
+  *(p+13) = *(buf+13);
+  *(p+14) = *(buf+14);
+  *(p+15) = *(buf+15);
+  return tmp;
+}
+
+template <typename T>
 std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<1u>*) noexcept {
   *buf = static_cast<std::byte>(val); // static_cast needed to convert char to std::byte
   return 1u;
@@ -208,6 +258,49 @@ std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<8u>*)
   return 8u;
 }
 
+template <typename T>
+std::size_t append_val_swap(std::byte* buf, const T& val, const size_tag<16u>*) noexcept {
+  const std::byte* p = cast_ptr_to<std::byte>(&val);
+  *(buf+0) = *(p+15);
+  *(buf+1) = *(p+14);
+  *(buf+2) = *(p+13);
+  *(buf+3) = *(p+12);
+  *(buf+4) = *(p+11);
+  *(buf+5) = *(p+10);
+  *(buf+6) = *(p+9);
+  *(buf+7) = *(p+8);
+  *(buf+8) = *(p+7);
+  *(buf+9) = *(p+6);
+  *(buf+10) = *(p+5);
+  *(buf+11) = *(p+4);
+  *(buf+12) = *(p+3);
+  *(buf+13) = *(p+2);
+  *(buf+14) = *(p+1);
+  *(buf+15) = *(p+0);
+  return 16u;
+}
+
+template <typename T>
+std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<16u>*) noexcept {
+  const std::byte* p = cast_ptr_to<std::byte>(&val);
+  *(buf+0) = *(p+0);
+  *(buf+1) = *(p+1);
+  *(buf+2) = *(p+2);
+  *(buf+3) = *(p+3);
+  *(buf+4) = *(p+4);
+  *(buf+5) = *(p+5);
+  *(buf+6) = *(p+6);
+  *(buf+7) = *(p+7);
+  *(buf+8) = *(p+8);
+  *(buf+9) = *(p+9);
+  *(buf+10) = *(p+10);
+  *(buf+11) = *(p+11);
+  *(buf+12) = *(p+12);
+  *(buf+13) = *(p+13);
+  *(buf+14) = *(p+14);
+  *(buf+15) = *(p+15);
+  return 16u;
+}
 
 } // end namespace detail
 
@@ -247,9 +340,11 @@ const bool big_endian = detect_big_endian();
 template <typename T>
 T extract_val(const std::byte* buf) noexcept {
 
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
+  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || 
+                sizeof(T) == 8u || sizeof(T) ==16u,
     "Size for value extraction is not supported.");
-  static_assert(std::is_integral<T>::value, "Value extraction is only supported for integral types.");
+  static_assert(std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>, 
+    "Value extraction is only supported for integral or std::byte types.");
 
   return big_endian ? detail::extract_val_noswap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::extract_val_swap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
@@ -268,7 +363,7 @@ T extract_val(const std::byte* buf) noexcept {
  *
  * @return Number of bytes copied into the @c std::byte buffer.
  *
- * @pre The buffer must already be allocated to hold at least @c sizeof(T) bytes.
+ * @pre The buffer must already be allocated to hold at least @c sizeof(T) byteC++ function overloading cppreferences.
  *
  * @note See note above about floating point values, which are not supported.
  *
@@ -276,9 +371,11 @@ T extract_val(const std::byte* buf) noexcept {
 template <typename T>
 std::size_t append_val(std::byte* buf, const T& val) noexcept {
 
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || sizeof(T) == 8u,
+  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || 
+                sizeof(T) == 8u || sizeof(T) ==16u,
     "Size for value appending is not supported.");
-  static_assert(std::is_integral<T>::value, "Value appending is only supported for integral types.");
+  static_assert(std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>, 
+    "Value appending is only supported for integral or std::byte types.");
 
   return big_endian ? detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
@@ -339,7 +436,7 @@ std::size_t append_var_int(std::byte* output, T val) {
 /**
  * @brief Given a buffer of @c std::bytes that hold a variable sized integer, decode
  * them into an unsigned integer.
- *
+ *C++ function overloading cppreference
  * For consistency with the @c append_var_int function, only unsigned integers are
  * supported for the output type of this function.
  *

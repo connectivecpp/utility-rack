@@ -42,17 +42,23 @@
  *
  *  Wire protocols that are in full text mode do not need to deal with binary endian
  *  swapping. However, sending or receiving data in a binary form is often desired 
- *  for size efficiency (e.g. sending images or video or large data sets).
+ *  for size efficiency (e.g. sending images and video, large data sets, or where
+ *  the message size needs to be as small as possible).
  *
  *  Functionality is provided for fundamental types, including @c bool, as well as vocabulary 
  *  types such as @c std::string and @c std::optional. Support is also provided for sequences, 
  *  where the number of elements is placed before the element sequence in the stream of
  *  bytes. 
+ *
+ *  Application defined types can define a @c marshall function which will be used in
+ *  appropriate places. Specifically, a type @c MyType can be used in a sequence or in
+ *  a @c std::optional or as part of another type without needing to duplicate the 
+ *  marshalling calls within the @c MyType @c marshall function.
  * 
  *  @c std::variant and @c std::any are not directly supported and require value extraction 
- *  by the application. (This might be a future enhancement if a good design is proposed.) 
- *  @c std::wstring and other non-char strings are also not directly supported, and 
- *  require additional calls from the application.
+ *  by the application. (Supporting @c std::variant or @c std::any might be a future 
+ *  enhancement if a good design is proposed.) @c std::wstring and other non-char strings are 
+ *  also not directly supported, and require additional calls from the application.
  *
  *  Central to the design of these marshalling and unmarshalling functions is a mapping of 
  *  two types to a single value. For marshalling, the two types are the native type (e.g. 
@@ -245,9 +251,9 @@ private:
  * @brief Marshall a single integral value into a buffer of bytes.
  *
  * This is the lowest level @c marshall function, and only works on fundamental
- * integral values. It expands the buffer and appends the value to the buffer,
- * performing byte swapping into big endian format as needed. @c char and
- * @c std::byte values will not be byte swapped.
+ * integral values (@c char, @c short, @c int, etc). It expands the buffer and appends 
+ * the value to the buffer, performing byte swapping into big endian format as needed. 
+ * @c char and @c std::byte values will not be byte swapped.
  *
  * @tparam CastVal The destination sized type in the byte buffer for the marshalled
  * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
@@ -266,7 +272,7 @@ private:
  *
  * @return Reference to the buffer parameter.
  *
- * Example usage, which marshalls an @int as an unsigned 16 bit into a byte 
+ * Example usage - marshall an @int as an unsigned 16 bit into a byte 
  * buffer:
  * @code
  *   marshall_val<std::uint16_t>(buf, my_int);
@@ -278,6 +284,11 @@ Buf& marshall_val(Buf& buf, const T& val) {
   buf.resize(old_sz + sizeof(CastVal));
   append_val(buf.data()+old_sz, static_cast<CastVal>(val));
   return buf;
+}
+
+template <typename CastVal, typename T, typename Buf>
+Buf& marshall(Buf& buf, const T& val) {
+
 }
 
 template <typename Buf, typename ...Ts>

@@ -27,12 +27,12 @@
 #include <mutex>
 
 #include "queue/wait_queue.hpp"
-#include "utility/circular_buffer.hpp"
 #include "utility/repeat.hpp"
 
 
 // buffer types for testing
 #include <nonstd/ring_span.hpp>
+#include <circular_buffer.hpp>
 
 using namespace std::literals::string_literals;
 
@@ -264,15 +264,15 @@ SCENARIO ( "Non-threaded wait_queue test, with element type std::string and ring
 
 SCENARIO ( "Non-threaded wait_queue test, with element type int and utility rack circular_buffer container type",
            "[wait_queue] [int] [circular_buffer]" ) {
-  chops::wait_queue<int, chops::circular_buffer<int> > wq(N);
+    chops::wait_queue<int, jm::circular_buffer<int, N> > wq{};
   non_threaded_push_test(wq, 42, N);
   non_threaded_arithmetic_test(wq, 0, N, ExpectedSum<int>);
   non_threaded_open_close_test(wq, 42, N);
 }
 
-SCENARIO ( "Non-threaded wait_queue test, with element type double and circular_buffer container type",
+SCENARIO ( "Non-threaded wait_queue test, with element type double and cicular_buffer container type",
            "[wait_queue] [double] [circular_buffer]" ) {
-  chops::wait_queue<double, chops::circular_buffer<double> > wq(N);
+    chops::wait_queue<double, jm::circular_buffer<double, N> > wq{};
   non_threaded_push_test(wq, 42.0, N);
   non_threaded_arithmetic_test(wq, 0.0, N, ExpectedSum<double>);
   non_threaded_open_close_test(wq, 42.0, N);
@@ -280,7 +280,7 @@ SCENARIO ( "Non-threaded wait_queue test, with element type double and circular_
 
 SCENARIO ( "Non-threaded wait_queue test, with element type std::string and circular_buffer container type",
            "[wait_queue] [string] [circular_buffer]" ) {
-  chops::wait_queue<std::string, chops::circular_buffer<std::string> > wq(N);
+    chops::wait_queue<std::string, jm::circular_buffer<std::string, N> > wq{};
   non_threaded_push_test(wq, "This code is bro-fessional level quality"s, N);
   non_threaded_open_close_test(wq, "Please, please, no more bro!"s, N);
 }

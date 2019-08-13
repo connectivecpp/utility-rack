@@ -95,6 +95,7 @@ The libraries and API's have minimal (as possible) library dependencies (there a
 - Version 1.12 (or later) of Chris Kohlhoff's `asio` repository is required for Periodic Timer. Note that it is the stand-alone Asio versus the Boost Asio implementation.
 - Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
 - Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
+- Version Thu Jul 12 21:58:58 2018 +0300 (or later) of Justas Masiulis [circular_buffer](https://github.com/JustasMasiulis/circular_buffer) is required in some test scenarios (see specifics below)
 - Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).
 
 See [References](doc/references.md) for additional details on the above libraries.
@@ -104,8 +105,8 @@ Specific dependencies:
 - All test scenarios: Catch 2
 - Periodic Timer (production): `asio`
 - Wait Queue (production): none
-  - Ring Span Lite (test)
-  - Boost.Circular (test)
+- Ring Span Lite (test)
+- Circular Buffer (test)
 - Shared Buffer (production): none
 
 # Supported Compilers and Platforms

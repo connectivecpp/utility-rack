@@ -208,8 +208,7 @@ constexpr T ExpectedSum = (N / 2) * (N - 1);
 
 // test with std::deque first
 
-SCENARIO ( "Non-threaded wait_queue test, with element type int and default container type of std::deque",
-           "[wait_queue] [int] [deque]" ) {
+SCENARIO ( "Non-threaded wait_queue test, with element type int and default container type of std::deque", "[wait_queue] [int] [deque]" ) {
   chops::wait_queue<int> wq;
   non_threaded_push_test(wq, 42, N);
   non_threaded_arithmetic_test(wq, 0, N, ExpectedSum<int>);
@@ -253,10 +252,10 @@ SCENARIO ( "Non-threaded wait_queue test, with element type double and ring_span
 
 SCENARIO ( "Non-threaded wait_queue test, with element type std::string and ring_span container type",
            "[wait_queue] [string] [ring_span]" ) {
-   std::string buf[N];
-   chops::wait_queue<std::string, nonstd::ring_span<std::string> > wq(buf+0, buf+N);
-   non_threaded_push_test(wq, "No bro speak, please"s, N);
-   non_threaded_open_close_test(wq, "Why so serious, bro?"s, N);
+    std::string buf[N];
+    chops::wait_queue<std::string, nonstd::ring_span<std::string> > wq(buf+0, buf+N);
+    non_threaded_push_test(wq, "No bro speak, please"s, N);
+    non_threaded_open_close_test(wq, "Why so serious, bro?"s, N);
 }
 
 // test with utility rack circular_buffer
@@ -407,7 +406,7 @@ SCENARIO ( "Fixed size ring_span, testing wrap around with int type",
       chops::repeat(N / 2, [&wq, AnswerPlus] { wq.push(AnswerPlus); } );
       THEN ("the size is full but half match answer and half answer plus, since there's been wrap") {
         REQUIRE (wq.size() == N);
-        // wait_pop should immediately return if the queue is non empty          
+        // wait_pop should immediately return if the queue is non empty
         chops::repeat(N / 2, [&wq, Answer] { REQUIRE (wq.wait_and_pop() == Answer); } );
         chops::repeat(N / 2, [&wq, AnswerPlus] { REQUIRE (wq.wait_and_pop() == AnswerPlus); } );
         REQUIRE (wq.empty());

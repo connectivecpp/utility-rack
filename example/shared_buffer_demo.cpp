@@ -98,11 +98,8 @@ int main() {
 
     // create number, convert to 'network' (big endian) byte order, place into buf2
     std::uint16_t count = 1;
-    //**************************** append_val(std::byte* buf, const T& val)
     chops::repeat(NUM_INTS, [count, x = buf2.data()] () mutable {auto sz =
         chops::append_val <std::uint16_t> (x, count++ * 5); x += sz; });
-//    chops::repeat(NUM_INTS, [&] () { *valptr++ =
-//        boost::endian::native_to_big (static_cast<std::uint16_t> (count++ * 5)); });
 
     // print them out
     valptr = const_cast<std::uint16_t*> (data);

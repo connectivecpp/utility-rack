@@ -33,19 +33,32 @@ struct location {
   short  altitude;
 };
 
-struct boundary {
+struct trail_stats {
+  long                length;
+  short               elev;
+  std::optional<int>  rating;
+};
+
+struct hiking_trail {
   std::string          name;
-  bool                 government;
-  std::list<location>  points;
-  std::optional<something> something;
+  bool                 federal;
+  location             trail_head;
+  std::list<location>  intersections;
+  trail_stats          stats;
 };
 
 namespace chops {
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const location& loc) {
-  return marshall<std::int16_t>(loc.altitude, marshall<std::int32_t>(loc.longitude, 
-                                marshall<std::int32_t>(loc.latitude, buf)));
+  return marshall<std::int32_t, std::int32_t, std::int16_t>(buf, 
+                  loc.latitude, loc.longitude, loc.altitude);
+}
+
+template <typename Buf>
+Buf& marshall(Buf& buf, const trail_stats& ts) {
+  marshall<std::uint64_t, std::uint16_t>(buf, ts.length, ts.elev);
+  return marshall_optional<std::uint8_t, std::int16_t>(buf, ts.rating);
 }
 
 /*

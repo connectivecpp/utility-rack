@@ -29,9 +29,9 @@
 #include "queue/wait_queue.hpp"
 #include "utility/repeat.hpp"
 
-// buffer types for testing
-#include <nonstd/ring_span.hpp>
-#include <circular_buffer.hpp>
+// circular buffer or ring span container types to use instead of the default std::deque
+#include "nonstd/ring_span.hpp"
+#include "circular_buffer.hpp"
 
 using namespace std::literals::string_literals;
 

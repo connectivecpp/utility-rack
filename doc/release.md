@@ -2,7 +2,7 @@
 
 ## Release 1.0
 
-Release 1.0 is under development (as of July 2019) and expected to be available by late Summer 2019. The functionality is already well tested under g++ and Linux, but needs additional testing on other compilers and platforms.
+Release 1.0 is under development (as of August 2019) and expected to be available by late Summer 2019. The functionality is already well tested under g++ and Linux, but needs additional testing on other compilers and platforms.
 
 ## Next Steps, ToDo's, Problems, and Constraints:
 

@@ -10,7 +10,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of July 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of August 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -82,9 +82,7 @@ Capturing perfectly forwarded references in a lambda is difficult. (Forwarding r
 
 C++ 17 is the primary baseline for this repository.
 
-A significant number of C++ 11 features are in the implementation and API. There are also limited C++ 14 and 17 features in use, although they tend to be relatively simple features of those standards (e.g. `std::optional`, `std::byte`, structured bindings). For users that don't want to use the latest C++ compilers or compile with C++ 17 flags, Martin Moene provides an excellent set of header-only libraries that implement many useful C++ library features, both C++ 17 as well as future C++ standards (see [References](doc/references.md)).
-
-Using Boost libraries instead of `std::optional` (and similar C++ 17 features) is also an option, and should require minimal porting.
+A significant number of C++ 11 features are in the implementation and API. There are also numerous C++ 14 and C++ 17 features in use, although many of them could be replaced with Boost (or similar) utilities or rewritten to use only C++ 11 capabilities. For users that don't want to use the latest C++ compilers or compile with C++ 17 flags, Martin Moene provides an excellent set of header-only libraries that implement many useful C++ library features, both C++ 17 as well as future C++ standards (see [References](doc/references.md)).
 
 While the main production branch will always be developed and tested with C++ 17 features (and relatively current compilers), alternative branches and forks for older compiler versions are expected. In particular, a branch using Martin Moene's libraries and general C++ 11 (or C++ 14) conformance is likely. Collaboration (through forking, change requests, etc) is very welcome to achieve older compiler conformance. A branch supporting a pre-C++ 11 compiler or language conformance is not likely to be directly supported through this repository (since it would require so many changes that it would result in a defacto different codebase).
 
@@ -94,9 +92,8 @@ The libraries and API's have minimal (as possible) library dependencies (there a
 
 - Version 1.12 (or later) of Chris Kohlhoff's `asio` repository is required for Periodic Timer. Note that it is the stand-alone Asio versus the Boost Asio implementation.
 - Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
-- Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
-- Version Thu Jul 12 21:58:58 2018 +0300 (or later) of Justas Masiulis [circular_buffer](https://github.com/JustasMasiulis/circular_buffer) is required in some test scenarios (see specifics below)
-- Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).
+- Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below; this dependency may be copied into the `utility-rack` repository in the future).
+- Version Thu Jul 12 21:58:58 2018 +0300 (or later) of Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) is required in some test scenarios (see specifics below; this dependency may be copied into the `utility-rack` repository in the future).
 
 See [References](doc/references.md) for additional details on the above libraries.
 
@@ -105,9 +102,8 @@ Specific dependencies:
 - All test scenarios: Catch 2
 - Periodic Timer (production): `asio`
 - Wait Queue (production): none
-- Ring Span Lite (test)
-- Circular Buffer (test)
-- Shared Buffer (production): none
+-- Wait Queue (test): `ring-span-lite`
+-- Wait Queue (test): `circular-buffer`
 
 # Supported Compilers and Platforms
 

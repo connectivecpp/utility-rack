@@ -26,7 +26,7 @@
 
 - Modern CMake design is important, although not a lot of reference material is available. See Daniel Pfeifer's C++Now 2017 talk on Effective CMake at https://www.youtube.com/watch?v=bsXLMQ6WgIk, Manuel Binna's GitHub page at https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1, and the book Professional CMake, A Practical Guide, by Craig Scott, at https://crascit.com/professional-cmake/. Effective CMake, by Kai Wolf, is under development at https://leanpub.com/effective-cmake.
 
-- Justas Masiulis provides a nice circular buffer implementation used in the `wait_queue` test app at https://github.com/JustasMasiulis/circular_buffer.
+- Justas Masiulis provides a nice circular buffer implementation used in the `wait_queue` test at https://github.com/JustasMasiulis/circular_buffer.
 
 - Diagrams in the documentation are created using the draw.io site at https://www.draw.io/.
 

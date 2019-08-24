@@ -102,8 +102,8 @@ Specific dependencies:
 - All test scenarios: Catch 2
 - Periodic Timer (production): `asio`
 - Wait Queue (production): none
--- Wait Queue (test): `ring-span-lite`
--- Wait Queue (test): `circular-buffer`
+    - Wait Queue (test): `ring-span-lite`
+    - Wait Queue (test): `circular-buffer`
 
 # Supported Compilers and Platforms
 

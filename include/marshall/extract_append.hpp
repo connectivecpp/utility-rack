@@ -2,9 +2,9 @@
  *
  *  @ingroup marshall_module
  *
- *  @brief Extract integral (non floating point) values from a byte buffer (in big endian) to 
+ *  @brief Extract arithmetic (non floating point) values from a byte buffer (in big-endian) to 
  *  native format; conversely, given an integral type value, append it to a buffer of bytes in 
- *  network endian order (big endian).
+ *  network endian order (big-endian).
  *
  *  The functions in this file are low-level, handling fundamental integral types and 
  *  extracting or appending to @c std::byte buffers. It is meant to be the lower layer
@@ -302,6 +302,23 @@ std::size_t append_val_noswap(std::byte* buf, const T& val, const size_tag<16u>*
   return 16u;
 }
 
+template <typename T>
+constexpr void assert_size() noexcept {
+  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || 
+                sizeof(T) == 8u || sizeof(T) ==16u,
+    "Size for value extraction is not supported.");
+}
+template <typename T>
+constexpr bool is_integral_or_byte() noexcept {
+  return std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>;
+}
+
+template <typename T>
+constexpr void assert_integral_or_byte() noexcept {
+  static_assert(is_integral_or_byte<T>(),
+    "Value extraction is only supported for integral or std::byte types.");
+}
+
 } // end namespace detail
 
 // C++ 20 will contain std::endian, which allows full compile time endian detection;
@@ -318,7 +335,7 @@ inline bool detect_big_endian () noexcept {
 const bool big_endian = detect_big_endian();
 
 /**
- * @brief Extract a value in network byte order (big endian) from a @c std::byte buffer 
+ * @brief Extract a value in network byte order (big-endian) from a @c std::byte buffer 
  * into a fundamental integral type in native endianness, swapping bytes as needed.
  *
  * This function template dispatches on specific sizes. If an unsupported size is attempted
@@ -340,11 +357,8 @@ const bool big_endian = detect_big_endian();
 template <typename T>
 T extract_val(const std::byte* buf) noexcept {
 
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || 
-                sizeof(T) == 8u || sizeof(T) ==16u,
-    "Size for value extraction is not supported.");
-  static_assert(std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>, 
-    "Value extraction is only supported for integral or std::byte types.");
+  detail::assert_size<T>();
+  detail::assert_integral_or_byte<T>();
 
   return big_endian ? detail::extract_val_noswap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::extract_val_swap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
@@ -352,7 +366,7 @@ T extract_val(const std::byte* buf) noexcept {
 
 /**
  * @brief Append a fundamental integral value to a @c std::byte buffer, swapping into network
- * endian order (big endian) as needed.
+ * endian order (big-endian) as needed.
  *
  * This function template dispatches on specific sizes. If an unsupported size is attempted
  * to be swapped, a static error is generated.
@@ -371,11 +385,8 @@ T extract_val(const std::byte* buf) noexcept {
 template <typename T>
 std::size_t append_val(std::byte* buf, const T& val) noexcept {
 
-  static_assert(sizeof(T) == 1u || sizeof(T) == 2u || sizeof(T) == 4u || 
-                sizeof(T) == 8u || sizeof(T) ==16u,
-    "Size for value appending is not supported.");
-  static_assert(std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>, 
-    "Value appending is only supported for integral or std::byte types.");
+  detail::assert_size<T>();
+  detail::assert_integral_or_byte<T>();
 
   return big_endian ? detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
@@ -396,7 +407,7 @@ std::size_t append_val(std::byte* buf, const T& val) noexcept {
  *
  * The output of this function is (by definition) in little-endian order (which is opposite
  * to the rest of the @c append and @c extract functions). However, this does not matter since
- * there is no byte swapping performed, and encoding and decoding will occur to the native 
+ * there is no byte swapping performed, and encoding and decoding will result in the native 
  * endianness of the platform.
  * 
  * @note Unsigned types are not supported.
@@ -436,7 +447,7 @@ std::size_t append_var_int(std::byte* output, T val) {
 /**
  * @brief Given a buffer of @c std::bytes that hold a variable sized integer, decode
  * them into an unsigned integer.
- *C++ function overloading cppreference
+ *
  * For consistency with the @c append_var_int function, only unsigned integers are
  * supported for the output type of this function.
  *

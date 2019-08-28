@@ -37,6 +37,13 @@ constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+
 auto net_buf = chops::make_byte_array(0xDD, 0xCC, 0xBB, 0xAA, 0xEE, 0x01, 0xFF,
     0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF, 0xAA);
 
+TEST_CASE ( "Size and integral assertions",
+            "[assertions]" ) {
+  REQUIRE (chops::detail::is_integral_or_byte<std::int32_t>());
+  REQUIRE (chops::detail::is_integral_or_byte<std::byte>());
+  REQUIRE (chops::detail::is_integral_or_byte<char>());
+}
+
 SCENARIO ( "Endian detection",
            "[endian] [little_endian]" ) {
 

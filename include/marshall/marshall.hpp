@@ -1,20 +1,30 @@
 /** @file
  *
- *  @defgroup marshall_module Classes and functions for binary data marshalling and
- *  unmarshalling (transform objects into and out of byte streams for transmission over 
- *  a network or file IO).
+ *  @defgroup marshall_module Classes and functions for big-endian binary data 
+ *  marshalling and unmarshalling (transform objects into and out of byte streams 
+ *  for transmission over a network or for file IO).
  *
  *  @ingroup marshall_module
  *
- *  @brief Classes and functions to transform objects into a binary stream of bytes 
- *  (marshall) and the converse (unmarshall), transform a stream of bytes into objects.
+ *  @brief Classes and functions to transform objects into a big-endian binary stream 
+ *  of bytes (marshall) and the converse (unmarshall), transform a stream of bytes into 
+ *  objects.
+ *
+ *  @note The design concept of the binary marshall and unmarshall functions is a great fit
+ *  for a metaprogamming implementation (using variadic templates). In particular,
+ *  the primary design concept is a mapping of two (and sometimes three) types to a 
+ *  single value. A typelist would allow a single function (or method) call to operate
+ *  on multiple values, instead of being forced to call the @c marshall or @c unmarshall
+ *  function once for each value (or sequence). However, the first release uses the 
+ *  simpler (no metaprogramming, no variadic templates) implementation with a hope that
+ *  a more sophisticated version will be available in the future.
  *
  *  The marshalling classes and functions are designed for networking (or file I/O), 
  *  where binary data marshalling and unmarshalling is needed to send and receive 
  *  messages (or to write or read defined portions of a file). Application code using 
  *  this library has full control of every byte that is sent or received. Application 
  *  objects are transformed into a @c std::byte buffer (and the converse) keeping a 
- *  binary representation in network (big endian) order.
+ *  binary representation in network (big-endian) order.
  *
  *  For example, a 32-bit binary number (either a signed or unsigned integer) in native
  *  endian order will be transformed into four 8-bit bytes in network (big) endian order
@@ -251,9 +261,9 @@ private:
  * @brief Marshall a single integral value into a buffer of bytes.
  *
  * This is the lowest level @c marshall function, and only works on fundamental
- * integral values (@c char, @c short, @c int, etc). It expands the buffer and appends 
- * the value to the buffer, performing byte swapping into big endian format as needed. 
- * @c char and @c std::byte values will not be byte swapped.
+ * integral values (@c char, @c short, @c int, etc) or a @c std::byte. It expands the 
+ * buffer and appends the value to the buffer, performing byte swapping into 
+ * big-endian format as needed. @c char and @c std::byte values will not be byte swapped.
  *
  * @tparam CastVal The destination sized type in the byte buffer for the marshalled
  * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
@@ -272,9 +282,10 @@ private:
  *
  * @return Reference to the buffer parameter.
  *
- * Example usage - marshall an @int as an unsigned 16 bit into a byte 
- * buffer:
+ * Example usage - marshall an @c int as an unsigned 16 bit value:
  * @code
+ *   std::vector<std::byte> buf;
+ *   // ...
  *   marshall_val<std::uint16_t>(buf, my_int);
  * @endcode
  */
@@ -288,12 +299,15 @@ Buf& marshall_val(Buf& buf, const T& val) {
 
 template <typename CastVal, typename T, typename Buf>
 Buf& marshall(Buf& buf, const T& val) {
-
+  if constexpr (detail::is_integral_or_byte<T>()) {
+    marshall_val<CastVal>(buf, val);
+  }
 }
 
-template <typename Buf, typename ...Ts>
-Buf& marshall(Buf& buf, Ts... ts) {
-  return (marshall_val<Ts>(ts), ...);
+template <typename Buf, typename T, typename ...Ts>
+Buf& marshall(Buf& buf, const T& first, Ts... rest) {
+  marshall<
+  return (marshall<Ts>(ts), ...);
 }
 
 template <typename CastBool, typename Buf>

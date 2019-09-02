@@ -260,17 +260,17 @@ private:
 /**
  * @brief Marshall a single arithmetic value into a buffer of bytes.
  *
- * This is the lowest level @c marshall function, and only works on fundamental
+ * This is the "primitive" @c marshall function, and only works on fundamental
  * arithmetic values (@c char, @c short, @c int, @c double, @c float, etc) or a 
  * @c std::byte. It expands the buffer and appends the value to the buffer, performing byte 
  * swapping into big-endian format as needed. @c char and @c std::byte values will not be 
  * byte swapped.
  *
- * @tparam CastVal The destination sized type in the byte buffer for the marshalled
+ * @tparam CastValType The destination sized type in the byte buffer for the marshalled
  * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
  * etc; this type must always be supplied in the function call, since it is not
  * deduced from the function argument (there are no standard typedefs for floating
- * point types, so @c float or @c double must be used). 
+ * point types - use @c float or @c double as the casting type). 
  *
  * @tparam T The native type of the value, typically deduced by the function
  * argument type.
@@ -288,69 +288,57 @@ private:
  * @code
  *   std::vector<std::byte> buf;
  *   // ...
- *   marshall_val<std::uint16_t>(buf, my_int);
+ *   marshall<std::uint16_t>(buf, my_int);
  * @endcode
  *
  * Example floating point usage - marshall a @c double:
  * @code
  *   std::vector<std::byte> buf;
  *   // ...
- *   marshall_val<double>(buf, my_double);
+ *   marshall<double>(buf, my_double);
  * @endcode
  */
-template <typename CastVal, typename T, typename Buf>
-Buf& marshall_val(Buf& buf, const T& val) {
-  auto old_sz = buf.size();
-  buf.resize(old_sz + sizeof(CastVal));
-  append_val(buf.data()+old_sz, static_cast<CastVal>(val));
-  return buf;
-}
-
-template <typename CastVal, typename T, typename Buf>
+template <typename CastValType, typename T, typename Buf>
 Buf& marshall(Buf& buf, const T& val) {
-  if constexpr (detail::is_integral_or_byte<T>()) {
-    marshall_val<CastVal>(buf, val);
-  }
+  static_assert(detail::is_arithmetic_or_byte<T>(), "An overload of the marshall function must be provided for this type");
+  auto old_sz = buf.size();
+  buf.resize(old_sz + sizeof(CastValType));
+  append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+  return buf;
 }
 
-template <typename Buf, typename T, typename ...Ts>
-Buf& marshall(Buf& buf, const T& first, Ts... rest) {
-  marshall<
-  return (marshall<Ts>(ts), ...);
-}
-
-template <typename CastBool, typename Buf>
+template <typename CastBoolType, typename Buf>
 Buf& marshall(Buf& buf, bool b) {
-  return marshall_val<CastBool>(buf, static_cast<CastBool>(b ? 1 : 0));
+  return marshall<CastBoolType>(buf, static_cast<CastBoolType>(b ? 1 : 0));
 }
 
-template <typename CastBool, typename CastVal, typename T, typename Buf>
+template <typename CastBoolType, typename CastValType, typename T, typename Buf>
 Buf& marshall_optional(Buf& buf, const std::optional<T>& val) {
-  marshall_val<CastBool>(buf, val.has_value());
+  marshall<CastBoolType>(buf, val.has_value());
   if (val.has_value()) {
-    marshall<CastVal>(buf, *val);
+    marshall<CastValType>(buf, *val);
   }
   return buf;
 }
 
-template <typename CastCnt, typename CastVal, typename Iter, typename Buf>
+template <typename CastCntType, typename CastValType, typename Iter, typename Buf>
 Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
-  marshall_val<CastCnt>(buf, num);
+  marshall<CastCntType>(buf, num);
   for (std::size_t i = 0u; i < num; ++i) {
-    marshall<CastVal>(buf, *iter);
+    marshall<CastValType>(buf, *iter);
     ++iter;
   }
   return buf;
 }
 
-template <typename CastCnt, typename Buf>
+template <typename CastCntType, typename Buf>
 Buf& marshall(Buf& buf, const std::string& str) {
-  return marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
+  return marshall_sequence<CastCntType, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
-template <typename CastCnt, typename Buf>
+template <typename CastCntType, typename Buf>
 Buf& marshall(Buf& buf, std::string_view str) {
-  return marshall_sequence<CastCnt, std::uint8_t>(buf, str.size(), str.cbegin());
+  return marshall_sequence<CastCntType, std::uint8_t>(buf, str.size(), str.cbegin());
 }
 
 } // end namespace

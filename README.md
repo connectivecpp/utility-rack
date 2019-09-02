@@ -10,7 +10,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of August 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of September 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -20,11 +20,13 @@ Release notes and upcoming development plans are [available here](doc/release.md
 
 ### Marshall
 
-(Fill in text.)
+The marshall functions and classes provide marshalling and unmarshalling of binary data. Marshalling (also called serialization, depending on context) provides a way to transform application objects into and out of byte streams that can be sent over a network (or use for file IO). 
+
+This marshalling functionality in this repository is useful when explicit control is needed for every bit and byte. This allows a developer to match an existing wire protocol or encoding scheme or to define his or her own wire protocol. Support is provided for fundamental arithmetic types as well as certain C++ vocabulary types such as @c std::optional. The binary data is always marshalled to big-endian (network) format.
 
 ### Shared Buffer
 
-Reference counted byte buffer classes used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
+Reference counted byte buffer classes are used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
 
 A detailed overview of the marshall classes is [available here](doc/marshall.md).
 

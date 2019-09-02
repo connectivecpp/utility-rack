@@ -51,25 +51,23 @@ namespace chops {
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const location& loc) {
-  return marshall<std::int32_t, std::int32_t, std::int16_t>(buf, 
-                  loc.latitude, loc.longitude, loc.altitude);
+  mashall<std::int32_t>(buf, loc.latitude);
+  mashall<std::int32_t>(buf, loc.longitude);
+  return marshall<std::int16_t>(buf, loc.altitude);
 }
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const trail_stats& ts) {
-  marshall<std::uint64_t, std::uint16_t>(buf, ts.length, ts.elev);
-  return marshall_optional<std::uint8_t, std::int16_t>(buf, ts.rating);
+  marshall<std::uint64_t>(buf, ts.length);
+  marshall<std::uint16_t>(buf, ts.elev);
+  return marshall_optional<std::uint8_t>(buf, ts.rating);
 }
 
-/*
 template <typename Buf>
-Buf& marshall(Buf& buf, const boundary& b) {
-  marshall<std::uint16_t>(buf, b.name);
-  marshall<std::uint8_t>(buf, b.government);
-  marshall_sequence<std::uint16_t
-  
+Buf& marshall(Buf& buf, const hiking_trail& ht) {
+  marshall<std::uint16_t>(buf, ht.name);
+  return marshall_optional<std::uint8_t>(buf, ts.rating);
 }
-*/
 
 } // end namespace chops
 

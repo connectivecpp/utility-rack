@@ -2,11 +2,11 @@
  *
  *  @ingroup marshall_module
  *
- *  @brief Extract arithmetic (non floating point) values from a byte buffer (in big-endian) to 
- *  native format; conversely, given an integral type value, append it to a buffer of bytes in 
- *  network endian order (big-endian).
+ *  @brief Functions to extract arithmetic binary values from a byte buffer (in big-endian) to 
+ *  native format; conversely, given an arithmetic binary value, append it to a buffer of bytes 
+ *  in network endian order (big-endian).
  *
- *  The functions in this file are low-level, handling fundamental integral types and 
+ *  The functions in this file are low-level, handling fundamental arithmetic types and 
  *  extracting or appending to @c std::byte buffers. It is meant to be the lower layer
  *  of marshalling utilities, where the next layer up provides buffer management,
  *  sequences, and overloads for specific types such as @c std::string, @c bool, and 
@@ -43,7 +43,7 @@
 
 #include <cstddef> // std::byte, std::size_t
 #include <cstdint> // std::uint32_t, etc
-#include <type_traits> // std::is_integral
+#include <type_traits> // std::is_arithmetic
 
 namespace chops {
 
@@ -309,14 +309,14 @@ constexpr void assert_size() noexcept {
     "Size for value extraction is not supported.");
 }
 template <typename T>
-constexpr bool is_integral_or_byte() noexcept {
-  return std::is_integral_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>;
+constexpr bool is_arithmetic_or_byte() noexcept {
+  return std::is_arithmetic_v<T> || std::is_same_v<std::remove_cv_t<T>, std::byte>;
 }
 
 template <typename T>
-constexpr void assert_integral_or_byte() noexcept {
-  static_assert(is_integral_or_byte<T>(),
-    "Value extraction is only supported for integral or std::byte types.");
+constexpr void assert_arithmetic_or_byte() noexcept {
+  static_assert(is_arithmetic_or_byte<T>(),
+    "Value extraction is only supported for arithmetic or std::byte types.");
 }
 
 } // end namespace detail
@@ -336,7 +336,7 @@ const bool big_endian = detect_big_endian();
 
 /**
  * @brief Extract a value in network byte order (big-endian) from a @c std::byte buffer 
- * into a fundamental integral type in native endianness, swapping bytes as needed.
+ * into a fundamental arithmetic type in native endianness, swapping bytes as needed.
  *
  * This function template dispatches on specific sizes. If an unsupported size is attempted
  * to be swapped, a compile time error is generated.
@@ -347,25 +347,27 @@ const bool big_endian = detect_big_endian();
  *
  * @pre The buffer must contain at least @c sizeof(T) bytes.
  *
- * @note Floating point swapping is not supported, only integral types. Swapping floating
- * point types can easily result in NaN representations, which can generate hardware traps,
+ * @note Floating point swapping is supported, but care must be taken. In particular, 
+ * the floating point representation must exactly match on both sides of the marshalling
+ * (most modern processors use IEEE 754 floating point representations). A byte swapped
+ * floating point value cannot be directly accessed (e.g. passed by value), due to the
+ * bit patterns possibly representing NaN values, which can generate hardware traps,
  * either causing runtime crashes or silently changing bits within the floating point number.
- * In particular, returning a byte swapped floating point type by value will result in
- * bad things happening.
+ * An integer value, however, will always have valid bit patterns, even when byte swapped.
  *
  */
 template <typename T>
 T extract_val(const std::byte* buf) noexcept {
 
   detail::assert_size<T>();
-  detail::assert_integral_or_byte<T>();
+  detail::assert_arithmetic_or_byte<T>();
 
   return big_endian ? detail::extract_val_noswap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::extract_val_swap<T>(buf, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));
 }
 
 /**
- * @brief Append a fundamental integral value to a @c std::byte buffer, swapping into network
+ * @brief Append a fundamental arithmetic value to a @c std::byte buffer, swapping into network
  * endian order (big-endian) as needed.
  *
  * This function template dispatches on specific sizes. If an unsupported size is attempted
@@ -379,14 +381,14 @@ T extract_val(const std::byte* buf) noexcept {
  *
  * @pre The buffer must already be allocated to hold at least @c sizeof(T) byteC++ function overloading cppreferences.
  *
- * @note See note above about floating point values, which are not supported.
+ * @note See note above about floating point values.
  *
  */
 template <typename T>
 std::size_t append_val(std::byte* buf, const T& val) noexcept {
 
   detail::assert_size<T>();
-  detail::assert_integral_or_byte<T>();
+  detail::assert_arithmetic_or_byte<T>();
 
   return big_endian ? detail::append_val_noswap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr)) :
                       detail::append_val_swap(buf, val, static_cast< const detail::size_tag<sizeof(T)>* >(nullptr));

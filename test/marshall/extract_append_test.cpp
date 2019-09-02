@@ -30,6 +30,8 @@ constexpr std::int16_t val3 = 0x01FF;
 constexpr std::uint64_t val4 = 0x0908070605040302;
 constexpr std::int32_t val5 = 0xDEADBEEF;
 constexpr std::byte val6 = static_cast<std::byte>(0xAA);
+constexpr float float_val = 42.0f;
+constexpr double double_val = 197.0;
 
 constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+
                        sizeof(val4)+sizeof(val5)+sizeof(val6);
@@ -37,11 +39,17 @@ constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+
 auto net_buf = chops::make_byte_array(0xDD, 0xCC, 0xBB, 0xAA, 0xEE, 0x01, 0xFF,
     0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF, 0xAA);
 
-TEST_CASE ( "Size and integral assertions",
+TEST_CASE ( "Size and arithmetic assertions",
             "[assertions]" ) {
-  REQUIRE (chops::detail::is_integral_or_byte<std::int32_t>());
-  REQUIRE (chops::detail::is_integral_or_byte<std::byte>());
-  REQUIRE (chops::detail::is_integral_or_byte<char>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::int32_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::uint32_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::int16_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::uint16_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::byte>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<char>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<unsigned char>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<double>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<float>());
 }
 
 SCENARIO ( "Endian detection",
@@ -110,6 +118,27 @@ SCENARIO ( "Extract values from a buffer",
         REQUIRE(v4 == val4);
         REQUIRE(v5 == val5);
         REQUIRE(v6 == val6);
+      }
+    }
+  } // end given
+}
+
+SCENARIO ( "Floating point append and extract",
+           "[floating_point]" ) {
+  GIVEN ("An empty byte buffer") {
+    std::byte buf[16];
+
+    WHEN ("Two floating point values are appended then extracted") {
+      std::byte* ptr = buf;
+      REQUIRE(chops::append_val(ptr, float_val) == 4u); ptr += sizeof(float_val);
+      REQUIRE(chops::append_val(ptr, double_val) == 8u);
+      ptr = buf;
+      auto f = chops::extract_val<float>(ptr); ptr += sizeof(f);
+      auto d = chops::extract_val<double>(ptr);
+
+      THEN ("the values are the same, in native order") {
+        REQUIRE (f == float_val);
+        REQUIRE (d == double_val);
       }
     }
   } // end given

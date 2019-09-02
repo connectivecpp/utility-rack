@@ -10,8 +10,13 @@
  *  of bytes (marshall) and the converse (unmarshall), transform a stream of bytes into 
  *  objects.
  *
- *  @note The design concept of the binary marshall and unmarshall functions is a great fit
- *  for a metaprogamming implementation (using variadic templates). In particular,
+ *  These functions and classes are useful when explicit control of every bit and byte
+ *  is needed (and the wire format is big-endian). Other marshalling and serialization
+ *  designs have strengths and weaknesses (see higher level documentation for more
+ *  explanation).
+ *
+ *  @note The design of the binary marshall and unmarshall functions is a great fit
+ *  for a C++ metaprogamming implementation (using variadic templates). In particular,
  *  the primary design concept is a mapping of two (and sometimes three) types to a 
  *  single value. A typelist would allow a single function (or method) call to operate
  *  on multiple values, instead of being forced to call the @c marshall or @c unmarshall
@@ -38,12 +43,14 @@
  *
  *  No support is directly provided for higher level abstractions such as inheritance
  *  hierarchies, version numbers, type flags, or object relations. Pointers are also not 
- *  directly supported (which would typically be part of an object relation). These higher
+ *  directly supported (which would typically be part of an object relation). No specific
+ *  wire protocol or data encoding is specified (other than big-endian). These higher
  *  level abstractions as well as "saving and later restoring a full application state" 
- *  are better served by a library such as Boost.Serialization.
+ *  are better served by a library such as Boost Serialization or Google Protocol
+ *  Buffers.
  *
- *  There is not any automatic generation of message processing code, such as Google 
- *  Protocol Buffers (a language neutral message definition process that generates 
+ *  There is not any automatic generation of message processing code (e.g. Google 
+ *  Protocol Buffers, a language neutral message definition process that generates 
  *  marshalling and unmarshalling code). Future C++ standards supporting reflection 
  *  may allow higher abstractions and more automation of marshalling code, but this
  *  library provides a modern C++ API (post C++ 11) for direct control of the 
@@ -60,7 +67,7 @@
  *  where the number of elements is placed before the element sequence in the stream of
  *  bytes. 
  *
- *  Application defined types can define a @c marshall function which will be used in
+ *  Application defined types can define a @c marshall function overload which will be used in
  *  appropriate places. Specifically, a type @c MyType can be used in a sequence or in
  *  a @c std::optional or as part of another type without needing to duplicate the 
  *  marshalling calls within the @c MyType @c marshall function.
@@ -82,14 +89,7 @@
  *  @note No support is provided for little-endian in the byte buffer. No support is provided
  *  for mixed endian (big-endian with little-endian) or where the endianness is specified as a 
  *  type parameter. No support is provided for "in-place" swapping of values. All of these
- *  use cases can be implemented using other libraries such as Boost.Endian.
- *
- *  @note Floating point types are not supported, only integral types. Character types
- *  are integral types, with no endian swapping needed. Swapping floating point types can 
- *  easily result in NaN representations, which can generate hardware traps, either causing 
- *  runtime crashes or silently changing bits within the floating point number. For this
- *  reason, floating point numbers must either be converted to a string representation, or
- *  converted into an integral type (e.g. an integer with an implicit scale factor).
+ *  use cases can be implemented using other libraries such as Boost Endian.
  *
  *  @note Performance considerations - for marshalling, iterative resizing of the output
  *  buffer is a fundamental operation. @c std::vector and @c mutable_shared_buffer 
@@ -258,17 +258,19 @@ private:
 
 
 /**
- * @brief Marshall a single integral value into a buffer of bytes.
+ * @brief Marshall a single arithmetic value into a buffer of bytes.
  *
  * This is the lowest level @c marshall function, and only works on fundamental
- * integral values (@c char, @c short, @c int, etc) or a @c std::byte. It expands the 
- * buffer and appends the value to the buffer, performing byte swapping into 
- * big-endian format as needed. @c char and @c std::byte values will not be byte swapped.
+ * arithmetic values (@c char, @c short, @c int, @c double, @c float, etc) or a 
+ * @c std::byte. It expands the buffer and appends the value to the buffer, performing byte 
+ * swapping into big-endian format as needed. @c char and @c std::byte values will not be 
+ * byte swapped.
  *
  * @tparam CastVal The destination sized type in the byte buffer for the marshalled
  * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
  * etc; this type must always be supplied in the function call, since it is not
- * deduced from the function argument. 
+ * deduced from the function argument (there are no standard typedefs for floating
+ * point types, so @c float or @c double must be used). 
  *
  * @tparam T The native type of the value, typically deduced by the function
  * argument type.
@@ -287,6 +289,13 @@ private:
  *   std::vector<std::byte> buf;
  *   // ...
  *   marshall_val<std::uint16_t>(buf, my_int);
+ * @endcode
+ *
+ * Example floating point usage - marshall a @c double:
+ * @code
+ *   std::vector<std::byte> buf;
+ *   // ...
+ *   marshall_val<double>(buf, my_double);
  * @endcode
  */
 template <typename CastVal, typename T, typename Buf>

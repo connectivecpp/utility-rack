@@ -120,6 +120,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <cstring> // std::memcpy
 
 namespace chops {
 
@@ -307,13 +308,15 @@ Buf& marshall(Buf& buf, const T& val) {
   return buf;
 }
 
+// overloads for specific types
 template <typename CastBoolType, typename Buf>
 Buf& marshall(Buf& buf, bool b) {
   return marshall<CastBoolType>(buf, static_cast<CastBoolType>(b ? 1 : 0));
 }
 
+
 template <typename CastBoolType, typename CastValType, typename T, typename Buf>
-Buf& marshall_optional(Buf& buf, const std::optional<T>& val) {
+Buf& marshall(Buf& buf, const std::optional<T>& val) {
   marshall<CastBoolType>(buf, val.has_value());
   if (val.has_value()) {
     marshall<CastValType>(buf, *val);
@@ -321,25 +324,37 @@ Buf& marshall_optional(Buf& buf, const std::optional<T>& val) {
   return buf;
 }
 
+// overload for sequences
 template <typename CastCntType, typename CastValType, typename Iter, typename Buf>
-Buf& marshall_sequence(Buf& buf, std::size_t num, Iter iter) {
-  marshall<CastCntType>(buf, num);
-  for (std::size_t i = 0u; i < num; ++i) {
+Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
+  marshall<CastCntType>(buf, num_elems);
+  for (std::size_t i = 0u; i < num_elems; ++i) {
     marshall<CastValType>(buf, *iter);
     ++iter;
   }
   return buf;
 }
 
-template <typename CastCntType, typename Buf>
-Buf& marshall(Buf& buf, const std::string& str) {
-  return marshall_sequence<CastCntType, std::uint8_t>(buf, str.size(), str.cbegin());
+// efficiently append a buffer of bytes to the end of the existing buffer
+template <typename Buf>
+Buf& marshall_buf(Buf& buf, std::size_t num_bytes, const std::byte* append_buf) {
+  auto old_sz = buf.size();
+  buf.resize(old_sz + num_bytes);
+  std::memcpy (buf.data()+old_sz, append_buf, num_bytes);
+  return buf;
 }
 
 template <typename CastCntType, typename Buf>
 Buf& marshall(Buf& buf, std::string_view str) {
-  return marshall_sequence<CastCntType, std::uint8_t>(buf, str.size(), str.cbegin());
+  marshall<CastCntType>(str.size());
+  return marshall_buf(buf, str.size(), cast_ptr_to<std::byte>(str.data()));
 }
+
+template <typename CastCntType, typename Buf>
+Buf& marshall(Buf& buf, const std::string& str) {
+  return marshall<CastCntType>(buf, std::string_view(str));
+}
+
 
 } // end namespace
 

@@ -51,8 +51,8 @@ namespace chops {
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const location& loc) {
-  mashall<std::int32_t>(buf, loc.latitude);
-  mashall<std::int32_t>(buf, loc.longitude);
+  marshall<std::int32_t>(buf, loc.latitude);
+  marshall<std::int32_t>(buf, loc.longitude);
   return marshall<std::int16_t>(buf, loc.altitude);
 }
 
@@ -60,13 +60,16 @@ template <typename Buf>
 Buf& marshall(Buf& buf, const trail_stats& ts) {
   marshall<std::uint64_t>(buf, ts.length);
   marshall<std::uint16_t>(buf, ts.elev);
-  return marshall_optional<std::uint8_t>(buf, ts.rating);
+  return marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
 }
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const hiking_trail& ht) {
   marshall<std::uint16_t>(buf, ht.name);
-  return marshall_optional<std::uint8_t>(buf, ts.rating);
+  marshall<std::uint8_t>(buf, ht.federal);
+  marshall<location>(buf, ht.trail_head);
+  marshall_sequence<std::uint16_t>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  return marshall<trail_stats>(buf, ht.stats);
 }
 
 } // end namespace chops
@@ -77,8 +80,8 @@ void test_marshall () {
   location pt1 { 42, 43, 21 };
   location pt2 { 62, 63, 11 };
 
-  chops::marshall(buf, pt1);
-  chops::marshall(buf, pt2);
+//  chops::marshall(buf, pt1);
+//  chops::marshall(buf, pt2);
 
 }
 

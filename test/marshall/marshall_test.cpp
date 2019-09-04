@@ -22,6 +22,7 @@
 #include <optional>
 
 #include "marshall/marshall.hpp"
+#include "marshall/shared_buffer.hpp"
 
 #include "utility/repeat.hpp"
 #include "utility/make_byte_array.hpp"
@@ -80,13 +81,15 @@ void test_marshall () {
   location pt1 { 42, 43, 21 };
   location pt2 { 62, 63, 11 };
 
-//  chops::marshall(buf, pt1);
-//  chops::marshall(buf, pt2);
+  chops::marshall(buf, pt1);
+  chops::marshall(buf, pt2);
 
 }
 
 TEST_CASE ( "Marshall using mutable_shared_buffer",
             "[marshall] [shared_buffer]" ) {
+
+  test_marshall<chops::mutable_shared_buffer>();
 
 }
 

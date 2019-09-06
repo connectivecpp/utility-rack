@@ -121,7 +121,7 @@
 #include <string>
 #include <string_view>
 #include <cstring> // std::memcpy
-#include <type_traits> // std::is_invocable
+#include <type_traits>
 
 namespace chops {
 
@@ -302,14 +302,14 @@ private:
  */
 template <typename CastValType, typename T, typename Buf>
 Buf& marshall(Buf& buf, const T& val) {
-  if constexpr (std::is_invocable_v<marshall<Buf>, T>) {
-    std::invoke(buf, val);
-  }
-  else {
-    static_assert(detail::is_arithmetic_or_byte<T>(), "An overload of the marshall function must be provided for this type");
-      auto old_sz = buf.size();
+  if constexpr (detail::is_arithmetic_or_byte<T>()) {
+    auto old_sz = buf.size();
     buf.resize(old_sz + sizeof(CastValType));
     append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+  }
+  else {
+    // should be user defined overload for type T
+    marshall(buf, val);
   }
   return buf;
 }
@@ -352,7 +352,7 @@ Buf& marshall_buf(Buf& buf, std::size_t num_bytes, const std::byte* append_buf) 
 
 template <typename CastCntType, typename Buf>
 Buf& marshall(Buf& buf, std::string_view str) {
-  marshall<CastCntType>(str.size());
+  marshall<CastCntType>(buf, str.size());
   return marshall_buf(buf, str.size(), cast_ptr_to<std::byte>(str.data()));
 }
 

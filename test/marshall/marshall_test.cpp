@@ -48,6 +48,8 @@ struct hiking_trail {
 
 namespace chops {
 
+using vector_bytes = std::vector<std::byte>;
+
 template <typename Buf>
 Buf& marshall(Buf& buf, const loc& loc) {
   marshall<std::int32_t>(buf, loc.latitude);
@@ -114,7 +116,8 @@ TEST_CASE ( "Marshall using mutable_shared_buffer",
 TEST_CASE ( "Marshall using std vector",
             "[marshall] [std_vector]" ) {
 
-  std::vector<std::byte> buf;
+//   std::vector<std::byte> buf;
+  chops::vector_bytes buf;
   test_marshall(buf);
 
 }

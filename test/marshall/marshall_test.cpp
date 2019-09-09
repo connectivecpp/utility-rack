@@ -46,48 +46,48 @@ struct hiking_trail {
   trail_stats     stats;
 };
 
-namespace chops {
+namespace mar_test {
 
 using vector_bytes = std::vector<std::byte>;
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const loc& loc) {
-  marshall<std::int32_t>(buf, loc.latitude);
-  marshall<std::int32_t>(buf, loc.longitude);
-  return marshall<std::int16_t>(buf, loc.altitude);
+  chops::marshall<std::int32_t>(buf, loc.latitude);
+  chops::marshall<std::int32_t>(buf, loc.longitude);
+  return chops::marshall<std::int16_t>(buf, loc.altitude);
 }
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const trail_stats& ts) {
-  marshall<std::uint64_t>(buf, ts.length);
-  marshall<std::uint16_t>(buf, ts.elev);
-  return marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
+  chops::marshall<std::uint64_t>(buf, ts.length);
+  chops::marshall<std::uint16_t>(buf, ts.elev);
+  return chops::marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
 }
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const hiking_trail& ht) {
-  marshall<std::uint16_t>(buf, ht.name);
-  marshall<std::uint8_t>(buf, ht.federal);
-  marshall<loc>(buf, ht.trail_head);
-  marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
-  return marshall<trail_stats>(buf, ht.stats);
+  chops::marshall<std::uint16_t>(buf, ht.name);
+  chops::marshall<std::uint8_t>(buf, ht.federal);
+  mar_test::marshall(buf, ht.trail_head);
+  chops::marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  return mar_test::marshall(buf, ht.stats);
 }
 
-} // end namespace chops
+} // end namespace mar_test
 
 template <typename Buf>
 void test_marshall (Buf& buf) {
   const loc pt1 { 42, 43, 21 };
   const loc pt2 { 62, 63, 11 };
 
-  chops::marshall(buf, pt1);
-  chops::marshall(buf, pt2);
+  mar_test::marshall(buf, pt1);
+  mar_test::marshall(buf, pt2);
 
   const trail_stats ts1 { 101, 51, std::make_optional(201) };
   const trail_stats ts2 { 301, 41, std::make_optional(401) };
 
-  chops::marshall(buf, ts1);
-  chops::marshall(buf, ts2);
+  mar_test::marshall(buf, ts1);
+  mar_test::marshall(buf, ts2);
 
   const loc inter1 { 1001, 1002, 500 };
   const loc inter2 { 1003, 1004, 501 };
@@ -100,8 +100,8 @@ void test_marshall (Buf& buf) {
   const hiking_trail hk1 { "Huge trail", true, pt1, { inter1, inter2, inter3 }, ts1 };
   const hiking_trail hk2 { "Small trail", false, pt2, { inter3, inter4, inter5, inter6 }, ts2 };
 
-  chops::marshall(buf, hk1);
-  chops::marshall(buf, hk2);
+  mar_test::marshall(buf, hk1);
+  mar_test::marshall(buf, hk2);
 
 }
 
@@ -117,7 +117,7 @@ TEST_CASE ( "Marshall using std vector",
             "[marshall] [std_vector]" ) {
 
 //   std::vector<std::byte> buf;
-  chops::vector_bytes buf;
+  mar_test::vector_bytes buf;
   test_marshall(buf);
 
 }

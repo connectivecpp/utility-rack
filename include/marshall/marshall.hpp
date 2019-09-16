@@ -122,6 +122,7 @@
 #include <string_view>
 #include <cstring> // std::memcpy
 #include <type_traits>
+#include <array>
 
 namespace chops {
 
@@ -199,31 +200,25 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
 */
 
 /**
- * @brief Adapt a C-style array or @c std::array so that it can be used with the
- * @c chops::marshall function templates.
+ * @brief Adapt a @c std::array so that a fixed size @c std::byte array can be used with 
+ * the @c chops::marshaller class template as the @c Buf template parameter.
  *
  * This class provides three methods (@c size, @c resize, @c data) as required by the
- * @c Buf parameter type in the @c chops::marshall functions. This adapter can only be 
- * used where the array or @c std::array object lifetime is the same or greater than 
- * the @c buf_adapter object, and where the array address never changes. In other words, 
- * a @c std::vector<std::byte> cannot be used with this adapter, as the underlying array 
- * may be reallocated and the buffer address changed. However, a @c std::vector<std::byte> 
- * can be directly used with the @c chops::marshall function templates.
+ * @c Buf parameter type in the @c chops::marshaller class template. 
  *
- * Copy and move semantics are defaulted, so care must be taken if multiple @c buf_adapter
- * objects are using the same underlying array of bytes.
+ * The logical size of the buffer is tracked for use by the @c marshaller object. If
+ * @c resize is called and there is not enough room in the buffer an exception is
+ * thrown.
  *
  */
-class buf_adapter {
+template <std::size_t N>
+class fixed_size_byte_array {
 public:
 /**
- * @brief Construct the @ buf_adapter given a @c std::byte pointer to the beginning of an array.
+ * @brief Default construct the @ fixed_size_byte_array.
  *
- * @pre The @c std::byte pointer passed in to the constructor must point to a buffer large enough
- * to contain the full final size of the marshalled data. No "end of buffer" checks are performed 
- * in the @c chops::marshall function templates.
  */
-  buf_adapter(std::byte* buf) noexcept : m_buf(buf), m_size(0u) { }
+  fixed_size_byte_array() noexcept : m_buf(), m_size(0u) { }
 
 /**
  * @brief Return the size of the data which has been written into the buffer.
@@ -236,7 +231,7 @@ public:
     return m_size;
   }
 /**
- * @brief Track how many bytes have been written into the buffer.
+ * @brief Track how many bytes are used within the buffer.
  */
   void resize(std::size_t sz) noexcept {
     m_size = sz;
@@ -244,21 +239,22 @@ public:
 /**
  * @brief Return a pointer to the beginning of the buffer.
  *
- * @return Return a pointer to the beginning of the buffer.
+ * @return A pointer to the beginning of the buffer.
  */
   std::byte* data() noexcept {
-    return m_buf;
+    return m_buf.data();
   }
 /**
- * @brief Logically reset so that new data can be written into the buffer.
+ * @brief Logically reset so that new data can be written into the buffer
+ * at the beginning.
  */
   void clear() noexcept {
     m_size = 0u;
   }
   
 private:
-  std::byte* m_buf;
-  std::size_t m_size;
+  std::array<std::byte, N> m_buf;
+  std::size_t              m_size;
 };
 
 

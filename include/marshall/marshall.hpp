@@ -210,6 +210,9 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
  * may be reallocated and the buffer address changed. However, a @c std::vector<std::byte> 
  * can be directly used with the @c chops::marshall function templates.
  *
+ * Copy and move semantics are defaulted, so care must be taken if multiple @c buf_adapter
+ * objects are using the same underlying array of bytes.
+ *
  */
 class buf_adapter {
 public:
@@ -262,29 +265,11 @@ private:
 /**
  * @brief Marshall a single arithmetic value into a buffer of bytes.
  *
- * This is the "primitive" @c marshall function, and only works on fundamental
- * arithmetic values (@c char, @c short, @c int, @c double, @c float, etc) or a 
- * @c std::byte. It expands the buffer and appends the value to the buffer, performing byte 
- * swapping into big-endian format as needed. @c char and @c std::byte values will not be 
- * byte swapped.
- *
- * @tparam CastValType The destination sized type in the byte buffer for the marshalled
- * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
- * etc; this type must always be supplied in the function call, since it is not
- * deduced from the function argument (there are no standard typedefs for floating
- * point types - use @c float or @c double as the casting type). 
- *
- * @tparam T The native type of the value, typically deduced by the function
- * argument type.
- *
- * @tparam Buf The buffer type, which must support @c size, @c resize, and
- * @c data methods, typically deduced by the function argument type.
- *
- * @param buf Buffer to hold the marshalled value; the buffer will be resized.
- *
- * @param val Value to be marshalled.
- *
- * @return Reference to the buffer parameter.
+ * @note Design history - originally marshalling was implemented with function templates
+ * only. The value added by a marshalling class is minimal compared to the functionality provided
+ * by the marshlling methods (or functions). However, the customization point design with overloaded 
+ * functions (only) is non-trival when all of the name lookups and ADL and overload selection comes 
+ * into play. The decision was made to use a class so that ADL does not come into play.
  *
  * Example usage - marshall an @c int as an unsigned 16 bit value:
  * @code
@@ -299,47 +284,83 @@ private:
  *   // ...
  *   marshall<double>(buf, my_double);
  * @endcode
+ *
+ * @tparam Buf The buffer type, which must contain an array of @c std::bytes, and must support 
+ * @c size, @c resize, and @c data methods.
+ *
  */
-template <typename CastValType, typename T, typename Buf>
-Buf& marshall(Buf& buf, const T& val) {
-  if constexpr (detail::is_arithmetic_or_byte<T>()) {
-    auto old_sz = buf.size();
-    buf.resize(old_sz + sizeof(CastValType));
-    append_val(buf.data()+old_sz, static_cast<CastValType>(val));
-  }
-  else {
-    // should be user defined overload for type T
-    marshall(buf, val);
-  }
-  return buf;
-}
+template <typename Buf = mutable_shared_buffer>
+class marshaller {
+private:
+  Buf m_buf;
 
-// overloads for specific types
-template <typename CastBoolType, typename Buf>
-Buf& marshall(Buf& buf, bool b) {
-  return marshall<CastBoolType>(buf, static_cast<CastBoolType>(b ? 1 : 0));
-}
+public:
 
+  marshaller() : m_buf() { }
 
-template <typename CastBoolType, typename CastValType, typename T, typename Buf>
-Buf& marshall(Buf& buf, const std::optional<T>& val) {
-  marshall<CastBoolType>(buf, val.has_value());
-  if (val.has_value()) {
-    marshall<CastValType>(buf, *val);
+/**
+ * @brief Marshall a single arithmetic value into a buffer of bytes.
+ *
+ * This is the "basic" @c marshall method, handling fundamental arithmetic values (@c char, @c short, 
+ * @c int, @c double, @c float, etc) or a @c std::byte, as well as the customization point for user
+ * defined types. For arithmetic types it expands the buffer and appends the value to the buffer, 
+ * performing byte swapping into big-endian format as needed. @c char and @c std::byte values will 
+ * not be byte swapped.
+ *
+ * @tparam CastValType The destination sized type in the byte buffer for the marshalled
+ * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
+ * etc; this type must always be supplied in the method call, since it is not
+ * deduced from the function argument (there are no standard typedefs for floating
+ * point types - use @c float or @c double as the casting type). 
+ *
+ * @tparam T The native type of the value, typically deduced by the function
+ * argument type.
+ *
+ * @param val Value to be marshalled.
+ *
+ * @return Reference to this @c marshaller object.
+ *
+ */
+  template <typename CastValType, typename T>
+  marshaller<Buf>& marshall(const T& val) {
+    if constexpr (detail::is_arithmetic_or_byte<T>()) {
+      auto old_sz = buf.size();
+      buf.resize(old_sz + sizeof(CastValType));
+      append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+    }
+    else {
+      // should be user defined overload for type T
+      marshall(buf, val);
+    }
+    return *this;
   }
-  return buf;
-}
 
-// overload for sequences
-template <typename CastCntType, typename CastValType, typename Iter, typename Buf>
-Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
-  marshall<CastCntType>(buf, num_elems);
-  for (std::size_t i = 0u; i < num_elems; ++i) {
-    marshall<CastValType>(buf, *iter);
-    ++iter;
+  // overloads for specific types
+  template <typename CastBoolType>
+  marshaller<Buf>& marshall(bool b) {
+    return marshall<CastBoolType>(static_cast<CastBoolType>(b ? 1 : 0));
   }
-  return buf;
-}
+
+
+  template <typename CastBoolType, typename CastValType, typename T>
+  Buf& marshall(const std::optional<T>& val) {
+    marshall<CastBoolType>(val.has_value());
+    if (val.has_value()) {
+      marshall<CastValType>(*val);
+    }
+    return *this;
+  }
+
+  // overload for sequences
+  template <typename CastCntType, typename CastValType, typename Iter>
+  marshaller<Buf>& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
+    marshall<CastCntType>(buf, num_elems);
+    for (std::size_t i = 0u; i < num_elems; ++i) {
+      marshall<CastValType>(buf, *iter);
+      ++iter;
+    }
+    return *this;
+  }
 
 // efficiently append a buffer of bytes to the end of the existing buffer
 template <typename Buf>
@@ -361,6 +382,7 @@ Buf& marshall(Buf& buf, const std::string& str) {
   return marshall<CastCntType>(buf, std::string_view(str));
 }
 
+};
 
 } // end namespace
 

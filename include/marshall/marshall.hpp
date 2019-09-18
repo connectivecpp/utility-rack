@@ -123,6 +123,7 @@
 #include <cstring> // std::memcpy
 #include <type_traits>
 #include <array>
+#include <cassert>
 
 namespace chops {
 
@@ -203,12 +204,12 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
  * @brief Adapt a @c std::array so that a fixed size @c std::byte array can be used with 
  * the @c chops::marshaller class template as the @c Buf template parameter.
  *
- * This class provides three methods (@c size, @c resize, @c data) as required by the
- * @c Buf parameter type in the @c chops::marshaller class template. 
+ * This class provides four methods (@c size, @c resize, @c data, @c clear) as required 
+ * by the @c Buf parameter type in the @c chops::marshaller class template. 
  *
  * The logical size of the buffer is tracked for use by the @c marshaller object. If
- * @c resize is called and there is not enough room in the buffer an exception is
- * thrown.
+ * @c resize is called and there is not enough room in the buffer an assert is
+ * fired.
  *
  */
 template <std::size_t N>
@@ -223,17 +224,20 @@ public:
 /**
  * @brief Return the size of the data which has been written into the buffer.
  *
- * @return The size of the data which has been written into the buffer, which is modified through
- * the @c resize method.
+ * @return The size of the data which has been written into the buffer, which is 
+ * modified through the @c resize method.
  *
  */
   std::size_t size() const noexcept {
     return m_size;
   }
 /**
- * @brief Track how many bytes are used within the buffer.
+ * @brief Increase the logical size, allowing bytes to be appended.
+ *
+ * @param sz New logical size.
  */
   void resize(std::size_t sz) noexcept {
+    assert(sz <= N);
     m_size = sz;
   }
 /**
@@ -263,7 +267,7 @@ private:
  *
  * @note Design history - originally marshalling was implemented with function templates
  * only. The value added by a marshalling class is minimal compared to the functionality provided
- * by the marshlling methods (or functions). However, the customization point design with overloaded 
+ * by the marshalling methods (or functions). However, the customization point design with overloaded 
  * functions (only) is non-trival when all of the name lookups and ADL and overload selection comes 
  * into play. The decision was made to use a class so that ADL does not come into play.
  *
@@ -282,7 +286,9 @@ private:
  * @endcode
  *
  * @tparam Buf The buffer type, which must contain an array of @c std::bytes, and must support 
- * @c size, @c resize, and @c data methods.
+ * @c size, @c resize, @c data, and @c clear methods; @c chops::mutable_shared_buffer,
+ * @c std::vector<std::byte>, and @c chops::fixed_size_byte_array all satisfy this
+ * requirement.
  *
  */
 template <typename Buf = mutable_shared_buffer>
@@ -294,14 +300,30 @@ public:
 
   marshaller() : m_buf() { }
 
+  Buf get_buf() const {
+    return m_buf;
+  }
+
+  const std::byte* data() const noexcept {
+    return m_buf.data();
+  }
+
+  std::size_t size() const noexcept {
+    return m_buf.size();
+  }
+
+  void clear() {
+    return m_buf.clear();
+  }
+
 /**
  * @brief Marshall a single arithmetic value into a buffer of bytes.
  *
  * This is the "basic" @c marshall method, handling fundamental arithmetic values (@c char, @c short, 
  * @c int, @c double, @c float, etc) or a @c std::byte, as well as the customization point for user
  * defined types. For arithmetic types it expands the buffer and appends the value to the buffer, 
- * performing byte swapping into big-endian format as needed. @c char and @c std::byte values will 
- * not be byte swapped.
+ * performing byte swapping into big-endian format as needed. Single @c char and @c std::byte 
+ * values will not be byte swapped.
  *
  * @tparam CastValType The destination sized type in the byte buffer for the marshalled
  * type, typically a type such as @c std::int32_t, @c std::uint32_t, @c std::int16_t,
@@ -320,13 +342,13 @@ public:
   template <typename CastValType, typename T>
   marshaller<Buf>& marshall(const T& val) {
     if constexpr (detail::is_arithmetic_or_byte<T>()) {
-      auto old_sz = buf.size();
-      buf.resize(old_sz + sizeof(CastValType));
-      append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+      auto old_sz = m_buf.size();
+      m_buf.resize(old_sz + sizeof(CastValType));
+      append_val(m_buf.data()+old_sz, static_cast<CastValType>(val));
     }
     else {
       // should be user defined overload for type T
-      marshall(buf, val);
+      marshall_udt(*this, val);
     }
     return *this;
   }
@@ -339,7 +361,7 @@ public:
 
 
   template <typename CastBoolType, typename CastValType, typename T>
-  Buf& marshall(const std::optional<T>& val) {
+  marshaller<Buf>& marshall(const std::optional<T>& val) {
     marshall<CastBoolType>(val.has_value());
     if (val.has_value()) {
       marshall<CastValType>(*val);
@@ -349,34 +371,38 @@ public:
 
   // overload for sequences
   template <typename CastCntType, typename CastValType, typename Iter>
-  marshaller<Buf>& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
-    marshall<CastCntType>(buf, num_elems);
+  marshaller<Buf>& marshall_sequence(std::size_t num_elems, Iter iter) {
+    marshall<CastCntType>(num_elems);
     for (std::size_t i = 0u; i < num_elems; ++i) {
-      marshall<CastValType>(buf, *iter);
+      marshall<CastValType>(*iter);
       ++iter;
     }
     return *this;
   }
 
-// efficiently append a buffer of bytes to the end of the existing buffer
-template <typename Buf>
-Buf& marshall_buf(Buf& buf, std::size_t num_bytes, const std::byte* append_buf) {
-  auto old_sz = buf.size();
-  buf.resize(old_sz + num_bytes);
-  std::memcpy (buf.data()+old_sz, append_buf, num_bytes);
-  return buf;
-}
+  // efficiently append a buffer of bytes to the end of the existing buffer
+  marshaller<Buf>& marshall_buf(std::size_t num_bytes, const std::byte* append_buf) {
+    auto old_sz = m_buf.size();
+    m_buf.resize(old_sz + num_bytes);
+    std::memcpy (m_buf.data()+old_sz, append_buf, num_bytes);
+    return *this;
+  }
 
-template <typename CastCntType, typename Buf>
-Buf& marshall(Buf& buf, std::string_view str) {
-  marshall<CastCntType>(buf, str.size());
-  return marshall_buf(buf, str.size(), cast_ptr_to<std::byte>(str.data()));
-}
+  template <typename CastCntType>
+  marshaller<Buf>& marshall(std::string_view str) {
+    marshall<CastCntType>(str.size());
+    return marshall_buf(str.size(), cast_ptr_to<std::byte>(str.data()));
+  }
 
-template <typename CastCntType, typename Buf>
-Buf& marshall(Buf& buf, const std::string& str) {
-  return marshall<CastCntType>(buf, std::string_view(str));
-}
+  template <typename CastCntType>
+  marshaller<Buf>& marshall(const std::string& str) {
+    return marshall<CastCntType>(std::string_view(str));
+  }
+
+  template <typename CastCntType>
+  marshaller<Buf>& marshall(const char* str) {
+    return marshall<CastCntType>(std::string_view(str));
+  }
 
 };
 

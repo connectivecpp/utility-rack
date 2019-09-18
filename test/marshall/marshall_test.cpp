@@ -2,8 +2,8 @@
  *
  *  @ingroup test_module
  *
- *  @brief Test scenarios for the various @c marshall and @c unmarshall function
- *  templates.
+ *  @brief Test scenarios for the @c marshaller and @c unmarshaller class
+ *  templates and related classes and functions.
  *
  *  @author Cliff Green
  *
@@ -46,48 +46,54 @@ struct hiking_trail {
   trail_stats     stats;
 };
 
-namespace mar_test {
-
-using vector_bytes = std::vector<std::byte>;
+/*
+namespace chops {
 
 template <typename Buf>
-Buf& marshall(Buf& buf, const loc& loc) {
-  chops::marshall<std::int32_t>(buf, loc.latitude);
-  chops::marshall<std::int32_t>(buf, loc.longitude);
-  return chops::marshall<std::int16_t>(buf, loc.altitude);
+void marshall_udt(marshaller<Buf>& m, const loc& loc) {
+  m.marshall<std::int32_t>(loc.latitude);
+  m.marshall<std::int32_t>(loc.longitude);
+  m.marshall<std::int16_t>(loc.altitude);
 }
 
 template <typename Buf>
-Buf& marshall(Buf& buf, const trail_stats& ts) {
-  chops::marshall<std::uint64_t>(buf, ts.length);
-  chops::marshall<std::uint16_t>(buf, ts.elev);
-  return chops::marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
+void marshall_udt(marshaller<Buf>& m, const trail_stats& ts) {
+  m.marshall<std::uint64_t>(ts.length);
+  m.marshall<std::uint16_t>(ts.elev);
+  m.marshall<std::uint8_t, std::uint16_t>(ts.rating);
 }
 
 template <typename Buf>
-Buf& marshall(Buf& buf, const hiking_trail& ht) {
-  chops::marshall<std::uint16_t>(buf, ht.name);
-  chops::marshall<std::uint8_t>(buf, ht.federal);
-  mar_test::marshall(buf, ht.trail_head);
-  chops::marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
-  return mar_test::marshall(buf, ht.stats);
+void marshall_udt(marshaller<Buf>& m, const hiking_trail& ht) {
+  m.marshall<std::uint16_t>(ht.name);
+  m.marshall<std::uint8_t>(ht.federal);
+  m.marshall(ht.trail_head);
+  m.marshall_sequence<std::uint16_t, loc>(ht.intersections.size(), ht.intersections.cbegin());
+  m.marshall(ht.stats);
 }
 
-} // end namespace mar_test
+} // end namespace chops
+*/
 
 template <typename Buf>
-void test_marshall (Buf& buf) {
+void test_marshall () {
+
+  chops::marshaller<Buf> m;
+
+  m.template marshall<std::uint16_t>(42);
+
+/*
   const loc pt1 { 42, 43, 21 };
   const loc pt2 { 62, 63, 11 };
 
-  mar_test::marshall(buf, pt1);
-  mar_test::marshall(buf, pt2);
+  m.marshall<loc>(pt1);
+  m.marshall<loc>(pt2);
 
   const trail_stats ts1 { 101, 51, std::make_optional(201) };
   const trail_stats ts2 { 301, 41, std::make_optional(401) };
 
-  mar_test::marshall(buf, ts1);
-  mar_test::marshall(buf, ts2);
+  m.marshall<trail_stats>(ts1);
+  m.marshall<trail_stats>(ts2);
 
   const loc inter1 { 1001, 1002, 500 };
   const loc inter2 { 1003, 1004, 501 };
@@ -100,43 +106,30 @@ void test_marshall (Buf& buf) {
   const hiking_trail hk1 { "Huge trail", true, pt1, { inter1, inter2, inter3 }, ts1 };
   const hiking_trail hk2 { "Small trail", false, pt2, { inter3, inter4, inter5, inter6 }, ts2 };
 
-  mar_test::marshall(buf, hk1);
-  mar_test::marshall(buf, hk2);
+  m.marshall<hiking_trail>(hk1);
+  m.marshall<hiking_trail>(hk2);
+*/
 
 }
 
 TEST_CASE ( "Marshall using mutable_shared_buffer",
             "[marshall] [shared_buffer]" ) {
 
-  chops::mutable_shared_buffer buf;
-  test_marshall(buf);
+  test_marshall<chops::mutable_shared_buffer>();
 
 }
 
 TEST_CASE ( "Marshall using std vector",
             "[marshall] [std_vector]" ) {
 
-//   std::vector<std::byte> buf;
-  mar_test::vector_bytes buf;
-  test_marshall(buf);
+  test_marshall<std::vector<std::byte> >();
 
 }
 
-TEST_CASE ( "Marshall using adapter on C array",
-            "[marshall] [array]" ) {
+TEST_CASE ( "Marshall using fixed_size_byte_array",
+            "[marshall] [fixed_size_byte_array]" ) {
 
-  std::byte t[1000];
-  chops::buf_adapter buf(t);
-  test_marshall(buf);
-
-}
-
-TEST_CASE ( "Marshall using adapter on std array",
-            "[marshall] [std_array]" ) {
-
-  std::array<std::byte, 1000> t;
-  chops::buf_adapter buf(t.data());
-  test_marshall(buf);
+  test_marshall<chops::fixed_size_byte_array<1000> >();
 
 }
 

@@ -603,20 +603,5 @@ inline bool operator== (const mutable_shared_buffer& lhs, const const_shared_buf
 
 } // end namespace
 
-/*
-// the following code appears to be the older, if legal, way to implement swap for a 
-// user-defined class type, but is generating errors on VC++, possibly because of the noexcept
-// swap idiom
-namespace std {
-
-template <>
-inline void swap(chops::mutable_shared_buffer& lhs, chops::mutable_shared_buffer& rhs) noexcept {
-  lhs.swap(rhs);
-}
-
-}
-*/
-
-
 #endif
 

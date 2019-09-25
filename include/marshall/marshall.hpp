@@ -15,7 +15,7 @@
  *  designs have strengths and weaknesses (see higher level documentation for more
  *  explanation).
  *
- *  @note The design of the binary marshall and unmarshall functions is a great fit
+ *  @note The design of the binary marshall and unmarshall functions is a good fit
  *  for a C++ metaprogamming implementation (using variadic templates). In particular,
  *  the primary design concept is a mapping of two (and sometimes three) types to a 
  *  single value. A typelist would allow a single function (or method) call to operate
@@ -67,10 +67,11 @@
  *  where the number of elements is placed before the element sequence in the stream of
  *  bytes. 
  *
- *  Application defined types can define a @c marshall function overload which will be used in
- *  appropriate places. Specifically, a type @c MyType can be used in a sequence or in
+ *  Application defined types can be associated with a @c marshall and @c unmarshall 
+ *  function overload, providing a convenient way to reuse the same lower-level 
+ *  marshalling code. Specifically, a type @c MyType can be used in a sequence or in 
  *  a @c std::optional or as part of another type without needing to duplicate the 
- *  marshalling calls within the @c MyType @c marshall function.
+ *  marshalling calls within the @c MyType @c marshall and @c unmarshall functions.
  * 
  *  @c std::variant and @c std::any are not directly supported and require value extraction 
  *  by the application. (Supporting @c std::variant or @c std::any might be a future 
@@ -126,10 +127,6 @@
 #include <cassert>
 
 namespace chops {
-
-namespace detail {
-
-} // end namespace detail
 
 /**
  * @brief Extract a sequence in network byte order from a @c std::byte buffer into the
@@ -202,14 +199,13 @@ std::size_t append_sequence(std::byte* buf, Cnt cnt, Iter start, Iter end) noexc
 
 /**
  * @brief Adapt a @c std::array so that a fixed size @c std::byte array can be used with 
- * the @c chops::marshaller class template as the @c Buf template parameter.
+ * the @c chops::marshall function template as the @c Buf template parameter.
  *
- * This class provides four methods (@c size, @c resize, @c data, @c clear) as required 
- * by the @c Buf parameter type in the @c chops::marshaller class template. 
+ * This class provides three methods (@c size, @c resize, @c data) as required 
+ * by the @c Buf parameter type in the @c chops::marshall function template. 
  *
- * The logical size of the buffer is tracked for use by the @c marshaller object. If
- * @c resize is called and there is not enough room in the buffer an assert is
- * fired.
+ * The logical size of the buffer is tracked. If @c resize is called and there 
+ * is not enough room in the buffer an assert is fired.
  *
  */
 template <std::size_t N>
@@ -261,6 +257,10 @@ private:
   std::size_t              m_size;
 };
 
+
+// simplify the function overload set so that std::vector<std::byte> and similar can
+// be used for the Buf template parameter
+struct adl_tag { };
 
 /**
  * @brief Marshall a single arithmetic value into a buffer of bytes.

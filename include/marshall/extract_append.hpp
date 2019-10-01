@@ -341,7 +341,7 @@ const bool big_endian = detect_big_endian();
  * This function template dispatches on specific sizes. If an unsupported size is attempted
  * to be swapped, a compile time error is generated.
  *
- * @param buf Pointer to an Array of @c std::bytes containing an object of type T in network 
+ * @param buf Pointer to an array of @c std::bytes containing an object of type T in network 
  * byte order.
  *
  * @return A value in native endian order.
@@ -374,7 +374,7 @@ T extract_val(const std::byte* buf) noexcept {
  * This function template dispatches on specific sizes. If an unsupported size is attempted
  * to be swapped, a static error is generated.
  *
- * @param buf Buffer of @c std::bytes already allocated to hold the bytes of the value.
+ * @param buf Pointer to array of @c std::bytes big enough to hold the bytes of the value.
  *
  * @param val Value in native endian order to append to buf.
  *

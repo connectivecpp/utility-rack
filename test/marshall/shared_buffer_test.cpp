@@ -33,18 +33,11 @@ constexpr int N = 11;
 
 template <typename SB, typename T>
 void pointer_check(const T* bp, typename SB::size_type sz) {
-
-  GIVEN ("An arbitrary buf pointer and a size") {
-    WHEN ("A shared buffer is constructed with the buf and size") {
-      SB sb(bp, sz);
-      THEN ("the shared buffer is not empty, the size matches and the contents match") {
-        REQUIRE_FALSE (sb.empty());
-        REQUIRE (sb.size() == sz);
-        const std::byte* buf = chops::cast_ptr_to<std::byte>(bp);
-        chops::repeat(sz, [&sb, buf] (const int& i) { REQUIRE(*(sb.data()+i) == *(buf+i)); } );
-      }
-    }
-  } // end given
+  SB sb(bp, sz);
+  REQUIRE_FALSE (sb.empty());
+  REQUIRE (sb.size() == sz);
+  const std::byte* buf = chops::cast_ptr_to<std::byte>(bp);
+  chops::repeat(sz, [&sb, buf] (const int& i) { REQUIRE(*(sb.data()+i) == *(buf+i)); } );
 }
 
 template <typename SB>
@@ -121,6 +114,15 @@ void shared_buffer_byte_vector_move() {
   } // end given
 }
  
+TEMPLATE_TEST_CASE ( "Checking shared buffer pointer construction", "[common]",
+  pointer_check<SB>(buf, sz);
+  const void* vp = static_cast<const void*>(buf);
+  pointer_check<SB>(vp, sz);
+  pointer_check<SB>(static_cast<const char*>(vp), sz);
+  pointer_check<SB>(static_cast<const unsigned char*>(vp), sz);
+  pointer_check<SB>(static_cast<const signed char*>(vp), sz);
+
+                     
 SCENARIO ( "Const shared buffer common test", 
            "[const_shared_buffer] [common]" ) {
   auto arr = chops::make_byte_array( 40, 41, 42, 43, 44, 60, 59, 58, 57, 56, 42, 42 );

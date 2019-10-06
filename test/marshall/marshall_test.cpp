@@ -46,7 +46,6 @@ struct hiking_trail {
   trail_stats     stats;
 };
 
-/*
 namespace chops {
 
 template <typename Buf>
@@ -73,7 +72,6 @@ void marshall_udt(marshaller<Buf>& m, const hiking_trail& ht) {
 }
 
 } // end namespace chops
-*/
 
 template <typename Buf>
 void test_marshall () {
@@ -112,7 +110,7 @@ void test_marshall () {
 
 }
 
-TEST_CASE ( "Marshall using mutable_shared_buffer",
+TEMPLATE_TEST_CASE ( "Marshall using mutable_shared_buffer",
             "[marshall] [shared_buffer]" ) {
 
   test_marshall<chops::mutable_shared_buffer>();

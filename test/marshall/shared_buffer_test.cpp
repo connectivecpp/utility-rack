@@ -31,108 +31,73 @@ constexpr std::byte Harhar { 42 };
 constexpr int N = 11;
 
 
-template <typename SB, typename T>
-void pointer_check(const T* bp, typename SB::size_type sz) {
-  SB sb(bp, sz);
+template <typename SB, typename PT>
+void generic_pointer_construction_test() {
+  auto arr = chops::make_byte_array( 40, 41, 42, 43, 44, 60, 59, 58, 57, 56, 42, 42 );
+  const PT* ptr = chops::cast_ptr_to<PT>(arr.data());
+  SB sb(ptr, arr.size());
   REQUIRE_FALSE (sb.empty());
-  REQUIRE (sb.size() == sz);
-  const std::byte* buf = chops::cast_ptr_to<std::byte>(bp);
-  chops::repeat(sz, [&sb, buf] (const int& i) { REQUIRE(*(sb.data()+i) == *(buf+i)); } );
+  const std::byte* buf = chops::cast_ptr_to<std::byte>(arr.data());
+  chops::repeat(arr.size(), [&sb, arr] (int i) { REQUIRE(*(sb.data()+i) == arr[i]); } );
 }
 
 template <typename SB>
-void shared_buffer_common(const std::byte* buf, typename SB::size_type sz) {
+void common_methods_test(const std::byte* buf, typename SB::size_type sz) {
 
   REQUIRE (sz > 2);
 
-  pointer_check<SB>(buf, sz);
-  const void* vp = static_cast<const void*>(buf);
-  pointer_check<SB>(vp, sz);
-  pointer_check<SB>(static_cast<const char*>(vp), sz);
-  pointer_check<SB>(static_cast<const unsigned char*>(vp), sz);
-  pointer_check<SB>(static_cast<const signed char*>(vp), sz);
-
-  GIVEN ("A shared buffer") {
-    SB sb(buf, sz);
-    REQUIRE_FALSE (sb.empty());
-    WHEN ("A separate shared buffer is constructed with the buf and size") {
-      SB sb2(buf, sz);
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("A second shared buffer is copy constructed") {
-      SB sb2(sb);
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("A shared buffer is constructed from another container") {
-      std::list<std::byte> lst (buf, buf+sz);
-      SB sb2(lst.cbegin(), lst.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the two shared buffers compare equal") {
-        REQUIRE (sb == sb2);
-      }
-    }
-    AND_WHEN ("A separate shared buffer is constructed shorter than the first") {
-      auto ba = chops::make_byte_array(buf[0], buf[1]);
-      SB sb2(ba.cbegin(), ba.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the separate shared buffer compares less than the first") {
-        REQUIRE (sb2 < sb);
-        REQUIRE (sb2 != sb);
-      }
-    }
-    AND_WHEN ("A separate shared buffer is constructed with values less than the first") {
-      auto ba = chops::make_byte_array(0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-      SB sb2(ba.cbegin(), ba.cend());
-      REQUIRE_FALSE (sb2.empty());
-      THEN ("the separate shared buffer compares less than the first") {
-        REQUIRE (sb2 != sb);
-      }
-    }
-  } // end given
+  SB sb(buf, sz);
+  REQUIRE_FALSE (sb.empty());
+  {
+    SB sb2(buf, sz);
+    REQUIRE_FALSE (sb2.empty());
+    REQUIRE (sb == sb2);
+  }
+  {
+    std::list<std::byte> lst (buf, buf+sz);
+    SB sb2(lst.cbegin(), lst.cend());
+    REQUIRE_FALSE (sb2.empty());
+    REQUIRE (sb == sb2);
+  }
+  {
+    auto ba = chops::make_byte_array(buf[0], buf[1]);
+    SB sb2(ba.cbegin(), ba.cend());
+    REQUIRE_FALSE (sb2.empty());
+    REQUIRE (sb2 < sb);
+    REQUIRE (sb2 != sb);
+  }
+  {
+    auto ba = chops::make_byte_array(0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+    SB sb2(ba.cbegin(), ba.cend());
+    REQUIRE_FALSE (sb2.empty());
+    REQUIRE (sb2 != sb);
+  }
 }
 
 template <typename SB>
-void shared_buffer_byte_vector_move() {
+void byte_vector_move_test() {
 
   auto arr = chops::make_byte_array (0x01, 0x02, 0x03, 0x04, 0x05);
 
-  GIVEN ("A vector of bytes") {
-    std::vector<std::byte> bv { arr.cbegin(), arr.cend() };
-    WHEN ("A shared buffer is constructed by moving from the byte vector") {
-      SB sb(std::move(bv));
-      THEN ("the shared buffer will contain the data and the byte vector will not") {
-        REQUIRE (sb == SB(arr.cbegin(), arr.cend()));
-        REQUIRE_FALSE (bv.size() == sb.size());
-      }
-    }
-  } // end given
+  std::vector<std::byte> bv { arr.cbegin(), arr.cend() };
+  SB sb(std::move(bv));
+  REQUIRE (sb == SB(arr.cbegin(), arr.cend()));
+  REQUIRE_FALSE (bv.size() == sb.size());
 }
  
-TEMPLATE_TEST_CASE ( "Checking shared buffer pointer construction", "[common]",
-  pointer_check<SB>(buf, sz);
-  const void* vp = static_cast<const void*>(buf);
-  pointer_check<SB>(vp, sz);
-  pointer_check<SB>(static_cast<const char*>(vp), sz);
-  pointer_check<SB>(static_cast<const unsigned char*>(vp), sz);
-  pointer_check<SB>(static_cast<const signed char*>(vp), sz);
-
-                     
-SCENARIO ( "Const shared buffer common test", 
-           "[const_shared_buffer] [common]" ) {
-  auto arr = chops::make_byte_array( 40, 41, 42, 43, 44, 60, 59, 58, 57, 56, 42, 42 );
-  shared_buffer_common<chops::const_shared_buffer>(arr.data(), arr.size());
+TEMPLATE_TEST_CASE ( "Checking generic pointer construction",
+                     "[common]",
+                     void, char, unsigned char, signed char ) {
+  generic_pointer_construction_test<chops::mutable_shared_buffer, TestType>();
+  generic_pointer_construction_test<chops::const_shared_buffer, TestType>();
 }
 
-SCENARIO ( "Mutable shared buffer common test",
-           "[mutable_shared_buffer] [common]" ) {
+                     
+TEMPLATE_TEST_CASE ( "Shared buffer common methods test",
+                     "[const_shared_buffer] [common]",
+                     chops::mutable_shared_buffer, chops::const_shared_buffer ) {
   auto arr = chops::make_byte_array ( 80, 81, 82, 83, 84, 90, 91, 92 );
-  shared_buffer_common<chops::const_shared_buffer>(arr.data(), arr.size());
+  common_methods_test<TestType>(arr.data(), arr.size());
 }
 
 SCENARIO ( "Mutable shared buffer copy construction and assignment",
@@ -310,17 +275,11 @@ SCENARIO ( "Mutable shared buffer move into const shared buffer",
   } // end given
 }
 
-SCENARIO ( "Move a vector of bytes into a mutable shared buffer",
-           "[mutable_shared_buffer] [move_byte_vec]" ) {
+TEMPLATE_TEST_CASE ( "Move a vector of bytes into a shared buffer",
+                     "[common] [move_byte_vec]",
+                     chops::mutable_shared_buffer, chops::const_shared_buffer ) {
 
-  shared_buffer_byte_vector_move<chops::mutable_shared_buffer>();
-
-}
-
-SCENARIO ( "Move a vector of bytes into a const shared buffer",
-           "[const_shared_buffer] [move_byte_vec]" ) {
-
-  shared_buffer_byte_vector_move<chops::const_shared_buffer>();
+  byte_vector_move_test<TestType>();
 
 }
 

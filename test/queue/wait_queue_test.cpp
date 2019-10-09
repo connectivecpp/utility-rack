@@ -6,7 +6,7 @@
  *
  *  @author Cliff Green
  *
- *  Copyright (c) 2017-2018 by Cliff Green
+ *  Copyright (c) 2017-2019 by Cliff Green
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -22,6 +22,7 @@
 #include <set>
 #include <optional>
 #include <chrono>
+#include <type_traits> // std::is_arithmetic
 
 #include <thread>
 #include <mutex>
@@ -35,8 +36,28 @@
 
 using namespace std::literals::string_literals;
 
-template <typename T, typename Q>
-void non_threaded_push_test(Q& wq, const T& val, int count) {
+constexpr int N = 40;
+
+// WQ creation function with non-used pointer for overloading
+template <typename T>
+auto create_wait_queue(const std::deque<T>*) {
+  return chops::wait_queue<T, std::deque<T> > { };
+}
+
+template <typename T>
+auto create_wait_queue(const nonstd::ring_span<T>*) {
+  static T buf[N];
+  return chops::wait_queue<T, nonstd::ring_span<T> > { buf+0, buf+N };
+}
+
+template <typename T>
+auto create_wait_queue(const jm::circular_buffer<T, N>*) {
+  return chops::wait_queue<T, jm::circular_buffer<T, N> > { };
+}
+
+
+template <typename Q>
+void non_threaded_push_test(Q& wq, const typename Q::value_type& val, int count) {
 
   GIVEN ("A newly constructed wait_queue") {
     REQUIRE (wq.empty());
@@ -61,36 +82,43 @@ void non_threaded_push_test(Q& wq, const T& val, int count) {
   } // end given
 }
 
-template <typename T, typename Q>
-void non_threaded_arithmetic_test(Q& wq, const T& base_val, int count, const T& expected_sum) {
+template <typename Q>
+void non_threaded_arithmetic_test(Q& wq, int count) {
 
-  GIVEN ("A newly constructed wait_queue, which will have numeric values added") {
-    REQUIRE (wq.empty());
+  using val_type = typename Q::value_type;
 
-    WHEN ("Apply is called against all elements to compute a sum") {
-      chops::repeat(count, [&wq, &base_val] (const int& i) { REQUIRE(wq.push(base_val+i)); } );
-      T sum { 0 };
-      wq.apply( [&sum] (const T& i) { sum += i; } );
-      THEN ("the sum should match the expected sum") {
-        REQUIRE (sum == expected_sum);
+  if constexpr (std::is_arithmetic_v<val_type>) {
+    constexpr val_type base_val { N };
+    constexpr val_type expected_sum = (N / 2) * (N - 1);
+
+    GIVEN ("A newly constructed wait_queue, which will have numeric values added") {
+      REQUIRE (wq.empty());
+
+      WHEN ("Apply is called against all elements to compute a sum") {
+        chops::repeat(count, [&wq, &base_val] (const int& i) { REQUIRE(wq.push(base_val+i)); } );
+        val_type sum { 0 };
+        wq.apply( [&sum] (const val_type& i) { sum += i; } );
+        THEN ("the sum should match the expected sum") {
+          REQUIRE (sum == expected_sum);
+        }
       }
-    }
 
-    AND_WHEN ("Try_pop is called") {
-      chops::repeat(count, [&wq, &base_val] (const int& i) { wq.push(base_val+i); } );
-      THEN ("elements should be popped in FIFO order") {
-        chops::repeat(count, [&wq, &base_val] (const int& i) { REQUIRE(*(wq.try_pop()) == (base_val+i)); } );
-        REQUIRE (wq.size() == 0);
-        REQUIRE (wq.empty());
+      AND_WHEN ("Try_pop is called") {
+        chops::repeat(count, [&wq, &base_val] (const int& i) { wq.push(base_val+i); } );
+        THEN ("elements should be popped in FIFO order") {
+          chops::repeat(count, [&wq, &base_val] (const int& i) { REQUIRE(*(wq.try_pop()) == (base_val+i)); } );
+          REQUIRE (wq.size() == 0);
+          REQUIRE (wq.empty());
+        }
       }
-    }
 
-  } // end given
+    } // end given
+  } // end if constexpr
 
 }
 
-template <typename T, typename Q>
-void non_threaded_open_close_test(Q& wq, const T& val, int count) {
+template <typename Q>
+void non_threaded_open_close_test(Q& wq, const typename Q::value_type& val, int count) {
 
   GIVEN ("A newly constructed wait_queue") {
 
@@ -202,86 +230,34 @@ bool threaded_test(Q& wq, int num_readers, int num_writers, int slice, const T& 
   return true;
 }
 
-constexpr int N = 40;
-template <typename T>
-constexpr T ExpectedSum = (N / 2) * (N - 1);
+// non threaded test, multiple container types, multiple element types
 
-// test with std::deque first
+TEMPLATE_TEST_CASE ( "Non-threaded wait_queue test", "[wait_queue] [non_threaded]",
+         (std::deque<int>), (std::deque<double>), (std::deque<short>), (std::deque<std::string>),
+         (nonstd::ring_span<int>), (nonstd::ring_span<double>), (nonstd::ring_span<short>), (nonstd::ring_span<std::string>),
+         (jm::circular_buffer<int, N>), (jm::circular_buffer<double, N>),
+         (jm::circular_buffer<short, N>), (jm::circular_buffer<std::string, N>) ) {
 
-SCENARIO ( "Non-threaded wait_queue test, with element type int and default container type of std::deque", "[wait_queue] [int] [deque]" ) {
-  chops::wait_queue<int> wq;
-  non_threaded_push_test(wq, 42, N);
-  non_threaded_arithmetic_test(wq, 0, N, ExpectedSum<int>);
-  non_threaded_open_close_test(wq, 42, N);
+  using val_type = typename TestType::value_type;
+  val_type val1;
+  val_type val2;
+  if constexpr (std::is_arithmetic_v<val_type>) {
+    val1 = 42;
+    val2 = 43;
+  }
+  else { // assume std::string value type in container - generalize as needed
+    val1 = "Howzit going, bro!";
+    val2 = "It's hanging, bro!";
+  }
+
+  auto wq = create_wait_queue( static_cast<const TestType*>(nullptr) );
+  non_threaded_push_test(wq, val1, N);
+  non_threaded_arithmetic_test(wq, N);
+  non_threaded_open_close_test(wq, val2, N);
 }
 
-SCENARIO ( "Non-threaded wait_queue test, with element type double and default container type of std::deque",
-           "[wait_queue] [double] [deque]" ) {
-  chops::wait_queue<double> wq;
-  non_threaded_push_test(wq, 42.0, N);
-  non_threaded_arithmetic_test(wq, 0.0, N, ExpectedSum<double>);
-  non_threaded_open_close_test(wq, 42.0, N);
-}
-
-SCENARIO ( "Non-threaded wait_queue test, with element type std::string and default container type of std::deque",
-           "[wait_queue] [string] [deque]" ) {
-  chops::wait_queue<std::string> wq;
-  non_threaded_push_test(wq, "Howzit going, bro!"s, N);
-  non_threaded_open_close_test(wq, "It's hanging, bro!"s, N);
-}
-
-// test with ring_span
-
-SCENARIO ( "Non-threaded wait_queue test, with element type int and ring_span container type",
-           "[wait_queue] [int] [ring_span]" ) {
-  int buf[N];
-  chops::wait_queue<int, nonstd::ring_span<int> > wq(buf+0, buf+N);
-  non_threaded_push_test(wq, 42, N);
-  non_threaded_arithmetic_test(wq, 0, N, ExpectedSum<int>);
-  non_threaded_open_close_test(wq, 42, N);
-}
-
-SCENARIO ( "Non-threaded wait_queue test, with element type double and ring_span container type",
-           "[wait_queue] [double] [ring_span]" ) {
-  double buf[N];
-  chops::wait_queue<double, nonstd::ring_span<double> > wq(buf+0, buf+N);
-  non_threaded_push_test(wq, 42.0, N);
-  non_threaded_arithmetic_test(wq, 0.0, N, ExpectedSum<double>);
-  non_threaded_open_close_test(wq, 42.0, N);
-}
-
-SCENARIO ( "Non-threaded wait_queue test, with element type std::string and ring_span container type",
-           "[wait_queue] [string] [ring_span]" ) {
-    std::string buf[N];
-    chops::wait_queue<std::string, nonstd::ring_span<std::string> > wq(buf+0, buf+N);
-    non_threaded_push_test(wq, "No bro speak, please"s, N);
-    non_threaded_open_close_test(wq, "Why so serious, bro?"s, N);
-}
-
-// test with utility rack circular_buffer
-
-SCENARIO ( "Non-threaded wait_queue test, with element type int and utility rack circular_buffer container type",
-           "[wait_queue] [int] [circular_buffer]" ) {
-    chops::wait_queue<int, jm::circular_buffer<int, N> > wq{};
-    non_threaded_push_test(wq, 42, N);
-    non_threaded_arithmetic_test(wq, 0, N, ExpectedSum<int>);
-    non_threaded_open_close_test(wq, 42, N);
-}
-
-SCENARIO ( "Non-threaded wait_queue test, with element type double and cicular_buffer container type",
-           "[wait_queue] [double] [circular_buffer]" ) {
-    chops::wait_queue<double, jm::circular_buffer<double, N> > wq{};
-    non_threaded_push_test(wq, 42.0, N);
-    non_threaded_arithmetic_test(wq, 0.0, N, ExpectedSum<double>);
-    non_threaded_open_close_test(wq, 42.0, N);
-}
-
-SCENARIO ( "Non-threaded wait_queue test, with element type std::string and circular_buffer container type",
-           "[wait_queue] [string] [circular_buffer]" ) {
-    chops::wait_queue<std::string, jm::circular_buffer<std::string, N> > wq{};
-    non_threaded_push_test(wq, "This code is bro-fessional level quality"s, N);
-    non_threaded_open_close_test(wq, "Please, please, no more bro!"s, N);
-}
+/*
+*/
 
 SCENARIO ( "Non-threaded wait_queue test, testing copy construction without move construction",
            "[wait_queue] [no_move]" ) {

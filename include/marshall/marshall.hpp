@@ -329,7 +329,7 @@ Buf& marshall(Buf& buf, const T& val) {
   else {
     // should be user defined overload for type T
     std::cerr << "Calling UDT" << std::endl;
-    return marshall(buf, val);
+    return marshall_udt(buf, val);
   }
 }
 

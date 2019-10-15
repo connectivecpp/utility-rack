@@ -40,6 +40,7 @@ struct trail_stats {
   std::optional<int>  rating;
 };
 
+/*
 struct hiking_trail {
   std::string     name;
   bool            federal;
@@ -47,25 +48,29 @@ struct hiking_trail {
   std::list<loc>  intersections;
   trail_stats     stats;
 };
+*/
 
 } // end namespace hiking
 
+namespace chops {
+
 template <typename Buf>
-Buf& marshall(Buf& buf, const loc& loc) {
-  chops::marshall<std::int32_t>(buf, loc.latitude);
-  chops::marshall<std::int32_t>(buf, loc.longitude);
-  chops::marshall<std::int16_t>(buf, loc.altitude);
+Buf& marshall_udt(Buf& buf, const loc& loc) {
+  marshall<std::int32_t>(buf, loc.latitude);
+  marshall<std::int32_t>(buf, loc.longitude);
+  marshall<std::int16_t>(buf, loc.altitude);
   return buf;
 }
 
 template <typename Buf>
-Buf& marshall(Buf& buf, const hiking::trail_stats& ts) {
-  chops::marshall<std::uint64_t>(buf, ts.length);
-  chops::marshall<std::uint16_t>(buf, ts.elev);
-  chops::marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
+Buf& marshall_udt(Buf& buf, const hiking::trail_stats& ts) {
+  marshall<std::uint64_t>(buf, ts.length);
+  marshall<std::uint16_t>(buf, ts.elev);
+  marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
   return buf;
 }
 
+/*
 template <typename Buf>
 Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
   chops::marshall<std::uint16_t>(buf, ht.name);
@@ -75,6 +80,9 @@ Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
   chops::marshall<hiking::trail_stats>(buf, ht.stats);
   return buf;
 }
+*/
+
+} // end namespace chops
 
 template <typename Buf>
 void test_marshall () {
@@ -95,6 +103,7 @@ void test_marshall () {
   chops::marshall<hiking::trail_stats>(buf, ts1);
   chops::marshall<hiking::trail_stats>(buf, ts2);
 
+/*
   const loc inter1 { 1001, 1002, 500 };
   const loc inter2 { 1003, 1004, 501 };
   const loc inter3 { 1005, 1006, 502 };
@@ -108,6 +117,7 @@ void test_marshall () {
 
   chops::marshall<hiking::hiking_trail>(buf, hk1);
   chops::marshall<hiking::hiking_trail>(buf, hk2);
+*/
 
 }
 

@@ -2,7 +2,7 @@
  *
  *  @ingroup test_module
  *
- *  @brief Test scenarios for the @c marshaller and @c unmarshaller class
+ *  @brief Test scenarios for the @c marshall and @c unmarshall function
  *  templates and related classes and functions.
  *
  *  @author Cliff Green
@@ -32,6 +32,8 @@ struct loc {
   short  altitude;
 };
 
+namespace hiking {
+
 struct trail_stats {
   long                length;
   short               elev;
@@ -46,52 +48,52 @@ struct hiking_trail {
   trail_stats     stats;
 };
 
-namespace chops {
+} // end namespace hiking
 
 template <typename Buf>
-void marshall_udt(marshaller<Buf>& m, const loc& loc) {
-  m.marshall<std::int32_t>(loc.latitude);
-  m.marshall<std::int32_t>(loc.longitude);
-  m.marshall<std::int16_t>(loc.altitude);
+Buf& marshall(Buf& buf, const loc& loc) {
+  chops::marshall<std::int32_t>(buf, loc.latitude);
+  chops::marshall<std::int32_t>(buf, loc.longitude);
+  chops::marshall<std::int16_t>(buf, loc.altitude);
+  return buf;
 }
 
 template <typename Buf>
-void marshall_udt(marshaller<Buf>& m, const trail_stats& ts) {
-  m.marshall<std::uint64_t>(ts.length);
-  m.marshall<std::uint16_t>(ts.elev);
-  m.marshall<std::uint8_t, std::uint16_t>(ts.rating);
+Buf& marshall(Buf& buf, const hiking::trail_stats& ts) {
+  chops::marshall<std::uint64_t>(buf, ts.length);
+  chops::marshall<std::uint16_t>(buf, ts.elev);
+  chops::marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
+  return buf;
 }
 
 template <typename Buf>
-void marshall_udt(marshaller<Buf>& m, const hiking_trail& ht) {
-  m.marshall<std::uint16_t>(ht.name);
-  m.marshall<std::uint8_t>(ht.federal);
-  m.marshall(ht.trail_head);
-  m.marshall_sequence<std::uint16_t, loc>(ht.intersections.size(), ht.intersections.cbegin());
-  m.marshall(ht.stats);
+Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
+  chops::marshall<std::uint16_t>(buf, ht.name);
+  chops::marshall<std::uint8_t>(buf, ht.federal);
+  chops::marshall<hiking::hiking_trail>(buf, ht.trail_head);
+  chops::marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  chops::marshall<hiking::trail_stats>(buf, ht.stats);
+  return buf;
 }
-
-} // end namespace chops
 
 template <typename Buf>
 void test_marshall () {
 
-  chops::marshaller<Buf> m;
+  Buf buf;
 
-  m.template marshall<std::uint16_t>(42);
+  chops::marshall<std::uint16_t>(buf, 42);
 
-/*
   const loc pt1 { 42, 43, 21 };
   const loc pt2 { 62, 63, 11 };
 
-  m.marshall<loc>(pt1);
-  m.marshall<loc>(pt2);
+  chops::marshall<loc>(buf, pt1);
+  chops::marshall<loc>(buf, pt2);
 
-  const trail_stats ts1 { 101, 51, std::make_optional(201) };
-  const trail_stats ts2 { 301, 41, std::make_optional(401) };
+  const hiking::trail_stats ts1 { 101, 51, std::make_optional(201) };
+  const hiking::trail_stats ts2 { 301, 41, std::make_optional(401) };
 
-  m.marshall<trail_stats>(ts1);
-  m.marshall<trail_stats>(ts2);
+  chops::marshall<hiking::trail_stats>(buf, ts1);
+  chops::marshall<hiking::trail_stats>(buf, ts2);
 
   const loc inter1 { 1001, 1002, 500 };
   const loc inter2 { 1003, 1004, 501 };
@@ -101,33 +103,19 @@ void test_marshall () {
   const loc inter6 { 1011, 1012, 505 };
 
 
-  const hiking_trail hk1 { "Huge trail", true, pt1, { inter1, inter2, inter3 }, ts1 };
-  const hiking_trail hk2 { "Small trail", false, pt2, { inter3, inter4, inter5, inter6 }, ts2 };
+  const hiking::hiking_trail hk1 { "Huge trail", true, pt1, { inter1, inter2, inter3 }, ts1 };
+  const hiking::hiking_trail hk2 { "Small trail", false, pt2, { inter3, inter4, inter5, inter6 }, ts2 };
 
-  m.marshall<hiking_trail>(hk1);
-  m.marshall<hiking_trail>(hk2);
-*/
-
-}
-
-TEMPLATE_TEST_CASE ( "Marshall using mutable_shared_buffer",
-            "[marshall] [shared_buffer]" ) {
-
-  test_marshall<chops::mutable_shared_buffer>();
+  chops::marshall<hiking::hiking_trail>(buf, hk1);
+  chops::marshall<hiking::hiking_trail>(buf, hk2);
 
 }
 
-TEST_CASE ( "Marshall using std vector",
-            "[marshall] [std_vector]" ) {
+TEMPLATE_TEST_CASE ( "Marshall ", "[marshall] [shared_buffer]",
+                     chops::mutable_shared_buffer, std::vector<std::byte>,
+                     chops::fixed_size_byte_array<1000> ) {
 
-  test_marshall<std::vector<std::byte> >();
-
-}
-
-TEST_CASE ( "Marshall using fixed_size_byte_array",
-            "[marshall] [fixed_size_byte_array]" ) {
-
-  test_marshall<chops::fixed_size_byte_array<1000> >();
+  test_marshall<TestType>();
 
 }
 

@@ -271,13 +271,14 @@ private:
 struct adl_tag { };
 
 // lower-level template function that performs the actual buffer manipulation and 
-// marshalling of a single value
-template <typename CastValType, typename T, typename Buf>
-Buf& marshall(Buf& buf, const T& val, adl_tag tg) {
-  auto old_sz = buf.size();
-  buf.resize(old_sz + sizeof(CastValType));
-  append_val(buf.data()+old_sz, static_cast<CastValType>(val));
-  return buf;
+// marshalling of a single value, enable-if'ed for overloading
+template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
+  std::enable_if_t (detail::is_arithmetic_or_byte<T>(), Buf&)
+    marshall(Buf& buf, const T& val, adl_tag) {
+      auto old_sz = buf.size();
+      buf.resize(old_sz + sizeof(CastValType));
+      append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+      return buf;
 }
 
 /**

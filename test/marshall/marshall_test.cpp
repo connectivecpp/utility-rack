@@ -40,7 +40,6 @@ struct trail_stats {
   std::optional<int>  rating;
 };
 
-/*
 struct hiking_trail {
   std::string     name;
   bool            federal;
@@ -48,14 +47,13 @@ struct hiking_trail {
   std::list<loc>  intersections;
   trail_stats     stats;
 };
-*/
 
 } // end namespace hiking
 
 namespace chops {
 
 template <typename Buf>
-Buf& marshall_udt(Buf& buf, const loc& loc) {
+Buf& marshall(Buf& buf, const loc& loc) {
   marshall<std::int32_t>(buf, loc.latitude);
   marshall<std::int32_t>(buf, loc.longitude);
   marshall<std::int16_t>(buf, loc.altitude);
@@ -63,24 +61,22 @@ Buf& marshall_udt(Buf& buf, const loc& loc) {
 }
 
 template <typename Buf>
-Buf& marshall_udt(Buf& buf, const hiking::trail_stats& ts) {
+Buf& marshall(Buf& buf, const hiking::trail_stats& ts) {
   marshall<std::uint64_t>(buf, ts.length);
   marshall<std::uint16_t>(buf, ts.elev);
   marshall<std::uint8_t, std::uint16_t>(buf, ts.rating);
   return buf;
 }
 
-/*
 template <typename Buf>
 Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
   chops::marshall<std::uint16_t>(buf, ht.name);
   chops::marshall<std::uint8_t>(buf, ht.federal);
-  chops::marshall<hiking::hiking_trail>(buf, ht.trail_head);
+  chops::marshall(buf, ht.trail_head);
   chops::marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
-  chops::marshall<hiking::trail_stats>(buf, ht.stats);
+  chops::marshall(buf, ht.stats);
   return buf;
 }
-*/
 
 } // end namespace chops
 
@@ -94,16 +90,15 @@ void test_marshall () {
   const loc pt1 { 42, 43, 21 };
   const loc pt2 { 62, 63, 11 };
 
-  chops::marshall<loc>(buf, pt1);
-  chops::marshall<loc>(buf, pt2);
+  chops::marshall(buf, pt1);
+  chops::marshall(buf, pt2);
 
   const hiking::trail_stats ts1 { 101, 51, std::make_optional(201) };
   const hiking::trail_stats ts2 { 301, 41, std::make_optional(401) };
 
-  chops::marshall<hiking::trail_stats>(buf, ts1);
-  chops::marshall<hiking::trail_stats>(buf, ts2);
+  chops::marshall(buf, ts1);
+  chops::marshall(buf, ts2);
 
-/*
   const loc inter1 { 1001, 1002, 500 };
   const loc inter2 { 1003, 1004, 501 };
   const loc inter3 { 1005, 1006, 502 };
@@ -115,9 +110,8 @@ void test_marshall () {
   const hiking::hiking_trail hk1 { "Huge trail", true, pt1, { inter1, inter2, inter3 }, ts1 };
   const hiking::hiking_trail hk2 { "Small trail", false, pt2, { inter3, inter4, inter5, inter6 }, ts2 };
 
-  chops::marshall<hiking::hiking_trail>(buf, hk1);
-  chops::marshall<hiking::hiking_trail>(buf, hk2);
-*/
+  chops::marshall(buf, hk1);
+  chops::marshall(buf, hk2);
 
 }
 

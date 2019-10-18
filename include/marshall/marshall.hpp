@@ -266,19 +266,19 @@ private:
 };
 
 
-// simplify the function overload set so that std::vector<std::byte> and similar can
-// be used for the Buf template parameter
+// add a function parameter to the function overload set so that std::vector<std::byte> and 
+// similar can be used for the Buf template parameter
 struct adl_tag { };
 
 // lower-level template function that performs the actual buffer manipulation and 
 // marshalling of a single value, enable-if'ed for overloading
 template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
-  std::enable_if_t (detail::is_arithmetic_or_byte<T>(), Buf&)
-    marshall(Buf& buf, const T& val, adl_tag) {
-      auto old_sz = buf.size();
-      buf.resize(old_sz + sizeof(CastValType));
-      append_val(buf.data()+old_sz, static_cast<CastValType>(val));
-      return buf;
+auto marshall_val(Buf& buf, const T& val, adl_tag) -> 
+      std::enable_if_t<detail::is_arithmetic_or_byte<T>(), Buf&> {
+  auto old_sz = buf.size();
+  buf.resize(old_sz + sizeof(CastValType));
+  append_val(buf.data()+old_sz, static_cast<CastValType>(val));
+  return buf;
 }
 
 /**
@@ -324,20 +324,13 @@ template <typename CastValType, typename T, typename Buf = chops::mutable_shared
  */
 template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
 Buf& marshall(Buf& buf, const T& val) {
-  if constexpr (detail::is_arithmetic_or_byte<T>()) {
-    return marshall<CastValType>(buf, val, adl_tag{});
-  }
-  else {
-    // should be user defined overload for type T
-    std::cerr << "Calling UDT" << std::endl;
-    return marshall_udt(buf, val);
-  }
+  return marshall_val<CastValType>(buf, val, adl_tag{});
 }
 
 // overloads for specific types
 template <typename CastBoolType, typename Buf = chops::mutable_shared_buffer>
 Buf& marshall(Buf& buf, bool b) {
-  return marshall<CastBoolType>(buf, static_cast<CastBoolType>(b ? 1 : 0));
+  return marshall_val<CastBoolType>(buf, static_cast<CastBoolType>(b ? 1 : 0), adl_tag{});
 }
 
 
@@ -353,7 +346,7 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 // overload for sequences
 template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer>
 Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
-  marshall<CastCntType>(buf, num_elems);
+  marshall_val<CastCntType>(buf, num_elems, adl_tag{});
   for (std::size_t i = 0u; i < num_elems; ++i) {
     marshall<CastValType>(buf, *iter);
     ++iter;

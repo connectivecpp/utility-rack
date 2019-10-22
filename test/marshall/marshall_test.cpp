@@ -70,11 +70,11 @@ Buf& marshall(Buf& buf, const hiking::trail_stats& ts) {
 
 template <typename Buf>
 Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
-  chops::marshall<std::uint16_t>(buf, ht.name);
-  chops::marshall<std::uint8_t>(buf, ht.federal);
-  chops::marshall(buf, ht.trail_head);
-  chops::marshall_sequence<std::uint16_t>(buf, ht.intersections.size(), ht.intersections.cbegin());
-  chops::marshall(buf, ht.stats);
+  marshall<std::uint16_t>(buf, ht.name);
+  marshall<std::uint8_t>(buf, ht.federal);
+  marshall(buf, ht.trail_head);
+  marshall<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  marshall(buf, ht.stats);
   return buf;
 }
 

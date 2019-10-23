@@ -320,9 +320,11 @@ SCENARIO ( "Non-threaded wait_queue test, testing complex constructor and emplac
   GIVEN ("A newly constructed wait_queue with a more complex type") {
 
     struct Band {
+      using engagement_type = std::vector<std::vector<std::string> >;
       Band() = delete;
       Band(double x, const std::string& bros) : doobie(x), brothers(bros), engagements() {
-        engagements = {"Seattle"s, "Portland"s, "Boise"s};
+        engagements = { {"Seattle"s, "Portland"s, "Boise"s}, {"Detroit"s, "Cleveland"s},
+                        {"London"s, "Liverpool"s, "Leeds"s, "Manchester"s} };
       }
       Band(const Band&) = delete;
       Band(Band&&) = default;
@@ -330,7 +332,9 @@ SCENARIO ( "Non-threaded wait_queue test, testing complex constructor and emplac
       Band& operator=(Band&&) = delete;
       double doobie;
       std::string brothers;
-      std::vector<std::string> engagements;
+      engagement_type engagements;
+
+      void set_engagements(const engagement_type& engs) { engagements = engs; }
     };
 
     chops::wait_queue<Band> wq;
@@ -338,24 +342,34 @@ SCENARIO ( "Non-threaded wait_queue test, testing complex constructor and emplac
     wq.push(Band{42.0, "happy"s});
     wq.emplace_push(44.0, "sad"s);
 
-    WHEN ("Values are emplace pushed on the queue") {
+    Band b3 { 46.0, "not sure"s };
+    Band::engagement_type e { {"Coffee 1"s, "Coffee 2"s}, {"Street corner"s} };
+    b3.set_engagements(e);
+    wq.push(std::move(b3));
+
+    WHEN ("Values are pushed on the queue, including emplace_push") {
       THEN ("the size is increased") {
         REQUIRE_FALSE (wq.empty());
-        REQUIRE (wq.size() == 2);
+        REQUIRE (wq.size() == 3);
       }
     }
 
     AND_WHEN ("Values are popped from the queue") {
       auto val1 { wq.try_pop() };
       auto val2 { wq.try_pop() };
+      auto val3 { wq.try_pop() };
       THEN ("the values are correct and the wait_queue is empty") {
         REQUIRE ((*val1).doobie == 42.0);
         REQUIRE ((*val1).brothers == "happy"s);
         REQUIRE ((*val2).doobie == 44.0);
         REQUIRE ((*val2).brothers == "sad"s);
-        REQUIRE ((*val2).engagements[0] == "Seattle"s);
-        REQUIRE ((*val2).engagements[1] == "Portland"s);
-        REQUIRE ((*val2).engagements[2] == "Boise"s);
+        REQUIRE ((*val2).engagements[0][0] == "Seattle"s);
+        REQUIRE ((*val2).engagements[0][1] == "Portland"s);
+        REQUIRE ((*val2).engagements[0][2] == "Boise"s);
+        REQUIRE ((*val2).engagements[2][0] == "London"s);
+        REQUIRE ((*val2).engagements[2][3] == "Manchester"s);
+        REQUIRE ((*val3).engagements[0][0] == "Coffee 1"s);
+        REQUIRE ((*val3).engagements[1][0] == "Street corner"s);
         REQUIRE (wq.empty());
       }
     }

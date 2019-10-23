@@ -88,14 +88,14 @@ void non_threaded_arithmetic_test(Q& wq, int count) {
   using val_type = typename Q::value_type;
 
   if constexpr (std::is_arithmetic_v<val_type>) {
-    constexpr val_type base_val { N };
-    constexpr val_type expected_sum = (N / 2) * (N - 1);
+    constexpr val_type base_val { 8 };
+    const val_type expected_sum = count * base_val;
 
     GIVEN ("A newly constructed wait_queue, which will have numeric values added") {
       REQUIRE (wq.empty());
 
       WHEN ("Apply is called against all elements to compute a sum") {
-        chops::repeat(count, [&wq, &base_val] (const int& i) { REQUIRE(wq.push(base_val+i)); } );
+        chops::repeat(count, [&wq, &base_val] () { REQUIRE(wq.push(base_val)); } );
         val_type sum { 0 };
         wq.apply( [&sum] (const val_type& i) { sum += i; } );
         THEN ("the sum should match the expected sum") {
@@ -346,13 +346,16 @@ SCENARIO ( "Non-threaded wait_queue test, testing complex constructor and emplac
     }
 
     AND_WHEN ("Values are popped from the queue") {
-      std::optional<Band> val1 { wq.try_pop() };
-      std::optional<Band> val2 { wq.try_pop() };
+      auto val1 { wq.try_pop() };
+      auto val2 { wq.try_pop() };
       THEN ("the values are correct and the wait_queue is empty") {
         REQUIRE ((*val1).doobie == 42.0);
         REQUIRE ((*val1).brothers == "happy"s);
         REQUIRE ((*val2).doobie == 44.0);
         REQUIRE ((*val2).brothers == "sad"s);
+        REQUIRE ((*val2).engagements[0] == "Seattle"s);
+        REQUIRE ((*val2).engagements[1] == "Portland"s);
+        REQUIRE ((*val2).engagements[2] == "Boise"s);
         REQUIRE (wq.empty());
       }
     }

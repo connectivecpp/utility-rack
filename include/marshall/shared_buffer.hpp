@@ -155,7 +155,7 @@ public:
  *
  *  The pointer passed into this constructor is cast into a @c std::byte pointer and bytes 
  *  are then copied. In particular, this method can be used for @c char pointers, 
- *  @c void pointers, @ unsigned @c char pointers, etc.
+ *  @c void pointers, @c unsigned @c char pointers, etc.
  *
  *  @param buf Pointer to a buffer of data. The pointer must be convertible 
  *  to a @c void pointer and then to a @c std::byte pointer.

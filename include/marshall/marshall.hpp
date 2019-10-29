@@ -351,7 +351,7 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 
 // overload for sequences
 template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer>
-Buf& marshall(Buf& buf, std::size_t num_elems, Iter iter) {
+Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
   marshall<CastCntType>(buf, num_elems);
   for (std::size_t i = 0u; i < num_elems; ++i) {
     if constexpr (detail::is_arithmetic_or_byte<decltype(*iter)>()) {

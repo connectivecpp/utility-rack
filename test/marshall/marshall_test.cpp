@@ -73,7 +73,7 @@ Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
   marshall<std::uint16_t>(buf, ht.name);
   marshall<std::uint8_t>(buf, ht.federal);
   marshall(buf, ht.trail_head);
-  marshall<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  marshall_sequence<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
   marshall(buf, ht.stats);
   return buf;
 }

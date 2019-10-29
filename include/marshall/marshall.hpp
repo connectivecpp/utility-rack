@@ -325,7 +325,7 @@ Buf& marshall(Buf& buf, const T& val, adl_tag) {
 template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
 auto marshall(Buf& buf, const T& val) ->
       std::enable_if_t<detail::is_arithmetic_or_byte<T>(), Buf&> {
-  return marshall<CastValType>(buf, val);
+  return marshall<CastValType>(buf, val, adl_tag { });
 }
 
 // overloads for specific types

@@ -25,6 +25,7 @@
 #include <type_traits> // std::is_arithmetic
 
 #include <thread>
+#include <future> // std::async
 #include <mutex>
 
 #include "queue/wait_queue.hpp"
@@ -374,6 +375,68 @@ SCENARIO ( "Non-threaded wait_queue test, testing complex constructor and emplac
       }
     }
   } // end given
+}
+
+using vv_float = std::vector<std::vector<float>>;
+using vv_wq = chops::wait_queue<vv_float>;
+
+const vv_float data1 { { 42.0f, 43.0f }, { 63.0f, 66.0f, 69.0f}, { 7.0f } };
+const vv_float data2 { { 8.0f }, { 0.0f }, { } };
+const vv_float data3 { };
+
+std::size_t vv_push_func(vv_wq& wq, std::size_t cnt) {
+  std::size_t n { 0u };
+  while (n < cnt) {
+    vv_float vv { data1 };
+    wq.push(std::move(vv));
+    vv = data2;
+    wq.push(std::move(vv));
+    vv = data3;
+    wq.push(std::move(vv));
+    vv = data1;
+    wq.push(vv);
+    vv = data2;
+    wq.push(vv);
+    vv = data3;
+    wq.push(vv);
+    ++n;
+  }
+  return cnt * 6u;
+}
+
+std::size_t vv_pop_func(vv_wq& wq, std::size_t exp) {
+  std::size_t n { 0u };
+  while (n < exp) {
+    auto res = wq.wait_and_pop();
+    if (!res) { // queue has been closed
+      break;
+    }
+    REQUIRE (*res == data1);
+    ++n;
+    res = wq.wait_and_pop();
+    REQUIRE (*res == data2);
+    ++n;
+    res = wq.wait_and_pop();
+    REQUIRE (*res == data3);
+    ++n;
+  }
+  return n;
+}
+
+TEST_CASE ( "Vector of vector of float, move and copy",
+            "[wait_queue] [float] [vector_vector_float]" ) {
+
+  vv_wq wq;
+  constexpr std::size_t cnt { 1000u };
+  constexpr std::size_t expected { cnt * 6u };
+  auto pop_fut = std::async (std::launch::async, vv_pop_func, std::ref(wq), expected);
+  auto push_fut = std::async (std::launch::async, vv_push_func, std::ref(wq), cnt);
+  auto push_res = push_fut.get();
+  auto pop_res = pop_fut.get();
+  wq.close();
+
+  REQUIRE (push_res == pop_res);
+
 }
 
 SCENARIO ( "Fixed size ring_span, testing wrap around with int type",

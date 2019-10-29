@@ -92,10 +92,18 @@ While the main production branch will always be developed and tested with C++ 17
 
 The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
 
-- Version 1.12 (or later) of Chris Kohlhoff's `asio` repository is required for Periodic Timer. Note that it is the stand-alone Asio versus the Boost Asio implementation.
-- Version 2.8.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
-- Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below; this dependency may be copied into the `utility-rack` repository in the future).
+All the dependencies listed below have links that will take you to the library or repository.
+
+Production external dependencies:
+
+- Version 1.13 (or later) of Chris Kohlhoff's [`asio`] (https://github.com/chriskohlhoff/asio) library is required. Note that it is the stand-alone library, not the Boost Asio implementation.
+
+Test external dependencies:
+
+- Version 2.8.0 (or later) of Phil Nash's [Catch 2](https://github.com/catchorg/Catch2) is required for all test scenarios.
+- Version 0.3 (or later) of Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library is required in some test scenarios.
 - Version Thu Jul 12 21:58:58 2018 +0300 (or later) of Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) is required in some test scenarios (see specifics below; this dependency may be copied into the `utility-rack` repository in the future).
+
 
 See [References](doc/references.md) for additional details on the above libraries.
 

@@ -129,6 +129,7 @@
 #include <string_view>
 #include <cstring> // std::memcpy
 #include <type_traits>
+#include <iterator> // value type of iterator
 #include <array>
 #include <cassert>
 
@@ -351,11 +352,12 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 }
 
 // overload for sequences
-template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer>
-Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter, decltype((*iter))* = nullptr) {
+template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer,
+          typename T = typename std::iterator_traits<Iter>::value_type> // last typename helps pulling namespace of T
+Buf& marshall(Buf& buf, std::size_t num_elems, Iter iter, const T* = nullptr) {
   marshall<CastCntType>(buf, num_elems);
   for (std::size_t i = 0u; i < num_elems; ++i) {
-    if constexpr (detail::is_arithmetic_or_byte<decltype(*iter)>()) {
+    if constexpr (detail::is_arithmetic_or_byte<T>()) {
       marshall<CastValType>(buf, *iter);
     }
     else {

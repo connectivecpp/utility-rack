@@ -270,9 +270,10 @@ private:
 // similar can be used for the Buf template parameter
 struct adl_tag { };
 
-// lower-level template function that performs the actual buffer manipulation and 
+// lower-level function template that performs the actual buffer manipulation and 
 // marshalling of a single value, with an ADL tag for full namespace inclusion in the
-// overload set; this function template is not called directly by application code
+// overload set; this function template is not called directly by application code, and
+// is only used with arithmetic values or a std::byte
 template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
 Buf& marshall(Buf& buf, const T& val, adl_tag) {
   auto old_sz = buf.size();
@@ -282,13 +283,13 @@ Buf& marshall(Buf& buf, const T& val, adl_tag) {
 }
 
 /**
- * @brief Marshall a single arithmetic value into a buffer of bytes.
+ * @brief Marshall a single arithmetic value or a @c std::byte into a buffer of bytes.
  *
  * This is the "basic" @c marshall method, handling fundamental arithmetic values (@c char, 
  * @c short, @c int, @c double, @c float, etc) or a @c std::byte, as well as the customization 
- * point for user defined types. For arithmetic types it expands the buffer and appends the value 
- * to the buffer, performing byte swapping into big-endian format as needed. Single @c char and 
- * @c std::byte values will not be byte swapped.
+ * point for user defined types. This function template calls a lower level function template that
+ * expands the buffer and appends the value to the buffer, performing byte swapping into big-endian 
+ * format as needed. Single @c char and @c std::byte values will not be byte swapped.
  *
  * Example usage - marshall an @c int as an unsigned 16 bit value:
  * @code
@@ -307,10 +308,10 @@ Buf& marshall(Buf& buf, const T& val, adl_tag) {
  * @tparam CastValType The fixed size type to be used for marshalling in the byte buffer,
  * typically a type such as @c std::int32_t, @c std::uint32_t, @c std::uint16_t, @c float,
  * etc; this type must always be supplied in the function call, since it is not
- * deduced from the function argument (there are no standard typedefs for floating
- * point types - use @c float or @c double as the casting type). 
+ * deduced from the function arguments. Note that there are no standard typedefs for floating
+ * point types - use @c float or @c double as the casting type. 
  *
- * @tparam T Native type of value to be marshalled (typically deduced).
+ * @tparam T Type of value to be marshalled (typically deduced).
  *
  * @tparam Buf The buffer type, which must contain an array of @c std::bytes, and must support 
  * @c size, @c resize, and @c data methods; @c chops::mutable_shared_buffer,
@@ -322,9 +323,9 @@ Buf& marshall(Buf& buf, const T& val, adl_tag) {
  * @param val Value to be marshalled.
  *
  */
-template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer>
-auto marshall(Buf& buf, const T& val) ->
-      std::enable_if_t<detail::is_arithmetic_or_byte<T>(), Buf&> {
+template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer,
+          typename std::enable_if_t<detail::is_arithmetic_or_byte<T>(), T>* = nullptr >
+Buf& marshall(Buf& buf, const T& val) {
   return marshall<CastValType>(buf, val, adl_tag { });
 }
 
@@ -351,7 +352,7 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 
 // overload for sequences
 template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer>
-Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter) {
+Buf& marshall_sequence(Buf& buf, std::size_t num_elems, Iter iter, decltype((*iter))* = nullptr) {
   marshall<CastCntType>(buf, num_elems);
   for (std::size_t i = 0u; i < num_elems; ++i) {
     if constexpr (detail::is_arithmetic_or_byte<decltype(*iter)>()) {

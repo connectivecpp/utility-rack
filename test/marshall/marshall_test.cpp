@@ -32,6 +32,19 @@ struct loc {
   short  altitude;
 };
 
+namespace chops {
+
+template <typename Buf>
+Buf& marshall(Buf& buf, const loc& loc) {
+  marshall<std::int32_t>(buf, loc.latitude);
+  marshall<std::int32_t>(buf, loc.longitude);
+  marshall<std::int16_t>(buf, loc.altitude);
+  return buf;
+}
+
+} // end namespace chops
+
+
 namespace hiking {
 
 struct trail_stats {
@@ -53,14 +66,6 @@ struct hiking_trail {
 namespace chops {
 
 template <typename Buf>
-Buf& marshall(Buf& buf, const loc& loc) {
-  marshall<std::int32_t>(buf, loc.latitude);
-  marshall<std::int32_t>(buf, loc.longitude);
-  marshall<std::int16_t>(buf, loc.altitude);
-  return buf;
-}
-
-template <typename Buf>
 Buf& marshall(Buf& buf, const hiking::trail_stats& ts) {
   marshall<std::uint64_t>(buf, ts.length);
   marshall<std::uint16_t>(buf, ts.elev);
@@ -73,7 +78,7 @@ Buf& marshall(Buf& buf, const hiking::hiking_trail& ht) {
   marshall<std::uint16_t>(buf, ht.name);
   marshall<std::uint8_t>(buf, ht.federal);
   marshall(buf, ht.trail_head);
-  marshall<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
+  marshall_seq<std::uint16_t, loc>(buf, ht.intersections.size(), ht.intersections.cbegin());
   marshall(buf, ht.stats);
   return buf;
 }
@@ -86,6 +91,10 @@ void test_marshall () {
   Buf buf;
 
   chops::marshall<std::uint16_t>(buf, 42);
+
+  std::vector<float> vf { 10.0f, 11.0f };
+  chops::marshall_seq<std::uint16_t, double>(buf, 2u, vf.cbegin());
+  chops::marshall_seq<std::uint16_t, double>(buf, 2u, vf.data());
 
   const loc pt1 { 42, 43, 21 };
   const loc pt2 { 62, 63, 11 };

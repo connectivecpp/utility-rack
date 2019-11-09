@@ -122,7 +122,7 @@
 #include "marshall/shared_buffer.hpp"
 #include "marshall/extract_append.hpp"
 
-#include <cstddef> // std::byte, std::size_t
+#include <cstddef> // std::byte, std::size_t, std::nullptr_t
 #include <cstdint> // std::uint32_t, etc
 #include <optional>
 #include <string>
@@ -325,7 +325,7 @@ Buf& marshall(Buf& buf, const T& val, adl_tag) {
  *
  */
 template <typename CastValType, typename T, typename Buf = chops::mutable_shared_buffer,
-          typename std::enable_if_t<detail::is_arithmetic_or_byte<T>(), T>* = nullptr >
+          typename = std::enable_if_t<detail::is_arithmetic_or_byte<T>()> >
 Buf& marshall(Buf& buf, const T& val) {
   return marshall<CastValType>(buf, val, adl_tag { });
 }
@@ -344,7 +344,7 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
     if constexpr (detail::is_arithmetic_or_byte<T>()) {
       marshall<CastValType>(buf, *val);
     }
-    else { // val should be a UDT
+    else { // *val should be a UDT
       marshall(buf, *val);
     }
   }
@@ -353,8 +353,8 @@ Buf& marshall(Buf& buf, const std::optional<T>& val) {
 
 // overload for sequences
 template <typename CastCntType, typename CastValType, typename Iter, typename Buf = chops::mutable_shared_buffer,
-          typename T = typename std::iterator_traits<Iter>::value_type> // last typename helps pulling namespace of T
-Buf& marshall(Buf& buf, std::size_t num_elems, Iter iter, const T* = nullptr) {
+          typename T = typename std::iterator_traits<Iter>::value_type>
+Buf& marshall_seq(Buf& buf, std::size_t num_elems, Iter iter) {
   marshall<CastCntType>(buf, num_elems);
   for (std::size_t i = 0u; i < num_elems; ++i) {
     if constexpr (detail::is_arithmetic_or_byte<T>()) {

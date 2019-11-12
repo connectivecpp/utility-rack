@@ -1,14 +1,8 @@
-#sudo: required
+
 dist: bionic
 language: cpp
 cache: ccache
-#os:
-#- linux
-#- osx
 
-#compiler:
-#- gcc
-#- clang
 common_sources: &all_sources
 - ubuntu-toolchain-r-test
 - llvm-toolchain-trusty
@@ -144,21 +138,6 @@ matrix:
 
     # 5/ OSX Clang Builds
 
-    # - os: osx
-    #   osx_image: xcode9
-    #   compiler: clang
-    #   env: COMPILER='clang++'
-
-    # - os: osx
-    #   osx_image: xcode9.1
-    #   compiler: clang
-    #   env: COMPILER='clang++'
-
-    # - os: osx
-    #   osx_image: xcode9.1
-    #   compiler: clang
-    #   env: COMPILER='clang++' CPP17=1
-
     - os: osx
       osx_image: xcode10.3
       compiler: clang
@@ -182,21 +161,8 @@ matrix:
 before install:
 
 install:
-#- sudo apt-get update -qq
-# - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-# - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
-# if [[ "${TRAVIS_OS_NAME}" == "linux" ]];
-#     CMAKE_URL="http://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.tar.gz"
-#     mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-#     export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-# - |
-#   if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-#     which cmake || brew install cmake;
-#   fi
-
 
 before_script:
-#- export CXX=${COMPILER}
 - |
   if [[ ${CPP17} -eq 1 ]]; then
     export CPP_STANDARD=17
@@ -205,22 +171,19 @@ before_script:
   else
     export CPP_STANDARD=11
   fi
-- cd .. && pwd
+- cd ..
 - wget https://github.com/chriskohlhoff/asio/archive/asio-1-14-0.tar.gz && mkdir asio && tar -zxvf asio-1-14-0.tar.gz -C asio --strip-components=1
 - wget https://github.com/catchorg/Catch2/archive/v2.10.2.tar.gz && mkdir Catch2 && tar -zxvf v2.10.2.tar.gz -C Catch2 --strip-components=1
 - wget https://github.com/martinmoene/ring-span-lite/archive/v0.3.0.tar.gz && mkdir ring-span-lite && tar -zxvf v0.3.0.tar.gz -C ring-span-lite --strip-components=1
 - wget https://github.com/JustasMasiulis/circular_buffer/archive/master.tar.gz && mkdir circular_buffer && tar -zxvf master.tar.gz -C circular_buffer --strip-components=1
-#- pwd && ls
-- mkdir build && cd build && ls
-#- pwd && ls
+- mkdir build && cd build
 - cmake ../utility-rack/
 
 script:
-#- pwd && ls
 - make all
 - make test
 
-#branches:
-#only:
-#-master
-#-addTravisCI
+branches:
+only:
+-master
+-develop

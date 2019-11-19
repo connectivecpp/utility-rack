@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
+ Branch | Status |
+ | --- | --- |
+| **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
+| **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
 
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 

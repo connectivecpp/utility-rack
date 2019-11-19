@@ -14,7 +14,7 @@ This software is written using modern C++ design idioms and the latest (2017) C+
 
 This project is distributed under the [Boost Software License](LICENSE.txt).
 
-[![Licence](https://img.shields.io/badge/license-boost-4480cc.png)](http://www.boost.org/LICENSE_1_0.txt)
+[![Licence](https://img.shields.io/badge/license-boost-4480cc.svg)](http://www.boost.org/LICENSE_1_0.txt)
 
 ## Utility Rack Release Status
 

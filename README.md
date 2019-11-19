@@ -3,6 +3,10 @@
 | **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
 | **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
 
+License
+[![Licence](https://img.shields.io/badge/license-boost-4480cc.png)](http://www.b
+oost.org/LICENSE_1_0.txt)
+
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 
 Th C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.

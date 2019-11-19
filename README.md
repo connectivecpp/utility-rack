@@ -3,7 +3,6 @@
 | **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
 | **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
 
-[![Licence](https://img.shields.io/badge/license-boost-4480cc.png)](http://www.boost.org/LICENSE_1_0.txt)
 
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 
@@ -14,6 +13,8 @@ This software is written using modern C++ design idioms and the latest (2017) C+
 # License
 
 This project is distributed under the [Boost Software License](LICENSE.txt).
+
+[![Licence](https://img.shields.io/badge/license-boost-4480cc.png)](http://www.boost.org/LICENSE_1_0.txt)
 
 ## Utility Rack Release Status
 

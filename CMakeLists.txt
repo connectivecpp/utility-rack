@@ -20,12 +20,14 @@ project ( utility-rack VERSION 1.0 LANGUAGES CXX )
 set ( package_name "utility-rack" )
 
 set ( include_source_dir "${CMAKE_SOURCE_DIR}/include" )
+set ( third_party_include_source_dir "${CMAKE_SOURCE_DIR}/third_party" )
 
 # Interface library:
 
 add_library ( ${package_name} INTERFACE )
 
 target_include_directories ( ${package_name} INTERFACE ${include_source_dir} )
+target_include_directories ( ${package_name} INTERFACE ${third_party_include_source_dir} )
 target_compile_features ( ${package_name} INTERFACE cxx_std_17)
 
 if ( UTILITY_RACK_OPT_BUILD_TESTS )

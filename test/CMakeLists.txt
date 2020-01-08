@@ -32,6 +32,7 @@ set ( DEFINITIONS "" )
 
 set ( header_dirs
     "${include_source_dir}"
+    "${third_party_include_source_dir}"
     )
 
 # Still learning find_package and related ways to bring in third party dependent include directories,
@@ -45,14 +46,6 @@ set ( asio_include_dir "${CMAKE_SOURCE_DIR}/../asio/asio/include" )
 if ( NOT $ENV{ASIO_INCLUDE_DIR} STREQUAL "" )
     set ( asio_include_dir $ENV{ASIO_INCLUDE_DIR}} )
 endif()
-set ( ring_span_lite_include_dir "${CMAKE_SOURCE_DIR}/../ring-span-lite/include" )
-if ( NOT $ENV{RING_SPAN_LITE_INCLUDE_DIR} STREQUAL "" )
-    set ( ring_span_lite_include_dir $ENV{RING_SPAN_LITE_INCLUDE_DIR}} )
-endif()
-set ( circular_buffer_include_dir "${CMAKE_SOURCE_DIR}/../circular_buffer/include" )
-if ( NOT $ENV{CIRCULAR_BUFFER_INCLUDE_DIR} STREQUAL "" )
-    set ( circular_buffer_include_dir $ENV{CIRCULAR_BUFFER_INCLUDE_DIR}} )
-endif()
 
 function ( add_target_dependencies target )
 #    find_package ( Catch2 REQUIRED )
@@ -61,12 +54,6 @@ function ( add_target_dependencies target )
 #    find_package ( asio REQUIRED )
 #    target_include_directories ( ${target} PRIVATE ${asio_INCLUDE_DIRS} )
     target_include_directories ( ${target} PRIVATE ${asio_include_dir} )
-#    find_package ( ring-span-lite REQUIRED )
-#    target_include_directories ( ${target} PRIVATE ${ring-span-lite_INCLUDE_DIRS} )
-    target_include_directories ( ${target} PRIVATE ${ring_span_lite_include_dir} )
-#    find_package ( circular_buffer REQUIRED )
-#    target_include_directories ( ${target} PRIVATE ${circular_buffer_INCLUDE_DIRS} )
-    target_include_directories ( ${target} PRIVATE ${circular_buffer_include_dir} )
 endfunction()
 
 function ( add_target_info target )

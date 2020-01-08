@@ -33,7 +33,7 @@
 
 // circular buffer or ring span container types to use instead of the default std::deque
 #include "nonstd/ring_span.hpp"
-#include "circular_buffer.hpp"
+#include "circular_buffer/circular_buffer.hpp"
 
 using namespace std::literals::string_literals;
 

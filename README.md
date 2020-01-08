@@ -141,9 +141,5 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 # About
 
-The primary author of Utility Rack is Cliff Green, cliffg at connectivecpp dot com. The primary co-authors are Thurman Gillespy, thurmang at connectivecpp dot com, and Roxanne Agerone, roxanne at connectivecpp dot com.
-
-Contributors include Matthew Briggs, Daniel Muldrew, and Bob Higgins.
-
-Additional information including author comments is [available here](doc/about.md).
+Team member information is [available here](https://connectivecpp.github.io/), and a few random author comments are [available here](doc/about.md).
 

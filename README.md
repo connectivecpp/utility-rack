@@ -1,16 +1,24 @@
+ Branch | Status |
+ | --- | --- |
+| **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
+| **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
+
+
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 
-Th C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
+The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
 # License
 
+[![Licence](https://img.shields.io/badge/license-boost-4480cc.svg)](http://www.boost.org/LICENSE_1_0.txt)
+
 This project is distributed under the [Boost Software License](LICENSE.txt).
 
 ## Utility Rack Release Status
 
-Release 1.0 is under development as of April 2019, awaiting CMake config file completion and testing under multiple compilers and platforms.
+Release 1.0 is under development as of January 2020, awaiting CMake enhancements, marshalling utility completion, and additional testing.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 
@@ -20,11 +28,13 @@ Release notes and upcoming development plans are [available here](doc/release.md
 
 ### Marshall
 
-(Fill in text.)
+The marshall functions and classes provide marshalling and unmarshalling of binary data. Marshalling (also called serialization, depending on context) provides a way to transform application objects into and out of byte streams that can be sent over a network (or use for file IO). 
+
+This marshalling functionality in this repository is useful when explicit control is needed for every bit and byte. This allows a developer to match an existing wire protocol or encoding scheme or to define his or her own wire protocol. Support is provided for fundamental arithmetic types as well as certain C++ vocabulary types such as @c std::optional. The binary data is always marshalled to big-endian (network) format.
 
 ### Shared Buffer
 
-Reference counted byte buffer classes used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
+Reference counted byte buffer classes are used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
 
 A detailed overview of the marshall classes is [available here](doc/marshall.md).
 
@@ -72,45 +82,47 @@ If the destination type is unrelated to the original type (and is not a `void *`
 
 ### Overloaded
 
-Create a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
+This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
+
+### Forward Capture
+
+Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](doc/references.md)).
 
 # C++ Language Requirements and Alternatives
 
 C++ 17 is the primary baseline for this repository.
 
-A significant number of C++ 11 features are in the implementation and API. There are also limited C++ 14 and 17 features in use, although they tend to be relatively simple features of those standards (e.g. `std::optional`, `std::byte`, structured bindings). For users that don't want to use the latest C++ compilers or compile with C++ 17 flags, Martin Moene provides an excellent set of header-only libraries that implement many useful C++ library features, both C++ 17 as well as future C++ standards (see [References](doc/references.md)).
-
-Using Boost libraries instead of `std::optional` (and similar C++ 17 features) is also an option, and should require minimal porting.
+A significant number of C++ 11 features are in the implementation and API. There are also numerous C++ 14 and C++ 17 features in use, although many of them could be replaced with Boost (or similar) utilities or rewritten to use only C++ 11 capabilities. For users that don't want to use the latest C++ compilers or compile with C++ 17 flags, Martin Moene provides an excellent set of header-only libraries that implement many useful C++ library features, both C++ 17 as well as future C++ standards (see [References](doc/references.md)).
 
 While the main production branch will always be developed and tested with C++ 17 features (and relatively current compilers), alternative branches and forks for older compiler versions are expected. In particular, a branch using Martin Moene's libraries and general C++ 11 (or C++ 14) conformance is likely. Collaboration (through forking, change requests, etc) is very welcome to achieve older compiler conformance. A branch supporting a pre-C++ 11 compiler or language conformance is not likely to be directly supported through this repository (since it would require so many changes that it would result in a defacto different codebase).
 
 # External Dependencies
 
-The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
+The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code).
 
-- Version 1.12 (or later) of Chris Kohlhoff's `asio` repository is required for Periodic Timer. Note that it is the stand-alone Asio versus the Boost Asio implementation.
-- Version 2.1.0 (or later) of Phil Nash's Catch 2 is required for all test scenarios.
-- Version 0.00 (or later) of Martin's Ring Span Lite is required in some test scenarios (see specifics below).
-- Version 1.65.1 (or later) of the Boost library is required in some test scenarios (see specifics below).
+Production external dependencies:
 
-See [References](doc/references.md) for additional details on the above libraries.
+- Version 1.13 (or later) of Chris Kohlhoff's [`asio`](https://github.com/chriskohlhoff/asio) library is required for the Periodic Timer class. Note that it is the stand-alone Asio library, not the Boost Asio version.
 
-Specific dependencies:
+Test external dependencies:
 
-- All test scenarios: Catch 2
-- Periodic Timer (production): `asio`
-- Wait Queue (production): none
-  - Ring Span Lite (test)
-  - Boost.Circular (test)
-- Shared Buffer (production): none
+- Version 2.8.0 (or later) of Phil Nash's [`Catch2`](https://github.com/catchorg/Catch2) library is required for all test scenarios.
+
+There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency management. These are:
+
+- Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
+- Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
+
+See [References](doc/references.md) for additional details.
 
 # Supported Compilers and Platforms
 
 Utility Rack has been compiled and tests run on:
 
-
 - g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
+
+Follow the CI links for additional build environments.
 
 # Installation
 
@@ -122,9 +134,5 @@ See [References](doc/references.md) for details on dependencies and inspirations
 
 # About
 
-The primary author of Utility Rack is Cliff Green, cliffg at connectivecpp dot com. The primary co-authors are Thurman Gillespy, thurmang at connectivecpp dot com, and Roxanne Agerone, roxanne at connectivecpp dot com.
-
-Contributors include Matthew Briggs, Daniel Muldrew, and Bob Higgins.
-
-Additional information including author comments is [available here](doc/about.md).
+Team member information is [available here](https://connectivecpp.github.io/), and a few random author comments are [available here](doc/about.md).
 

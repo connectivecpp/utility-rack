@@ -4,9 +4,9 @@
  *
  *  @brief Test scenarios for @c extract_val and @c append_val functions.
  *
- *  @author Cliff Green
+ *  @author Cliff Green, Roxanne Agerone
  *
- *  Copyright (c) 2019 by Cliff Green
+ *  Copyright (c) 2019 by Cliff Green, Roxanne Agerone
  *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -29,11 +29,28 @@ constexpr char val2 = 0xEE;
 constexpr std::int16_t val3 = 0x01FF;
 constexpr std::uint64_t val4 = 0x0908070605040302;
 constexpr std::int32_t val5 = 0xDEADBEEF;
+constexpr std::byte val6 = static_cast<std::byte>(0xAA);
+constexpr float float_val = 42.0f;
+constexpr double double_val = 197.0;
 
-constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+sizeof(val4)+sizeof(val5);
+constexpr int arr_sz = sizeof(val1)+sizeof(val2)+sizeof(val3)+
+                       sizeof(val4)+sizeof(val5)+sizeof(val6);
 
 auto net_buf = chops::make_byte_array(0xDD, 0xCC, 0xBB, 0xAA, 0xEE, 0x01, 0xFF,
-    0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF);
+    0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0xDE, 0xAD, 0xBE, 0xEF, 0xAA);
+
+TEST_CASE ( "Size and arithmetic assertions",
+            "[assertions]" ) {
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::int32_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::uint32_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::int16_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::uint16_t>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<std::byte>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<char>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<unsigned char>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<double>());
+  REQUIRE (chops::detail::is_arithmetic_or_byte<float>());
+}
 
 SCENARIO ( "Endian detection",
            "[endian] [little_endian]" ) {
@@ -70,7 +87,8 @@ SCENARIO ( "Append values into a buffer",
       REQUIRE(chops::append_val(ptr, val2) == 1u); ptr += sizeof(val2);
       REQUIRE(chops::append_val(ptr, val3) == 2u); ptr += sizeof(val3);
       REQUIRE(chops::append_val(ptr, val4) == 8u); ptr += sizeof(val4);
-      REQUIRE(chops::append_val(ptr, val5) == 4u);
+      REQUIRE(chops::append_val(ptr, val5) == 4u); ptr += sizeof(val5);
+      REQUIRE(chops::append_val(ptr, val6) == 1u);
       
       THEN ("the buffer will have all of the values in network endian order") {
         chops::repeat(arr_sz, [&buf] (int i) { REQUIRE (buf[i] == net_buf[i]); } );
@@ -90,7 +108,8 @@ SCENARIO ( "Extract values from a buffer",
       char v2 = chops::extract_val<char>(ptr); ptr += sizeof(v2);
       std::int16_t v3 = chops::extract_val<std::int16_t>(ptr); ptr += sizeof(v3);
       std::uint64_t v4 = chops::extract_val<std::uint64_t>(ptr); ptr += sizeof(v4);
-      std::int32_t v5 = chops::extract_val<std::int32_t>(ptr);
+      std::int32_t v5 = chops::extract_val<std::int32_t>(ptr); ptr += sizeof(v5);
+      std::byte v6 = chops::extract_val<std::byte>(ptr);
 
       THEN ("the values are all in native order") {
         REQUIRE(v1 == val1);
@@ -98,8 +117,122 @@ SCENARIO ( "Extract values from a buffer",
         REQUIRE(v3 == val3);
         REQUIRE(v4 == val4);
         REQUIRE(v5 == val5);
+        REQUIRE(v6 == val6);
       }
     }
   } // end given
+}
+
+SCENARIO ( "Floating point append and extract",
+           "[floating_point]" ) {
+  GIVEN ("An empty byte buffer") {
+    std::byte buf[16];
+
+    WHEN ("Two floating point values are appended then extracted") {
+      std::byte* ptr = buf;
+      REQUIRE(chops::append_val(ptr, float_val) == 4u); ptr += sizeof(float_val);
+      REQUIRE(chops::append_val(ptr, double_val) == 8u);
+      ptr = buf;
+      auto f = chops::extract_val<float>(ptr); ptr += sizeof(f);
+      auto d = chops::extract_val<double>(ptr);
+
+      THEN ("the values are the same, in native order") {
+        REQUIRE (f == float_val);
+        REQUIRE (d == double_val);
+      }
+    }
+  } // end given
+}
+
+template <typename Dest, typename Src>
+void test_round_trip_var_int (Src src, std::size_t exp_sz) {
+  std::byte test_buf [10];
+  auto outsize = chops::append_var_int<Src>(test_buf, src);
+  auto output = chops::extract_var_int<Dest>(test_buf, outsize);
+  REQUIRE(output == src);
+  REQUIRE(outsize == exp_sz);
+}
+
+TEST_CASE ( "Append and extract variable length integers","[append_var_int]" ) {
+
+    std::byte test_buf [10];
+
+  {
+    auto outsize = chops::append_var_int<std::uint32_t>(test_buf, 0xCAFE);
+    REQUIRE(static_cast<int> (test_buf[0]) == 254);
+    REQUIRE(static_cast<int> (test_buf[1]) == 149);
+    REQUIRE(static_cast<int> (test_buf[2]) == 3);
+
+    auto output = chops::extract_var_int<unsigned int>(test_buf, outsize);
+    
+    REQUIRE(output == 51966u); // 0xCAFE is 51966
+    REQUIRE(outsize == 3u);
+  }
+}
+
+TEST_CASE ( "Append and extract variable length integers, round trip testing",
+            "[append_var_int]" ) {
+
+  test_round_trip_var_int<unsigned int> (static_cast<std::uint32_t>(0xFFFFFFFF),
+                                         5u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(40001u),
+                                         3u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(0xFFFF),
+                                         3u);
+  test_round_trip_var_int<unsigned short> (static_cast<std::uint16_t>(7u),
+                                         1u);
+  test_round_trip_var_int<unsigned long long> (static_cast<std::uint64_t>(0xFFFFFFFFFFFFFFFF),
+                                         10u);
+  test_round_trip_var_int<unsigned int> (static_cast<std::uint32_t>(42u),
+                                         1u);
+}
+
+TEST_CASE ( "Append var len integer of 127","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x7F);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 127);
+    REQUIRE(outsize == 1);
+}
+TEST_CASE ( "Append var len integer of 128","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x80);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<unsigned int> (test_buf[1]) == 1);
+    REQUIRE(outsize == 2);
+}
+TEST_CASE ( "Append var len integer larger than 4 bytes","[append_var_int]" ) {
+    
+    std::byte test_buf [7];
+    auto outsize = chops::append_var_int<unsigned int>(test_buf, 0x10000000);
+    REQUIRE(static_cast<unsigned int> (test_buf[0]) == 128); //byte flag set
+    REQUIRE(static_cast<unsigned int> (test_buf[4]) == 1);
+    REQUIRE(outsize == 5);
+}
+
+TEST_CASE( "Extracting variable integer larger than two bytes", "[extract_var_int]" ) {
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0xFE); // encodes to 126 with byte flag set
+    test_buf[1] = static_cast<std::byte>(0xCA); // encodes to 9472
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 2u);
+    // 126 + 9472 = 9598
+    REQUIRE( val1 == 9598 );
+}
+
+TEST_CASE("Extracting variable integer smaller than a byte", "[extract_var_int]"){
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0x7F); // encodes to 127
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 1u);
+    REQUIRE( val1 == 127 );
+}
+
+TEST_CASE("Extracting variable integer of 128", "[extract_var_int]"){
+    std::byte test_buf [7];
+    test_buf[0] = static_cast<std::byte>(0x80); // encodes to 0 with byte flag set
+    test_buf[1] = static_cast<std::byte>(0x01); // encodes to 128
+    auto val1 = chops::extract_var_int<std::uint32_t>(test_buf, 2u);
+    // 127 + 1 = 128
+    REQUIRE( val1 == 128 );
 }
 

@@ -28,7 +28,7 @@
 #include <cstdint> // std::uint16_t
 #include <string>
 
-#include <boost/endian/conversion.hpp> // boost::endian
+#include "marshall/extract_append.hpp"
 #include "marshall/shared_buffer.hpp"
 #include "utility/repeat.hpp"
 
@@ -98,13 +98,13 @@ int main() {
 
     // create number, convert to 'network' (big endian) byte order, place into buf2
     std::uint16_t count = 1;
-    chops::repeat(NUM_INTS, [&] () { *valptr++ = 
-        boost::endian::native_to_big (static_cast<std::uint16_t> (count++ * 5)); });
+    chops::repeat(NUM_INTS, [count, x = buf2.data()] () mutable {auto sz =
+        chops::append_val <std::uint16_t> (x, count++ * 5); x += sz; });
 
     // print them out
     valptr = const_cast<std::uint16_t*> (data);
     // read 2 bytes, convert back to proper endian order, print
-    auto f = [&valptr] () { std::cout << boost::endian::big_to_native (*valptr++) << " "; }; 
+    auto f = [x = buf2.data()] () mutable { std::cout << chops::extract_val<std::uint16_t>(x) << " "; x+=2;};
     chops::repeat(NUM_INTS, f);
     printLn();
 

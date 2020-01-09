@@ -98,38 +98,31 @@ While the main production branch will always be developed and tested with C++ 17
 
 # External Dependencies
 
-The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code). There are more dependencies in the test code than in the production code.
-
-All the dependencies listed below have links that will take you to the library or repository.
+The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code).
 
 Production external dependencies:
 
-- Version 1.13 (or later) of Chris Kohlhoff's [`asio`](https://github.com/chriskohlhoff/asio) library is required. Note that it is the stand-alone library, not the Boost Asio implementation.
+- Version 1.13 (or later) of Chris Kohlhoff's [`asio`](https://github.com/chriskohlhoff/asio) library is required for the Periodic Timer class. Note that it is the stand-alone Asio library, not the Boost Asio version.
 
 Test external dependencies:
 
 - Version 2.8.0 (or later) of Phil Nash's [`Catch2`](https://github.com/catchorg/Catch2) library is required for all test scenarios.
-- Version 0.3 (or later) of Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library is required in some test scenarios.
-- Version Thu Jul 12 21:58:58 2018 +0300 (or later) of Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library is required in some test scenarios (see specifics below; this dependency may be copied into the `utility-rack` repository in the future).
 
+There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency managements. These are:
 
-See [References](doc/references.md) for additional details on the above libraries.
+- Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in Wait Queue unit test.
+- Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in Wait Queue unit test.
 
-Specific dependencies:
-
-- All test scenarios: Catch 2
-- Periodic Timer (production): `asio`
-- Wait Queue (production): none
-    - Wait Queue (test): `ring-span-lite`
-    - Wait Queue (test): `circular-buffer`
+See [References](doc/references.md) for additional details.
 
 # Supported Compilers and Platforms
 
 Utility Rack has been compiled and tests run on:
 
-
 - g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
+
+Follow the CI links for additional build environments.
 
 # Installation
 

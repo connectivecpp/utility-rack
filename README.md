@@ -108,10 +108,10 @@ Test external dependencies:
 
 - Version 2.8.0 (or later) of Phil Nash's [`Catch2`](https://github.com/catchorg/Catch2) library is required for all test scenarios.
 
-There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency managements. These are:
+There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency management. These are:
 
-- Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in Wait Queue unit test.
-- Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in Wait Queue unit test.
+- Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
+- Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
 
 See [References](doc/references.md) for additional details.
 

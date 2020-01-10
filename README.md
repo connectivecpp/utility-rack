@@ -122,7 +122,7 @@ Utility Rack has been compiled and tests run on:
 - g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
 
-Follow the CI links for additional build environments.
+Follow the Travis CI badges for additional build environments.
 
 # Installation
 

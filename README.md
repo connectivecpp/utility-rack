@@ -111,7 +111,7 @@ Test external dependencies:
 There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency management. These are:
 
 - Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
-- Justas Masiulis [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
+- Justas Masiulis' [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
 
 See [References](doc/references.md) for additional details.
 
@@ -122,7 +122,7 @@ Utility Rack has been compiled and tests run on:
 - g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
 
-Follow the CI links for additional build environments.
+Follow the Travis CI badges for additional build environments.
 
 # Installation
 

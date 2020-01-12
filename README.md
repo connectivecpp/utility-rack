@@ -1,26 +1,23 @@
- Branch | Status |
- | --- | --- |
-| **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
-| **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
-
-
 # Utility Rack - Tasty, Useful C++ Classes and Functions
 
 The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 This software is written using modern C++ design idioms and the latest (2017) C++ standard.
 
-# License
+# Build and Release Status, License Info
 
-[![Licence](https://img.shields.io/badge/license-boost-4480cc.svg)](http://www.boost.org/LICENSE_1_0.txt)
+Branch | Status |
+ | --- | --- |
+| **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
+| **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
 
-This project is distributed under the [Boost Software License](LICENSE.txt).
-
-## Utility Rack Release Status
+**Latest tag:** ![Latest Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack)
 
 Release 1.0 is under development as of January 2020, awaiting CMake enhancements, marshalling utility completion, and additional testing.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
+
+This project is distributed under the [Boost Software License](LICENSE.txt): [![Licence](https://img.shields.io/badge/license-boost-4480cc.svg)](http://www.boost.org/LICENSE_1_0.txt)
 
 # Utility Rack Components
 

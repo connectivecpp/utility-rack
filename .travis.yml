@@ -1,7 +1,17 @@
+sudo: false
 
 dist: bionic
 language: cpp
 cache: ccache
+
+branches:
+only:
+ -master
+
+addons:
+  apt:
+    packages:
+      - doxygen
 
 common_sources: &all_sources
 - ubuntu-toolchain-r-test
@@ -109,8 +119,5 @@ before_script:
 script:
 - make all -j2
 - make test -j2
+- doxygen Doxyfile
 
-branches:
-only:
- -master
- -develop

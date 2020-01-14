@@ -119,5 +119,6 @@ before_script:
 script:
 - make all -j2
 - make test -j2
+- cd ../utility-rack
 - doxygen Doxyfile
 

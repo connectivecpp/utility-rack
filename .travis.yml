@@ -1,4 +1,4 @@
-sudo: false
+sudo: enabled
 
 dist: bionic
 language: cpp
@@ -7,11 +7,7 @@ cache: ccache
 branches:
 only:
  -master
-
-addons:
-  apt:
-    packages:
-      - doxygen
+ -develop
 
 common_sources: &all_sources
 - ubuntu-toolchain-r-test
@@ -25,14 +21,6 @@ matrix:
   include:
 
     # 1/ Linux Clang Builds
-
-    - os: linux
-      compiler: clang
-      addons:
-          apt:
-              sources: *all_sources
-              packages: ['clang-3.9']
-      env: COMPILER='clang++-3.9'
 
     - os: linux
       compiler: clang
@@ -106,9 +94,10 @@ matrix:
       env: COMPILER='clang++'
 
 before install:
+ - sudo apt-get install -y doxygen
 
 install:
-
+ 
 before_script:
 - cd ..
 - wget https://github.com/chriskohlhoff/asio/archive/asio-1-14-0.tar.gz && mkdir asio && tar -zxvf asio-1-14-0.tar.gz -C asio --strip-components=1

@@ -1,2 +1,5 @@
-html/
-**.out
+*.out
+*.o
+*.so
+*.dll
+*.obj

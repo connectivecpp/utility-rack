@@ -15,7 +15,7 @@ cmake_minimum_required ( VERSION 3.10 )
 
 option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON )
 option ( UTILITY_RACK_OPT_BUILD_EXAMPLES  "Build perform utility-rack examples" ON )
-option ( UTILITY_RACK_OPT_BUILD_DOCS  "Build doxygen documentation" ON )
+option ( UTILITY_RACK_OPT_BUILD_DOCS  "Build doxygen documentation" OFF )
 
 project ( utility-rack VERSION 1.0 LANGUAGES CXX )
 

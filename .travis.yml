@@ -1,5 +1,3 @@
-sudo: enabled
-
 dist: bionic
 language: cpp
 cache: ccache
@@ -109,14 +107,5 @@ script:
 - make test -j2
 
 after_success:
-- cd
-- sudo apt-get install -y doxygen
-- doxygen doc/doxyfile.config
 
 deploy:
-  provider: pages
-  skip_cleanup: true
-  local_dir: doc/html
-  github_token: $GH_REPO_TOKEN
-  on:
-    branch: master

@@ -1,7 +1,11 @@
-
 dist: bionic
 language: cpp
 cache: ccache
+
+branches:
+only:
+ -master
+ -develop
 
 common_sources: &all_sources
 - ubuntu-toolchain-r-test
@@ -15,14 +19,6 @@ matrix:
   include:
 
     # 1/ Linux Clang Builds
-
-    - os: linux
-      compiler: clang
-      addons:
-          apt:
-              sources: *all_sources
-              packages: ['clang-3.9']
-      env: COMPILER='clang++-3.9'
 
     - os: linux
       compiler: clang
@@ -98,7 +94,7 @@ matrix:
 before install:
 
 install:
-
+ 
 before_script:
 - cd ..
 - wget https://github.com/chriskohlhoff/asio/archive/asio-1-14-0.tar.gz && mkdir asio && tar -zxvf asio-1-14-0.tar.gz -C asio --strip-components=1
@@ -110,7 +106,6 @@ script:
 - make all -j2
 - make test -j2
 
-branches:
-only:
- -master
- -develop
+after_success:
+
+deploy:

@@ -6,12 +6,12 @@
 # (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 # CMake 3.8 required for cxx_std_17 target_compile_features
-# CMake 3.10 required for doxygen target
+# CMake 3.9 required for doxygen target
 
 # Cliff note, Sep 5, 2018: I'm still a CMake newbie, so there's many improvements that can
 # be made. I'm trying to use modern CMake techniques (see [References] (doc/references.md)).
 
-cmake_minimum_required ( VERSION 3.10 )
+cmake_minimum_required ( VERSION 3.9 )
 
 option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON )
 option ( UTILITY_RACK_OPT_BUILD_EXAMPLES  "Build perform utility-rack examples" ON )

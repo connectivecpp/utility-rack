@@ -14,8 +14,11 @@ find_package ( Doxygen
              )
 
 if (DOXYGEN_FOUND)
+  set ( DOXYGEN_PROJECT_NAME "Utility Rack API Reference" )
+  set ( DOXYGEN_PROJECT_BRIEF "Documentation of the classes and functions residing in Utility Rack" )
+  set ( DOXYGEN_EXCLUDE_PATTERNS */detail/* )
   doxygen_add_docs ( docs
-                     include test example 
+                     include
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                      COMMENT "Document generation command"
                    )

@@ -27,11 +27,11 @@ This project is distributed under the [Boost Software License](LICENSE.txt): [![
 
 The marshall functions and classes provide marshalling and unmarshalling of binary data. Marshalling (also called serialization, depending on context) provides a way to transform application objects into and out of byte streams that can be sent over a network (or use for file IO). 
 
-This marshalling functionality in this repository is useful when explicit control is needed for every bit and byte. This allows a developer to match an existing wire protocol or encoding scheme or to define his or her own wire protocol. Support is provided for fundamental arithmetic types as well as certain C++ vocabulary types such as @c std::optional. The binary data is always marshalled to big-endian (network) format.
+This marshalling functionality in this repository is useful when explicit control is needed for every bit and byte. This allows a developer to match an existing wire protocol or encoding scheme or to define his or her own wire protocol. Support is provided for fundamental arithmetic types as well as certain C++ vocabulary types such as `std::optional`. The binary data is always marshalled to big-endian (network) format.
 
 ### Shared Buffer
 
-Reference counted byte buffer classes are used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](doc/references.md)). 
+Reference counted byte buffer classes are used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](https://connectivecpp.github.io/doc/references.md)). 
 
 A detailed overview of the marshall classes is [available here](doc/marshall.md).
 
@@ -41,7 +41,7 @@ A detailed overview of the marshall classes is [available here](doc/marshall.md)
 
 Wait Queue is a multi-reader, multi-writer FIFO queue for transferring data between threads. It is templatized on the type of data passed through the queue as well as the queue container type. Data is passed with value semantics, either by copying or by moving (as opposed to a queue that transfers data by pointer or reference). The wait queue has both wait and no-wait pop semantics, as well as simple "close" and "open" capabilities (to allow graceful shutdown or restart of thread or process communication). A fixed size container (e.g. a `ring_span`) can be used, eliminating any and all dynamic memory management (useful in embedded or performance constrained environments). Similarly, a circular buffer that only allocates on construction can be used, which eliminates dynamic memory management when pushing or popping values on or off the queue.
 
-Wait Queue is inspired by code from Anthony Williams' Concurrency in Action book (see [References](doc/references.md)), although heavily modified.
+Wait Queue is inspired by code from Anthony Williams' Concurrency in Action book (see [References](https://connectivecpp.github.io/doc/references.md)), although heavily modified.
 
 A detailed overview is [available here](doc/queue.md).
 
@@ -49,7 +49,7 @@ A detailed overview is [available here](doc/queue.md).
 
 ### Periodic Timer
 
-The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio timers (see [References](doc/references.md)) when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
+The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio timers (see [References](https://connectivecpp.github.io/doc/references.md)) when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
 
 Asynchronous timers from Asio are relatively easy to use. However, there are no timers that are periodic. This class simplifies the usage, using application supplied function object callbacks. When the timer is started, the application specifies whether each callback is invoked based on a duration (e.g. one second after the last callback), or on timepoints (e.g. a callback will be invoked each second according to the clock).
 
@@ -59,15 +59,15 @@ A detailed overview is [available here](doc/timer.md).
 
 ### Repeat
 
-Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo (see [References](doc/references.md)). The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap.
+Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo (see [References](https://connectivecpp.github.io/doc/references.md)). The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap.
 
 ### Erase Where
 
-A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](doc/references.md)).
+A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.md)).
 
 ### Make Byte Array
 
-Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](doc/references.md)) is useful to simplify creation of byte buffers, specially for testing purposes.
+Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.md)) is useful to simplify creation of byte buffers, specially for testing purposes.
 
 ### Cast Pointer To
 
@@ -79,23 +79,17 @@ If the destination type is unrelated to the original type (and is not a `void *`
 
 ### Overloaded
 
-This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from https://en.cppreference.com/w/cpp/utility/variant/visit.
+This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from [C++ Reference](https://en.cppreference.com/w/cpp/utility/variant/visit).
 
 ### Forward Capture
 
-Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](doc/references.md)).
+Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](https://connectivecpp.github.io/doc/references.md)).
 
 # C++ Language Requirements and Alternatives
 
-C++ 17 is the primary baseline for this repository.
-
-A significant number of C++ 11 features are in the implementation and API. There are also numerous C++ 14 and C++ 17 features in use, although many of them could be replaced with Boost (or similar) utilities or rewritten to use only C++ 11 capabilities. For users that don't want to use the latest C++ compilers or compile with C++ 17 flags, Martin Moene provides an excellent set of header-only libraries that implement many useful C++ library features, both C++ 17 as well as future C++ standards (see [References](doc/references.md)).
-
-While the main production branch will always be developed and tested with C++ 17 features (and relatively current compilers), alternative branches and forks for older compiler versions are expected. In particular, a branch using Martin Moene's libraries and general C++ 11 (or C++ 14) conformance is likely. Collaboration (through forking, change requests, etc) is very welcome to achieve older compiler conformance. A branch supporting a pre-C++ 11 compiler or language conformance is not likely to be directly supported through this repository (since it would require so many changes that it would result in a defacto different codebase).
+C++ 17 is the primary baseline for this repository. Additional notes on possible alternatives are [available here](https://connectivecpp.github.io/).
 
 # External Dependencies
-
-The libraries and API's have minimal (as possible) library dependencies (there are heavy dependencies on the C++ standard library in all of the code).
 
 Production external dependencies:
 
@@ -110,7 +104,7 @@ There are single file headers that have been copied into the `third_party` direc
 - Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
 - Justas Masiulis' [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
 
-See [References](doc/references.md) for additional details.
+See [References](https://connectivecpp.github.io/doc/references.md) for additional details.
 
 # Supported Compilers and Platforms
 
@@ -127,7 +121,7 @@ The Utility Rack components are header-only, so installation consists of downloa
 
 # References
 
-See [References](doc/references.md) for details on dependencies and inspirations for Utility Rack.
+See [References](https://connectivecpp.github.io/doc/references.md) for details on dependencies and inspirations for Utility Rack.
 
 # About
 

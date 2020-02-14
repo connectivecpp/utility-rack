@@ -63,11 +63,11 @@ Repeat is a function template to abstract and simplify loops that repeat N times
 
 ### Erase Where
 
-A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.md)).
+A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.html)).
 
 ### Make Byte Array
 
-Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.md)) is useful to simplify creation of byte buffers, specially for testing purposes.
+Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes.
 
 ### Cast Pointer To
 
@@ -83,7 +83,7 @@ This utility creates a class providing a set of function object overloads (`oper
 
 ### Forward Capture
 
-Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](https://connectivecpp.github.io/doc/references.md)).
+Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](https://connectivecpp.github.io/doc/references.html)).
 
 # C++ Language Requirements and Alternatives
 
@@ -104,7 +104,7 @@ There are single file headers that have been copied into the `third_party` direc
 - Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
 - Justas Masiulis' [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
 
-See [References](https://connectivecpp.github.io/doc/references.md) for additional details.
+See [References](https://connectivecpp.github.io/doc/references.html) for additional details.
 
 # Supported Compilers and Platforms
 
@@ -121,7 +121,7 @@ The Utility Rack components are header-only, so installation consists of downloa
 
 # References
 
-See [References](https://connectivecpp.github.io/doc/references.md) for details on dependencies and inspirations for Utility Rack.
+See [References](https://connectivecpp.github.io/doc/references.html) for details on dependencies and inspirations for Utility Rack.
 
 # About
 

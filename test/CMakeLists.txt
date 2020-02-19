@@ -30,14 +30,14 @@ include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
 
 include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
 include ( "${cmake_all_repos_include_dir}/unit_test_main_lib.cmake" )
-include ( "${cmake_all_repos_include_dir}/make_exe_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/target_exe_func.cmake" )
 
 enable_testing()
 
 foreach ( test_src IN LISTS test_sources )
     get_filename_component ( targ ${test_src} NAME_WE )
-    message ( "Calling make_unit_test_exe for: ${targ}" )
-    make_unit_test_exe ( ${targ} ${test_src} )
+    message ( "Calling unit_test_target_exe for: ${targ}" )
+    unit_test_target_exe ( ${targ} ${test_src} )
 endforeach()
 
 # end of file

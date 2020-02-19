@@ -1,4 +1,4 @@
-# Copyright 2018-2020 by Cliff Green
+# Copyright 2020 by Cliff Green
 #
 # https://github.com/connectivecpp/utility-rack
 #

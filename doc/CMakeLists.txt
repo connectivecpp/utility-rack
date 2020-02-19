@@ -9,25 +9,8 @@ cmake_minimum_required ( VERSION 3.9 )
 
 project ( utility-rack-doc VERSION 1.0 LANGUAGES CXX )
 
-find_package ( Doxygen 
-               OPTIONAL_COMPONENTS dot mscgen dia
-             )
-
-if (DOXYGEN_FOUND)
-  set ( DOXYGEN_PROJECT_NAME "Utility Rack API Reference" )
-  set ( DOXYGEN_PROJECT_BRIEF "Documentation of the classes and functions residing in Utility Rack" )
-  set ( DOXYGEN_EXCLUDE_PATTERNS */detail/* )
-  doxygen_add_docs ( docs
-                     include
-                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                     COMMENT "Document generation command"
-                   )
-
-else (DOXYGEN_FOUND)
-  message("Doxygen needs to be installed to generate the doxygen documentation")
-endif (DOXYGEN_FOUND)
-
-
+set ( doxygen_proj_name "Utility Rack Reference" )
+include ( "${cmake_all_repos_include_dir}/doxygen_gen.cmake" )
 
 # end of file
 

@@ -27,6 +27,7 @@ set ( package_name "utility-rack" )
 set ( include_source_dir "${CMAKE_SOURCE_DIR}/include" )
 set ( third_party_include_source_dir "${CMAKE_SOURCE_DIR}/third_party" )
 set ( cmake_include_dir "${CMAKE_SOURCE_DIR}/cmake" )
+set ( cmake_all_repos_include_dir "${CMAKE_SOURCE_DIR}/cmake/all_repos" )
 
 # Interface library:
 

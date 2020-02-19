@@ -23,8 +23,8 @@ set ( example_sources
 
 include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
 
-include ( "${cmake_include_dir}/all_repos/add_target_info_func.cmake" )
-include ( "${cmake_include_dir}/all_repos/make_exe_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/make_exe_func.cmake" )
 
 foreach ( example_src IN LISTS example_sources )
     get_filename_component ( targ ${example_src} NAME_WE )

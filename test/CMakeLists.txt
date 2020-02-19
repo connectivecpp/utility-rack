@@ -9,7 +9,7 @@ cmake_minimum_required ( VERSION 3.8 )
 
 project ( utility-rack-test VERSION 1.0 LANGUAGES CXX )
 
-include ( "${cmake_include_dir}/all_repos/unit_test_vars.cmake" )
+include ( "${cmake_all_repos_include_dir}/unit_test_vars.cmake" )
 
 include ( "${cmake_include_dir}/header_dirs_var.cmake" )
 
@@ -28,9 +28,9 @@ set ( test_sources
 
 include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
 
-include ( "${cmake_include_dir}/all_repos/add_target_info_func.cmake" )
-include ( "${cmake_include_dir}/all_repos/unit_test_main_lib.cmake" )
-include ( "${cmake_include_dir}/all_repos/make_exe_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/unit_test_main_lib.cmake" )
+include ( "${cmake_all_repos_include_dir}/make_exe_func.cmake" )
 
 enable_testing()
 

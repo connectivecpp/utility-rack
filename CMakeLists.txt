@@ -17,12 +17,16 @@ option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON
 option ( UTILITY_RACK_OPT_BUILD_EXAMPLES  "Build perform utility-rack examples" ON )
 option ( UTILITY_RACK_OPT_BUILD_DOCS  "Build doxygen documentation" OFF )
 
+set ( OPTIONS "" )
+set ( DEFINITIONS "" )
+
 project ( utility-rack VERSION 1.0 LANGUAGES CXX )
 
 set ( package_name "utility-rack" )
 
 set ( include_source_dir "${CMAKE_SOURCE_DIR}/include" )
 set ( third_party_include_source_dir "${CMAKE_SOURCE_DIR}/third_party" )
+set ( cmake_include_dir "${CMAKE_SOURCE_DIR}/cmake" )
 
 # Interface library:
 
@@ -38,7 +42,6 @@ if ( UTILITY_RACK_OPT_BUILD_TESTS )
 endif()
 
 if ( UTILITY_RACK_OPT_BUILD_EXAMPLES )
-  enable_testing()
   add_subdirectory ( example )
 endif()
 

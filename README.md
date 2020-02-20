@@ -110,14 +110,14 @@ See [References](https://connectivecpp.github.io/doc/references.html) for additi
 
 Utility Rack has been compiled and tests run on:
 
-- g++ 7.2, g++ 7.3, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
+- g++ 7.2 thru 7.4, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
 - (TBD, will include at least clang on linux and vc++ on Windows)
 
 Follow the Travis CI badges for additional build environments.
 
 # Installation
 
-The Utility Rack components are header-only, so installation consists of downloading or cloning and setting compiler include paths appropriately. No compile time configuration macros are defined.
+The Utility Rack components are header-only, so installation consists of downloading or cloning and setting compiler include paths appropriately. No compile time configuration macros are defined. CMake builds can be performed for unit test and example applications.
 
 # References
 
@@ -125,5 +125,5 @@ See [References](https://connectivecpp.github.io/doc/references.html) for detail
 
 # About
 
-Team member information is [available here](https://connectivecpp.github.io/), and a few random author comments are [available here](doc/about.md).
+Team member information is [available here](https://connectivecpp.github.io/).
 

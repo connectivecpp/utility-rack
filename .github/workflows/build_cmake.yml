@@ -7,7 +7,20 @@ on:
       - develop
 
 jobs:
-  build-ubuntu:
+  get-dependencies:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with: catchorg/Catch2
+      ref:  master
+    - uses: actions/checkout@v2
+      with: chriskohlhoff/asio
+      ref:  master
+
+  build-unixes:
+    needs: get-dependencies
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -17,13 +30,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run: mkdir build && cd build && cmake ..
+      run:  mkdir build && cd build && cmake ..
     - name: build
-      run: cmake --build .
+      run:  cmake --build build
     - name: test
-      run: ctest
+      run:  cd build && ctest
 
   build-windows:
+    needs: get-dependencies
 
     runs-on: windows-latest
 
@@ -32,6 +46,7 @@ jobs:
     - name: configure
       run: mkdir build && cd build && cmake ..
     - name: build
-      run: cmake --build .
+      run: cmake --build build
     - name: test
-      run: ctest -C "Debug"
+      run: cd build && ctest -C "Debug"
+

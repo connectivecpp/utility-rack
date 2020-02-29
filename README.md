@@ -6,10 +6,16 @@ This software is written using modern C++ design idioms and the latest (2017) C+
 
 # Build and Release Status, License Info
 
+Travis CI Status:
+
 Branch | Status |
  | --- | --- |
 | **Master** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
 | **Develop** | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
+
+GitHub Actions CI Status:
+
+![CMake Build Matrix](https://github.com/connectivecpp/utility-rack/workflows/CMake%20Build%20Matrix/badge.svg)
 
 **Latest tag:** ![Latest Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack)
 

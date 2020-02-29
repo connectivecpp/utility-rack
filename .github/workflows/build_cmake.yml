@@ -35,20 +35,8 @@ jobs:
         repository: chriskohlhoff/asio
         ref:  master
         path: asio
-    - name: ls1
-      run:  ls
-    - name: ls-main
-      run:  ls main
     - name: configure
       run:  mkdir build && cd build && cmake ../main
-    - name: ls2
-      run:  ls
-    - name: ls-build
-      run:  ls build
-    - name: ls-asio
-      run:  ls asio
-    - name: ls-catch
-      run:  ls Catch2
     - name: build
       run:  cd build && cmake --build .
     - name: test
@@ -73,9 +61,9 @@ jobs:
         ref:  master
         path: asio
     - name: configure
-      run: cd ..; mkdir build; cd build; cmake ../${{ github.event.repository.name }}
+      run: mkdir build; cd build; cmake ../main
     - name: build
-      run: cd ../build; cmake --build .
+      run: cd build; cmake --build .
     - name: test
-      run: cd ../build; ctest -C "Debug"
+      run: cd build; ctest -C "Debug"
 

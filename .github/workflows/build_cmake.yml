@@ -13,11 +13,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with: catchorg/Catch2
-      ref:  master
+      with:
+        repository: catchorg/Catch2
+        ref:  master
     - uses: actions/checkout@v2
-      with: chriskohlhoff/asio
-      ref:  master
+      with:
+        repository: chriskohlhoff/asio
+        ref:  master
 
   build-unixes:
     needs: get-dependencies

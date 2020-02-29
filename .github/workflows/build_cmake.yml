@@ -37,9 +37,13 @@ jobs:
         path: asio
     - name: ls1
       run:  ls
+    - name: ls-main
+      run:  ls main
     - name: configure
       run:  mkdir build && cd build && cmake ../main
     - name: ls2
+      run:  ls
+    - name: ls-build
       run:  ls build
     - name: build
       run:  cd build && cmake --build .

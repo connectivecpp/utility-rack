@@ -32,7 +32,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run:  echo "GH workspace: " $GITHUB_WORKSPACE
+      run:  echo GH workspace $GITHUB_WORKSPACE
       run:  mkdir build && cd build && cmake ..
 
     - name: build

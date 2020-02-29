@@ -31,14 +31,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: echo
-      run: echo Repo name ${{ github.event.repository.name }}
     - name: configure
-      run:  cd .. && mkdir build && cd build && cmake ..
+      run:  cd .. && mkdir build && cd build && cmake ../${{ github.event.repository.name }}
     - name: build
-      run:  cmake --build build
+      run:  cd ../build && cmake --build .
     - name: test
-      run:  cd build && ctest
+      run:  cd ../build && ctest
 
   build-windows:
     needs: get-dependencies

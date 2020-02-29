@@ -23,26 +23,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+        path: main
+    - uses: actions/checkout@v2
       with:
         repository: catchorg/Catch2
         ref:  master
-        path: ..
+        path: catch2
     - uses: actions/checkout@v2
       with:
         repository: chriskohlhoff/asio
         ref:  master
-        path: ..
-    - uses: actions/checkout@v2
-    - name: configure
-      run:  cd .. && mkdir build && cd build && cmake ../${{ github.event.repository.name }}
+        path: asio
     - name: ls1
-      run:  ls ..
+      run:  ls
+    - name: configure
+      run:  mkdir build && cd build && cmake ../main
     - name: ls2
-      run:  ls ../build
+      run:  ls build
     - name: build
-      run:  cd ../build && cmake --build .
+      run:  cd build && cmake --build .
     - name: test
-      run:  cd ../build && ctest
+      run:  cd build && ctest
 
   build-windows:
 

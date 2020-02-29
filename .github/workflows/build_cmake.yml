@@ -34,7 +34,7 @@ jobs:
     - name: configure
       run:  cd .. && mkdir build && cd build && cmake ../${{ github.event.repository.name }}
     - name: ls
-      run:  ls $GITHUB_WORKSPACE
+      run:  ls ..
     - name: build
       run:  cd ../build && cmake --build .
     - name: test

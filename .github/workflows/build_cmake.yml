@@ -1,3 +1,9 @@
+# Note differences between Unix variants and Windows shell when invoking
+# multiple commands on one line - bash uses double ampersand, powershell
+# uses semi-colon
+#
+# Currently there is duplication, specially for the dependency management,
+# this should be refactored in the future
 name: CMake Build Matrix
 
 on:
@@ -7,9 +13,13 @@ on:
       - develop
 
 jobs:
-  get-dependencies:
 
-    runs-on: ubuntu-latest
+  build-unixes:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,16 +30,6 @@ jobs:
       with:
         repository: chriskohlhoff/asio
         ref:  master
-
-  build-unixes:
-    needs: get-dependencies
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
     - uses: actions/checkout@v2
     - name: configure
       run:  cd .. && mkdir build && cd build && cmake ../${{ github.event.repository.name }}
@@ -39,16 +39,23 @@ jobs:
       run:  cd ../build && ctest
 
   build-windows:
-    needs: get-dependencies
 
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        repository: catchorg/Catch2
+        ref:  master
+    - uses: actions/checkout@v2
+      with:
+        repository: chriskohlhoff/asio
+        ref:  master
+    - uses: actions/checkout@v2
     - name: configure
-      run: mkdir build && cd build && cmake ..
+      run: cd ..; mkdir build; cd build; cmake ../${{ github.event.repository.name }}
     - name: build
-      run: cmake --build build
+      run: cd ../build; cmake --build .
     - name: test
-      run: cd build && ctest -C "Debug"
+      run: cd ../build; ctest -C "Debug"
 

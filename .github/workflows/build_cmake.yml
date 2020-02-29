@@ -26,15 +26,19 @@ jobs:
       with:
         repository: catchorg/Catch2
         ref:  master
+        path: ..
     - uses: actions/checkout@v2
       with:
         repository: chriskohlhoff/asio
         ref:  master
+        path: ..
     - uses: actions/checkout@v2
     - name: configure
       run:  cd .. && mkdir build && cd build && cmake ../${{ github.event.repository.name }}
-    - name: ls
+    - name: ls1
       run:  ls ..
+    - name: ls2
+      run:  ls ../build
     - name: build
       run:  cd ../build && cmake --build .
     - name: test
@@ -49,10 +53,12 @@ jobs:
       with:
         repository: catchorg/Catch2
         ref:  master
+        path: ..
     - uses: actions/checkout@v2
       with:
         repository: chriskohlhoff/asio
         ref:  master
+        path: ..
     - uses: actions/checkout@v2
     - name: configure
       run: cd ..; mkdir build; cd build; cmake ../${{ github.event.repository.name }}

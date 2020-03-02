@@ -22,24 +22,27 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout
+      uses: actions/checkout@v2
       with:
         path: main
-    - uses: actions/checkout@v2
+    - name: checkout-catch
+      uses: actions/checkout@v2
       with:
         repository: catchorg/Catch2
         ref:  master
         path: Catch2
-    - uses: actions/checkout@v2
+    - name: checkout-asio
+      uses: actions/checkout@v2
       with:
         repository: chriskohlhoff/asio
         ref:  master
         path: asio
-    - name: configure
+    - name: configure-cmake
       run:  mkdir build && cd build && cmake ../main
     - name: build
       run:  cd build && cmake --build .
-    - name: test
+    - name: unit-test
       run:  cd build && ctest
 
   build-windows:
@@ -47,23 +50,46 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout
+      uses: actions/checkout@v2
       with:
         path: main
-    - uses: actions/checkout@v2
+    - name: checkout-catch
+      uses: actions/checkout@v2
       with:
         repository: catchorg/Catch2
         ref:  master
         path: Catch2
-    - uses: actions/checkout@v2
+    - name: checkout-asio
+      uses: actions/checkout@v2
       with:
         repository: chriskohlhoff/asio
         ref:  master
         path: asio
-    - name: configure
+    - name: configure-cmake
       run: mkdir build; cd build; cmake ../main
     - name: build
       run: cd build; cmake --build .
-    - name: test
+    - name: unit-test
       run: cd build; ctest -C "Debug"
 
+  generate-docs:
+
+    runs-on: ubuntu-latest
+    needs: [ build-unixes, build-windows ]
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+        path: main
+    - name: configure-cmake
+      run:  mkdir build && cd build && cmake -D UTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main
+    - name: build-docs
+      run:  cd build && cmake --build . --target docs
+    - name: publish-to-git
+      uses: seanmiddleditch/gha-publish-to-git@master
+      with:
+        branch: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_pat: &{{ secrets.GH_PAT }}
+        source_folder: main/doc/html

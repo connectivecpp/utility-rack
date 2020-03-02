@@ -84,7 +84,7 @@ jobs:
       with:
         path: main
     - name: configure-cmake
-      run:  mkdir build && cd build && cmake -D UTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main
+      run:  mkdir build && cd build && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main
     - name: build-docs
       run:  cd build && cmake --build . --target docs
     - name: publish-to-git

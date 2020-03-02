@@ -81,6 +81,7 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v2
+      with:
         path: main
     - name: configure-cmake
       run:  mkdir build && cd build && cmake -D UTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main

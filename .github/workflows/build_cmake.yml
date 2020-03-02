@@ -88,9 +88,9 @@ jobs:
     - name: build-docs
       run:  cd build && cmake --build . --target docs
     - name: publish-to-git
-      uses: seanmiddleditch/gha-publish-to-git@master
+      uses: peaceiris/actions-gh-pages@v3
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        source_folder: doc/html
-        target_folder: doc/html
+        publish_dir: ./doc/html
+        force_orphan: true

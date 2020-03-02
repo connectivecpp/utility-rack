@@ -94,4 +94,3 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         github_pat: ${{ secrets.GITHUB_PAT }}
         source_folder: doc/html
-      if: success() && github.event == 'push'

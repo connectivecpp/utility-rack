@@ -83,6 +83,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: main
+        persist-credentials: false
     - name: get-dependent-apps
       run: sudo apt-get install doxygen && sudo apt-get install graphviz
     - name: configure-cmake
@@ -90,9 +91,8 @@ jobs:
     - name: build-docs
       run:  cd build && cmake --build . --target docs
     - name: publish-to-git
-      uses: seanmiddleditch/gha-publish-to-git@master
+      uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        github_pat: ${{ secrets.GH_PAT }}
-        source_folder: main/doc/html
+        folder: main/doc/html

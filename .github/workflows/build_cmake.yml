@@ -79,12 +79,14 @@ jobs:
     needs: [ build-unixes, build-windows ]
 
     steps:
-    - name: checkout
-      uses: actions/checkout@v2
     - name: get-dependent-apps
       run: sudo apt-get install doxygen && sudo apt-get install graphviz
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        path: main
     - name: configure-cmake
-      run:  mkdir build && cd build && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ..
+      run:  mkdir build && cd build && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main
     - name: build-docs
       run:  cd build && cmake --build . --target docs
     - name: publish-to-git
@@ -92,4 +94,5 @@ jobs:
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        dry_run: false
+        source_folder: ./main
+        dry_run: true

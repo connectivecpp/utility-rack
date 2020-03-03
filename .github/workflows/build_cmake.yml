@@ -93,4 +93,5 @@ jobs:
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_pat: ${{ secrets.GH_PAT }}
         #         dry_run: true

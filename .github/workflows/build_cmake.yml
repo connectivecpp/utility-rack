@@ -86,7 +86,7 @@ jobs:
     - name: configure-cmake
       run:  mkdir build_docs && cd build_docs && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ..
     - name: build-docs
-      run:  cd build_docs && cmake --build . --target docs && cd .. && rmdir -r build_docs
+      run:  cd build_docs && cmake --build . --target docs && cd .. && rm -r build_docs
     - name: publish-to-git
       uses: seanmiddleditch/gha-publish-to-git@master
       with:

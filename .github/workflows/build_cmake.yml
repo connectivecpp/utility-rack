@@ -83,16 +83,13 @@ jobs:
       run: sudo apt-get install doxygen && sudo apt-get install graphviz
     - name: checkout
       uses: actions/checkout@v2
-      with:
-        path: main
     - name: configure-cmake
-      run:  mkdir build && cd build && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../main
+      run:  mkdir build_docs && cd build_docs && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON .
     - name: build-docs
-      run:  cd build && cmake --build . --target docs
+      run:  cd build_docs && cmake --build . --target docs && cd .. && rmdir -r build_docs
     - name: publish-to-git
       uses: seanmiddleditch/gha-publish-to-git@master
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        source_folder: ./main
         dry_run: true

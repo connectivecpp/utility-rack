@@ -58,7 +58,7 @@ int main() {
 
     // remove the elements
     printStr("pop (and remove) each element from the queue");
-    int num_elements = wq.size();
+    auto num_elements = wq.size();
     while (num_elements-- > 0) {
         auto result = wq.try_pop(); // std::optional<int>
         if (result) {

@@ -31,7 +31,7 @@ void printNum(int num) { std::cout << num << " "; } // print the number passed t
 // calculate factorial - each call calculates the next factorial
 const void calcFactorial(bool print) {
     static int count = 1;
-    static u_int64_t fact = 1;
+    static std::uint64_t fact = 1;
 
     fact *= count;
     
@@ -56,18 +56,18 @@ public:
     constexpr Factorial(int num) { next(num); }
 
     // get the current calculated factorial (default is 0!)
-    constexpr u_int64_t getFact() const { return m_fact; }
+    constexpr std::uint64_t getFact() const { return m_fact; }
 
     constexpr int getCount() const { return m_count; }
 
     // calculate the next num factorials
-    constexpr u_int64_t next(int num) {
+    constexpr std::uint64_t next(int num) {
         chops::repeat(num, [&] () { m_fact *= (m_count++ == 0 ? 1 : m_count); } );
         return m_fact;
     }
 
     // calculate the next factorial
-    constexpr u_int64_t next()  {
+    constexpr std::uint64_t next()  {
         return next(1);
     }
 
@@ -77,7 +77,7 @@ public:
 
 private:
     int m_count = 0;
-    u_int64_t m_fact = 1;
+    std::uint64_t m_fact = 1;
 };
 
 // tasty utility lambdas
@@ -108,7 +108,7 @@ int main() {
     // factorials using lambda function
     printStr("factorial using lambda function");
 
-    u_int64_t fact = 1;
+    std::uint64_t fact = 1;
     int num = 5;
     chops::repeat(5, [&] () { static int count = 1; fact *= count++; });
     std::cout << num <<"! = " << fact <<std::endl << std::endl;

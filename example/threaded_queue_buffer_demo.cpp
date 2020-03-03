@@ -25,6 +25,7 @@
 #include <algorithm> // std::for_each
 #include <atomic> // std::atomic
 #include <future> // std::promise, std::future
+#include <ctime> // std::time
 
 #include "queue/wait_queue.hpp"
 #include "marshall/shared_buffer.hpp"
@@ -102,7 +103,7 @@ public:
     // generate a random number, range [(0...99) + start_num * 100]
     // every INTERVAL usec
     void operator()() {
-        std::srand(time(0));
+        std::srand(static_cast<unsigned int>(std::time(nullptr)));
         int num_count = NUM_LIMIT;
         // create NUM_LIMIT random numbers
         while (num_count-- > 0) {

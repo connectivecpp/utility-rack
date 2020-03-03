@@ -4,6 +4,7 @@
 #
 # Currently there is duplication, specially for the dependency management,
 # this should be refactored in the future
+#
 name: CMake Build Matrix
 
 on:
@@ -92,4 +93,4 @@ jobs:
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        dry_run: true
+        #         dry_run: true

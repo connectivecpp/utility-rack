@@ -92,4 +92,4 @@ jobs:
       with:
         branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        dry_run: true
+        dry_run: false

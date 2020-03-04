@@ -95,5 +95,5 @@ jobs:
       with:
         BRANCH: gh-pages
         ACCESS_TOKEN: ${{ secrets.GH_PAT }}
-        FOLDER: .
+        FOLDER: doc/html
         DEBUG: true

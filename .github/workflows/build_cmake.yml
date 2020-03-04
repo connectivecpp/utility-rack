@@ -85,15 +85,12 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
       with:
-        persist-credentials: false
+        ref: gh-pages
+    - name: remove-old-docs
+      run:  cd doc/html && rm -f *
     - name: configure-cmake
       run:  mkdir build_docs && cd build_docs && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ..
     - name: build-docs
       run:  cd build_docs && cmake --build . --target docs && cd .. && rm -r build_docs
-    - name: publish-to-git
-      uses: JamesIves/github-pages-deploy-action@releases/v3
-      with:
-        BRANCH: gh-pages
-        ACCESS_TOKEN: ${{ secrets.GH_PAT }}
-        FOLDER: doc/html
-        DEBUG: true
+    - name: add-new-docs
+      run:  cd doc/html && git add * && git commit -m "Adding generated html docs" && git push origin gh-pages

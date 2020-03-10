@@ -25,7 +25,7 @@ This project is distributed under the [Boost Software License](LICENSE.txt): [![
 
 # Utility Rack Components
 
-Doxygen HTML [available here|(doc/html/index.html).
+Doxygen HTML [available here](doc/html/index.html).
 
 ## Marshall Utilities
 

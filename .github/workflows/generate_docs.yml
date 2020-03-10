@@ -24,8 +24,6 @@ jobs:
       run:  mkdir build_docs && cd build_docs && cmake -DUTILITY_RACK_OPT_BUILD_DOCS:bool=ON ../master_branch
     - name: build-docs
       run:  cd build_docs && cmake --build . --target docs
-    - name: remove-build-dir
-      run:  rm -rf build_docs
     - name: checkout-gh-pages
       uses: actions/checkout@v2
       with:
@@ -33,8 +31,9 @@ jobs:
         path: pages_branch
     - name: sync-git-add-commit-push
       run: |
-            rsync -a --quiet --delete master_branch pages_branch
-            cd pages_branch
+            cd pages_branch/doc/html
+            rm -rf *
+            rsync -a --quiet ../../../build_docs/doc/html .
             git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
             git config --local user.name  "${GITHUB_ACTOR}"
             git add .

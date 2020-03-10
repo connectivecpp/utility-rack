@@ -1,0 +1,5 @@
+<map id="include/marshall/marshall.hpp" name="include/marshall/marshall.hpp">
+<area shape="rect" id="node2" href="$cast__ptr__to_8hpp.html" title="utility/cast_ptr_to.hpp" alt="" coords="91,155,237,181"/>
+<area shape="rect" id="node3" href="$shared__buffer_8hpp.html" title="Reference counted byte buffer classes, both const and mutable versions. " alt="" coords="439,80,617,107"/>
+<area shape="rect" id="node9" href="$extract__append_8hpp.html" title="Functions to extract arithmetic binary values from a byte buffer (in big&#45;endian) to native format; co..." alt="" coords="124,80,313,107"/>
+</map>

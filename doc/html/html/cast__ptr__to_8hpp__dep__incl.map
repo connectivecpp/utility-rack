@@ -1,0 +1,5 @@
+<map id="include/utility/cast_ptr_to.hpp" name="include/utility/cast_ptr_to.hpp">
+<area shape="rect" id="node2" href="$extract__append_8hpp.html" title="Functions to extract arithmetic binary values from a byte buffer (in big&#45;endian) to native format; co..." alt="" coords="5,95,165,136"/>
+<area shape="rect" id="node3" href="$marshall_8hpp.html" title="include/marshall/marshall.hpp" alt="" coords="105,184,300,211"/>
+<area shape="rect" id="node4" href="$shared__buffer_8hpp.html" title="Reference counted byte buffer classes, both const and mutable versions. " alt="" coords="241,95,399,136"/>
+</map>

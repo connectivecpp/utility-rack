@@ -5,12 +5,8 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required ( VERSION 3.9 )
-
-project ( utility-rack-doc VERSION 1.0 LANGUAGES CXX )
-
-set ( doxygen_proj_name "Utility Rack Reference" )
-include ( "${cmake_all_repos_include_dir}/doxygen_gen.cmake" )
+add_library ( ${main_test_lib_name} STATIC ${test_main_src} )
+add_target_info ( ${main_test_lib_name} )
 
 # end of file
 

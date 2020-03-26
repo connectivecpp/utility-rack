@@ -25,7 +25,7 @@
 #include "utility/cast_ptr_to.hpp"
 
 constexpr std::uint32_t val1 = 0xDDCCBBAA;
-constexpr char val2 = 0xEE;
+constexpr char val2 = static_cast<char>(0xEE);
 constexpr std::int16_t val3 = 0x01FF;
 constexpr std::uint64_t val4 = 0x0908070605040302;
 constexpr std::int32_t val5 = 0xDEADBEEF;

@@ -1,4 +1,4 @@
-# Copyright 2019 by Cliff Green
+# Copyright 2019-2020 by Cliff Green
 #
 # https://github.com/connectivecpp/utility-rack
 #
@@ -11,6 +11,8 @@ project ( utility-rack-example VERSION 1.0 LANGUAGES CXX )
 
 set ( example_source_dir "${CMAKE_SOURCE_DIR}/example" )
 
+include ( "${cmake_include_dir}/header_dirs_var.cmake" )
+
 set ( example_sources 
     "${example_source_dir}/repeat_demo.cpp"
     "${example_source_dir}/shared_buffer_demo.cpp"
@@ -19,48 +21,15 @@ set ( example_sources
     "${example_source_dir}/timer_demo.cpp"
     "${example_source_dir}/erase_where_demo.cpp" )
 
-set ( OPTIONS "" )
-set ( DEFINITIONS "" )
+include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
 
-set ( header_dirs
-    "${include_source_dir}"
-#    "${test_include_dir}"
-    )
-
-# Still learning find_package and related ways to bring in third party dependent include directories,
-# so don't judge, instead please help.
-
-set ( asio_include_dir "${CMAKE_SOURCE_DIR}/../asio/asio/include" )
-if ( NOT $ENV{ASIO_INCLUDE_DIR} STREQUAL "" )
-    set ( asio_include_dir $ENV{ASIO_INCLUDE_DIR}} )
-endif()
-
-function ( add_target_dependencies target )
-#    find_package ( asio REQUIRED )
-#    target_include_directories ( ${target} PRIVATE ${asio_INCLUDE_DIRS} )
-    target_include_directories ( ${target} PRIVATE ${asio_include_dir} )
-endfunction()
-
-function ( add_target_info target )
-    target_compile_features    ( ${target} PRIVATE cxx_std_17 )
-    target_compile_options     ( ${target} PRIVATE ${OPTIONS} )
-    target_compile_definitions ( ${target} PRIVATE ${DEFINITIONS} )
-    target_include_directories ( ${target} PRIVATE ${header_dirs} )
-    add_target_dependencies    ( ${target} )
-endfunction()
-
-function ( make_exe target src )
-    add_executable        ( ${target} ${src} )
-    add_target_info       ( ${target} )
-    target_link_libraries ( ${target} PRIVATE pthread )
-    message ( "Example executable to create: ${target}" )
-    add_test ( NAME ${target} COMMAND ${target} )
-endfunction()
+include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
+include ( "${cmake_all_repos_include_dir}/target_exe_func.cmake" )
 
 foreach ( example_src IN LISTS example_sources )
     get_filename_component ( targ ${example_src} NAME_WE )
-    message ( "Calling make_exe for: ${targ}" )
-    make_exe ( ${targ} ${example_src} )
+    message ( "Calling target_exe for: ${targ}" )
+    target_exe ( ${targ} ${example_src} )
 endforeach()
 
 # end of file

@@ -38,7 +38,7 @@ void generic_pointer_construction_test() {
   SB sb(ptr, arr.size());
   REQUIRE_FALSE (sb.empty());
   const std::byte* buf = chops::cast_ptr_to<std::byte>(arr.data());
-  chops::repeat(arr.size(), [&sb, arr] (int i) { REQUIRE(*(sb.data()+i) == arr[i]); } );
+  chops::repeat(static_cast<int>(arr.size()), [&sb, arr] (int i) { REQUIRE(*(sb.data()+i) == arr[i]); } );
 }
 
 template <typename SB>
@@ -87,7 +87,7 @@ void byte_vector_move_test() {
  
 TEMPLATE_TEST_CASE ( "Checking generic pointer construction",
                      "[common]",
-                     void, char, unsigned char, signed char ) {
+                     char, unsigned char, signed char ) {
   generic_pointer_construction_test<chops::mutable_shared_buffer, TestType>();
   generic_pointer_construction_test<chops::const_shared_buffer, TestType>();
 }
@@ -268,7 +268,7 @@ SCENARIO ( "Mutable shared buffer move into const shared buffer",
         REQUIRE_FALSE (msb == csb);
         msb.clear();
         msb.resize(arr2.size());
-        msb.append(arr2.cbegin(), arr2.size());
+        msb.append(arr2.data(), arr2.size());
         REQUIRE_FALSE (msb == csb);
       }
     }

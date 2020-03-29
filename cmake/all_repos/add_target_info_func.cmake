@@ -9,6 +9,8 @@ function ( add_target_info target )
     target_compile_features    ( ${target} PRIVATE cxx_std_17 )
     target_compile_options     ( ${target} PRIVATE ${OPTIONS} )
     target_compile_definitions ( ${target} PRIVATE ${DEFINITIONS} )
+    # _WINNT version is for Windows 7, needed for Asio lib
+    add_compile_definitions    ( _WIN32_WINNT=0x0601 )
     target_include_directories ( ${target} PRIVATE ${header_dirs} )
     add_target_dependencies    ( ${target} )
 endfunction()

@@ -2,22 +2,17 @@
 
 The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
-This software is written using modern C++ design idioms and the latest (2017) C++ standard.
+This software is written using modern C++ design idioms and the C++ 20 standard.
 
 # Build and Release Status, License Info
 
-**Travis CI Build Status:**
+![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/build_run_unit_test_cmake.yml?branch=main&label=GH%20Actions%20build,%20unit%20tests%20on%20main)
 
-*Master Branch* [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=master)](https://travis-ci.org/connectivecpp/utility-rack)
-*Develop Branch* | [![Build Status](https://travis-ci.org/connectivecpp/utility-rack.svg?branch=develop)](https://travis-ci.org/connectivecpp/utility-rack)
-
-**GitHub Actions CI Build Status:**
-
-![CMake Build Matrix](https://github.com/connectivecpp/utility-rack/workflows/CMake%20Build%20Matrix/badge.svg)
+![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/build_run_unit_test_cmake.yml?branch=develop&label=GH%20Actions%20build,%20unit%20tests%20on%20develop)
 
 **Latest tag:** ![Latest Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack)
 
-Release 1.0 is under development as of January 2020, awaiting CMake enhancements, marshalling utility completion, and additional testing.
+Release 1.0 is under development as of May 2024, awaiting C++ 20 enhancements, binary serialization utility completion, and additional testing.
 
 Release notes and upcoming development plans are [available here](doc/release.md).
 

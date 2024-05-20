@@ -1,55 +1,51 @@
-# Copyright 2018-2020 by Cliff Green
+# Copyright (c) 2024 by Cliff Green
 #
 # https://github.com/connectivecpp/utility-rack
+#
+# I'm still learning CMake, so improvement suggestions are always welcome.
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-# CMake 3.8 required for cxx_std_17 target_compile_features
-# CMake 3.9 required for doxygen target
-# CMake 3.12 required for add_compile_definitions
+cmake_minimum_required ( VERSION 3.14 FATAL_ERROR )
 
-# Cliff note, Sep 5, 2018: I'm still a CMake newbie, so there's many improvements that can
-# be made. I'm trying to use modern CMake techniques (see [References] (doc/references.md)).
+project ( utility_rack 
+	  LANGUAGES CXX 
+	  DESCRIPTION "A collection of small utility classes and functions"
+	  HOMEPAGE_URL "https://github.com/connectivecpp/utility-rack/" )
 
-cmake_minimum_required ( VERSION 3.12 )
+option ( UTILITY_RACK_BUILD_TESTS "Build unit tests" OFF )
+option ( UTILITY_RACK_BUILD_EXAMPLES "Build examples" OFF )
+option ( UTILITY_RACK_INSTALL "Install header only library" OFF )
 
-option ( UTILITY_RACK_OPT_BUILD_TESTS  "Build and perform utility-rack tests" ON )
-option ( UTILITY_RACK_OPT_BUILD_EXAMPLES  "Build perform utility-rack examples" ON )
-option ( UTILITY_RACK_OPT_BUILD_DOCS  "Build doxygen documentation" OFF )
+# add library targets
 
-set ( OPTIONS "" )
-set ( DEFINITIONS "" )
+add_library ( utility_rack INTERFACE )
+add_library ( chops::utility_rack ALIAS utility_rack )
 
-project ( utility-rack VERSION 1.0 LANGUAGES CXX )
+# configure library target
 
-set ( package_name "utility-rack" )
+target_include_directories ( utility_rack INTERFACE
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+			     $<INSTALL_INTERFACE:include/> )
+target_compile_features ( utility_rack INTERFACE cxx_std_20 )
 
-set ( include_source_dir "${CMAKE_SOURCE_DIR}/include" )
-set ( third_party_include_source_dir "${CMAKE_SOURCE_DIR}/third_party" )
-set ( cmake_include_dir "${CMAKE_SOURCE_DIR}/cmake" )
-set ( cmake_all_repos_include_dir "${CMAKE_SOURCE_DIR}/cmake/all_repos" )
-
-# Interface library:
-
-add_library ( ${package_name} INTERFACE )
-
-target_include_directories ( ${package_name} INTERFACE ${include_source_dir} )
-target_include_directories ( ${package_name} INTERFACE ${third_party_include_source_dir} )
-target_compile_features ( ${package_name} INTERFACE cxx_std_17)
-
-if ( UTILITY_RACK_OPT_BUILD_TESTS )
+# check to build unit tests
+if ( ${UTILITY_RACK_BUILD_TESTS} )
   enable_testing()
   add_subdirectory ( test )
-endif()
+endif ()
 
-if ( UTILITY_RACK_OPT_BUILD_EXAMPLES )
+# check to build example code
+if ( ${UTILITY_RACK_BUILD_EXAMPLES} )
   add_subdirectory ( example )
-endif()
+endif ()
 
-if ( UTILITY_RACK_OPT_BUILD_DOCS )
-  add_subdirectory ( doc )
-endif()
+# check to install
+if ( ${UTILITY_RACK_INSTALL} )
+  set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt )
+  include ( CPack )
+endif ()
 
 # end of file
 

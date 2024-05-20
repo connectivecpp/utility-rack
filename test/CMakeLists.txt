@@ -1,44 +1,35 @@
-# Copyright 2018-2020 by Cliff Green
-#
-# https://github.com/connectivecpp/utility-rack
+# Copyright (c) 2024 by Cliff Green
 #
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required ( VERSION 3.12 )
+cmake_minimum_required ( VERSION 3.14 FATAL_ERROR )
 
-project ( utility-rack-test VERSION 1.0 LANGUAGES CXX )
+# create project
+project ( utility_test LANGUAGES CXX )
 
-include ( "${cmake_all_repos_include_dir}/unit_test_vars.cmake" )
+set ( test_app_names
+    "cast_ptr_to_test"
+    "erase_where_test"
+    "forward_capture_test"
+    "make_byte_array_test"
+    "overloaded_test"
+    "repeat_test" )
 
-include ( "${cmake_include_dir}/header_dirs_var.cmake" )
+# add executable
+foreach ( test_app_name IN test_app_names )
+  add_executable ( test_app_name {test_app_name}.cpp )
+  target_compile_features ( test_app_name PRIVATE cxx_std_20 )
+  target_link_libraries ( test_app_name PRIVATE Catch2::Catch2WithMain )
+endforeach()
 
-set ( test_sources 
-    "${test_source_dir}/queue/wait_queue_test.cpp"
-    "${test_source_dir}/timer/periodic_timer_test.cpp"
-    "${test_source_dir}/marshall/extract_append_test.cpp"
-    #    "${test_source_dir}/marshall/marshall_test.cpp"
-    "${test_source_dir}/marshall/shared_buffer_test.cpp"
-    "${test_source_dir}/utility/cast_ptr_to_test.cpp"
-    "${test_source_dir}/utility/erase_where_test.cpp"
-    "${test_source_dir}/utility/make_byte_array_test.cpp"
-    "${test_source_dir}/utility/overloaded_test.cpp"
-    #    "${test_source_dir}/utility/forward_capture_test.cpp"
-    "${test_source_dir}/utility/repeat_test.cpp" )
-
-include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
-
-include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
-include ( "${cmake_all_repos_include_dir}/unit_test_main_lib.cmake" )
-include ( "${cmake_all_repos_include_dir}/target_exe_func.cmake" )
 
 enable_testing()
 
-foreach ( test_src IN LISTS test_sources )
-    get_filename_component ( targ ${test_src} NAME_WE )
-    message ( "Calling unit_test_target_exe for: ${targ}" )
-    unit_test_target_exe ( ${targ} ${test_src} )
+foreach ( test_app_name IN test_app_names )
+  add_test ( NAME run_{test_app_name} COMMAND test_app_name )
+  set_tests_properties ( run_{test_app_name} 
+    PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed"
+  )
 endforeach()
-
-# end of file
 

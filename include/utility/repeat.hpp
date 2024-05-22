@@ -1,24 +1,22 @@
 /** @file
  *
- *  @ingroup utility_module
+ * @brief Repeat code N times, since the C++ standard range-for does not make it
+ * easy to repeat a loop N times. The lambda or function object can access the iteration
+ * count, if desired.
  *
- *  @brief Repeat code N times, since the C++ standard range-for does not make it
- *  easy to repeat a loop N times. The lambda or function object can access the iteration
- *  count, if desired.
+ * This code is copied from Vittorio Romeo's blog at https://vittorioromeo.info/, specifically
+ * the first article in the series: 
+ * https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html. This
+ * is the same as his, including the noexcept propagation, except that it has been 
+ * simplified so that the count type is not simplified. Vittorio has written another article
+ * showing a compile-time repeat function.
  *
- *  This code is copied from Vittorio Romeo's blog at https://vittorioromeo.info/, specifically
- *  the first article in the series: 
- *  https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html. This
- *  is the same as his, including the noexcept propagation, except that it has been 
- *  simplified so that the count type is not simplified. Vittorio has written another article
- *  showing a compile-time repeat function.
+ * @authors Vittorio Romeo, Cliff Green
  *
- *  @authors Vittorio Romeo, Cliff Green
+ * @copyright (c) 2017-2024 by Cliff Green
  *
- *  Copyright (c) 2017-2019 by Cliff Green
- *
- *  Distributed under the Boost Software License, Version 1.0. 
- *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ * Distributed under the Boost Software License, Version 1.0. 
+ * (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
  */
 

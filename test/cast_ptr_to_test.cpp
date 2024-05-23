@@ -14,7 +14,8 @@
 #include <cstddef> // std::byte
 #include <cstdint> // std::uint16_t, std::uint32_t
 
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
+
 #include "utility/cast_ptr_to.hpp"
 
 SCENARIO( "casting unsigned int* to std::byte*", "[cast_ptr_to]" ) {

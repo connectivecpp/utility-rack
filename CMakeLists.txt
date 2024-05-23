@@ -11,7 +11,7 @@ cmake_minimum_required ( VERSION 3.14 FATAL_ERROR )
 
 project ( utility_rack 
 	  LANGUAGES CXX 
-	  DESCRIPTION "A collection of small utility classes and functions"
+	  DESCRIPTION "A collection of small and tasty utility classes and functions"
 	  HOMEPAGE_URL "https://github.com/connectivecpp/utility-rack/" )
 
 option ( UTILITY_RACK_BUILD_TESTS "Build unit tests" OFF )

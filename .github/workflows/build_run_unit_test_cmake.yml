@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-14]
-        # os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -21,12 +20,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          path: main
       - name: create-build-dir
         run: mkdir build
       - name: configure-cmake
-        run: cd build && cmake ../main
+        run: cd build && cmake -D UTILITY_RACK_BUILD_TESTS:BOOL=ON -D UTILITY_RACK_BUILD_EXAMPLES:BOOL=ON ..
       - name: build
         run: cd build && cmake --build . --config $BUILD_TYPE
       - name: run-unit-test

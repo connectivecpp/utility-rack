@@ -25,5 +25,5 @@ This utility creates a class providing a set of function object overloads (`oper
 
 ### Forward Capture
 
-Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](https://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html).
+Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's [blog article](https://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html).
 

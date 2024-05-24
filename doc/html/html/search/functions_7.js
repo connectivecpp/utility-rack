@@ -1,5 +1,0 @@
-var searchData=
-[
-  ['marshall',['marshall',['../marshall_8hpp.html#a3c19fc7907af6885c278a078002dae9b',1,'chops']]],
-  ['mutable_5fshared_5fbuffer',['mutable_shared_buffer',['../classchops_1_1mutable__shared__buffer.html#a34d38e7470f23f8b43cec524b12f1128',1,'chops::mutable_shared_buffer::mutable_shared_buffer() noexcept'],['../classchops_1_1mutable__shared__buffer.html#aa6c1b5d6079858278d137a888ddeb041',1,'chops::mutable_shared_buffer::mutable_shared_buffer(byte_vec &amp;&amp;bv) noexcept'],['../classchops_1_1mutable__shared__buffer.html#ad0bdf2cb43376f2aefcf283ac866df49',1,'chops::mutable_shared_buffer::mutable_shared_buffer(size_type sz)'],['../classchops_1_1mutable__shared__buffer.html#a5b7b95f0c8a547dd8c27eca058564b2b',1,'chops::mutable_shared_buffer::mutable_shared_buffer(const std::byte *buf, size_type sz)'],['../classchops_1_1mutable__shared__buffer.html#ae402208669489c6c46e9e0145f70b203',1,'chops::mutable_shared_buffer::mutable_shared_buffer(const T *buf, size_type sz)'],['../classchops_1_1mutable__shared__buffer.html#a753533f2fda59421e3616f76588c9d3e',1,'chops::mutable_shared_buffer::mutable_shared_buffer(InIt beg, InIt end)']]]
-];

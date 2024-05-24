@@ -1,0 +1,7 @@
+<map id="/github/workspace/include/utility/erase_where.hpp" name="/github/workspace/include/utility/erase_where.hpp">
+<area shape="rect" id="Node000001" title="Convenience functions for the erase&#45;remove idiom in C++." alt="" coords="104,5,276,46"/>
+<area shape="rect" id="Node000002" href="$erase__where__example_8cpp.html" title="Example code demonstrating use of chops::erase_where and chops::erase_where_if." alt="" coords="5,94,185,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,59,118,96,115,92,155,55"/>
+<area shape="rect" id="Node000003" href="$erase__where__test_8cpp.html" title="Test scenarios for erase_where utility functions." alt="" coords="209,94,362,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,55,266,92,262,96,221,59"/>
+</map>

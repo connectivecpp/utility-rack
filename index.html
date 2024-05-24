@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Utility Rack: Main Page</title>
+<title>Utility Rack: Utility Rack Overview</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -68,10 +68,32 @@ $(function() {
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">Utility Rack Documentation</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">Utility Rack Overview </div></div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p><a class="anchor" id="md__2github_2workspace_2include_2utility_2overview"></a> </p>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Repeat</h2>
+<p>Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo. The C++ range based <code>for</code> doesn't directly allow N repetitions of code. Vittorio's utility fills that gap. Vittorio's blog article is <a href="https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html">here</a>.</p>
+<h2><a class="anchor" id="autotoc_md2"></a>
+Erase Where</h2>
+<p>A common mistake in C++ is to forget to call <code>std::erase</code> after calling <code>std::remove</code>. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see <a href="https://connectivecpp.github.io/doc/references.html">References</a>).</p>
+<h2><a class="anchor" id="autotoc_md3"></a>
+Make Byte Array</h2>
+<p>Since <code>std::byte</code> pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see <a href="https://connectivecpp.github.io/doc/references.html">References</a>) is useful to simplify creation of byte buffers, specially for testing purposes.</p>
+<h2><a class="anchor" id="autotoc_md4"></a>
+Cast Pointer To</h2>
+<p>Using <code>reinterpret_cast</code> in C++ may mean undefined (even if well understood and executionally correct) behavior. In networking and other types of I/O processing it is a common need to convert a pointer to a <code>char *</code>, or in C++ 17 (and later) a <code>std::byte *</code>.</p>
+<p>The <code>cast_ptr_to</code> utility conveniently combines a static cast to <code>void *</code> with a static cast to a specified (via function template parameter) type. Typically the destination type is a <code>std::byte</code> pointer.</p>
+<p>If the destination type is unrelated to the original type (and is not a <code>void *</code> or some form of <code>char *</code> such as <code>std::byte *</code>) undefined behavior will still occur. However, if converting the pointer to a <code>std::byte</code> pointer and then back to the original pointer type, the behavior is well defined and safe.</p>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Overloaded</h2>
+<p>This utility creates a class providing a set of function object overloads (<code>operator()</code>) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling <code>std::visit</code>, allowing a set of lambdas to be created corresponding to the visitation set for a <code>std::variant</code>. The code is directly copied from <a href="https://en.cppreference.com/w/cpp/utility/variant/visit">C++ Reference</a>.</p>
+<h2><a class="anchor" id="autotoc_md6"></a>
+Forward Capture</h2>
+<p>Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's <a href="https://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html">blog article</a>. </p>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

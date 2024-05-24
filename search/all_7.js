@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['utility_20rack_20components_0',['Example code for the various Chops Utility Rack components.',['../group__example__module.html',1,'']]]
+  ['pointer_20to_0',['Cast Pointer To',['../index.html#autotoc_md4',1,'']]]
 ];

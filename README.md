@@ -14,7 +14,7 @@
 
 The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
-An overview of the utilities (and associated examples) is [here](overview.md). It is also the main page of the generated Doxygen documentation.
+More info on the utilities is [here](overview.md). It is also the main page of the generated Doxygen documentation.
 
 ## Generated Documentation
 

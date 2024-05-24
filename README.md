@@ -8,6 +8,8 @@
 
 ![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/gen_docs.yml?branch=main&label=GH%20Actions%20generate%20docs)
 
+![GH Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack?label=GH%20tag)
+
 ## Overview
 
 The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.

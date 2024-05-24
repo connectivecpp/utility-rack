@@ -1,19 +1,17 @@
 /** @file
  *
- *  @ingroup test_module
+ * @brief Test scenarios for Blitz Rakete's utility function.
  *
- *  @brief Test scenarios for Blitz Rakete's utility function.
+ * @author Cliff Green
  *
- *  @author Cliff Green
+ * @copyright (c) 2018-2024 by Cliff Green
  *
- *  Copyright (c) 2018 by Cliff Green
- *
- *  Distributed under the Boost Software License, Version 1.0. 
- *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ * Distributed under the Boost Software License, Version 1.0. 
+ * (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  */
 
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include "utility/make_byte_array.hpp"
 #include "utility/repeat.hpp"

@@ -1,36 +1,21 @@
-# Copyright 2019-2020 by Cliff Green
-#
-# https://github.com/connectivecpp/utility-rack
+# Copyright (c) 2024 by Cliff Green
 #
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required ( VERSION 3.12 )
+cmake_minimum_required ( VERSION 3.14 FATAL_ERROR )
 
-project ( utility-rack-example VERSION 1.0 LANGUAGES CXX )
+# create project
+project ( utility_rack_example LANGUAGES CXX )
 
-set ( example_source_dir "${CMAKE_SOURCE_DIR}/example" )
+set ( example_app_names  erase_where_example
+                         repeat_example )
 
-include ( "${cmake_include_dir}/header_dirs_var.cmake" )
-
-set ( example_sources 
-    "${example_source_dir}/repeat_demo.cpp"
-    "${example_source_dir}/shared_buffer_demo.cpp"
-    "${example_source_dir}/wait_queue_demo.cpp"
-    "${example_source_dir}/threaded_queue_buffer_demo.cpp"
-    "${example_source_dir}/timer_demo.cpp"
-    "${example_source_dir}/erase_where_demo.cpp" )
-
-include ( "${cmake_include_dir}/add_target_dependencies.cmake" )
-
-include ( "${cmake_all_repos_include_dir}/add_target_info_func.cmake" )
-include ( "${cmake_all_repos_include_dir}/target_exe_func.cmake" )
-
-foreach ( example_src IN LISTS example_sources )
-    get_filename_component ( targ ${example_src} NAME_WE )
-    message ( "Calling target_exe for: ${targ}" )
-    target_exe ( ${targ} ${example_src} )
+# add executable
+foreach ( example_app_name IN LISTS example_app_names )
+  message ( "Creating example executable: ${example_app_name}" )
+  add_executable ( ${example_app_name} ${example_app_name}.cpp )
+  target_compile_features ( ${example_app_name} PRIVATE cxx_std_20 )
+  target_link_libraries ( ${example_app_name} PRIVATE utility_rack )
 endforeach()
-
-# end of file
 

@@ -1,22 +1,21 @@
 /** @file
  *
- *  @ingroup test_module
+ * @brief Test scenarios for @c cast_ptr_to utility functions.
  *
- *  @brief Test scenarios for @c cast_ptr_to utility functions.
+ * @author Thurman Gillespy, Cliff Green
  *
- *  @author Thurman Gillespy, Cliff Green
+ * @copyright (c) 2019-2024 by Thurman Gillespy, Cliff Green
  *
- *  Copyright (c) 2019 by Thurman Gillespy, Cliff Green
- *
- *  Distributed under the Boost Software License, Version 1.0. 
- *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ * Distributed under the Boost Software License, Version 1.0. 
+ * (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  */
 
 #include <cstddef> // std::byte
 #include <cstdint> // std::uint16_t, std::uint32_t
 
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
+
 #include "utility/cast_ptr_to.hpp"
 
 SCENARIO( "casting unsigned int* to std::byte*", "[cast_ptr_to]" ) {

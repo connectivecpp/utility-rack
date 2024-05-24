@@ -1,130 +1,63 @@
-# Utility Rack - Tasty, Useful C++ Classes and Functions
+# Utility Rack - Tasty, Useful Header-Only C++ Classes and Functions
 
-The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
-
-This software is written using modern C++ design idioms and the C++ 20 standard.
-
-# Build and Release Status, License Info
+#### Unit Test and Documentation Generation Workflow Status
 
 ![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/build_run_unit_test_cmake.yml?branch=main&label=GH%20Actions%20build,%20unit%20tests%20on%20main)
 
 ![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/build_run_unit_test_cmake.yml?branch=develop&label=GH%20Actions%20build,%20unit%20tests%20on%20develop)
 
-**Latest tag:** ![Latest Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack)
+![GH Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/connectivecpp/utility-rack/gen_docs.yml?branch=main&label=GH%20Actions%20generate%20docs)
 
-Release 1.0 is under development as of May 2024, awaiting C++ 20 enhancements, binary serialization utility completion, and additional testing.
+![GH Tag](https://img.shields.io/github/v/tag/connectivecpp/utility-rack?label=GH%20tag)
 
-Release notes and upcoming development plans are [available here](doc/release.md).
+## Overview
 
-This project is distributed under the [Boost Software License](LICENSE.txt): [![Licence](https://img.shields.io/badge/license-boost-4480cc.svg)](http://www.boost.org/LICENSE_1_0.txt)
+The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
-# Utility Rack Components
+More info on the utilities is [here](overview.md). It is also the main page of the generated Doxygen documentation.
 
-Doxygen HTML [available here](doc/html/index.html).
+## Generated Documentation
 
-## Marshall Utilities
+The generated Doxygen documentation for these utilities is [here](https://connectivecpp.github.io/utility-rack/).
 
-### Marshall
+## Dependencies
 
-The marshall functions and classes provide marshalling and unmarshalling of binary data. Marshalling (also called serialization, depending on context) provides a way to transform application objects into and out of byte streams that can be sent over a network (or use for file IO). 
+The utilities in `utility-rack` do not have any third-party dependencies. They use C++ standard library headers only. The unit test code does have dependencies as noted below.
 
-This marshalling functionality in this repository is useful when explicit control is needed for every bit and byte. This allows a developer to match an existing wire protocol or encoding scheme or to define his or her own wire protocol. Support is provided for fundamental arithmetic types as well as certain C++ vocabulary types such as `std::optional`. The binary data is always marshalled to big-endian (network) format.
+## C++ Standard
 
-### Shared Buffer
+This software is compiled with the C++ 20 standard, although some of the idioms were written for C++ 17 and may have newer and more modern implementations. C++ 20 features such as `concepts` / `requires` will be added.
 
-Reference counted byte buffer classes are used within the marshalling classes as well as the Chops Net IP library, but can be useful in other contexts. These classes are based on example code inside Chris Kohlhoff's Asio library (see [References](https://connectivecpp.github.io/doc/references.html)). 
+## Supported Compilers
 
-A detailed overview of the marshall classes is [available here](doc/marshall.md).
+Continuous integration workflows build and unit test on g++ (through Ubuntu), MSVC (through Windows), and clang (through macOS).
 
-## Queue Utilities
+## Unit Test Dependencies
 
-### Wait Queue
+The unit test code uses [Catch2](https://github.com/catchorg/Catch2). If the `UTILITY_RACK_BUILD_TESTS` flag is provided to Cmake (see commands below) the Cmake configure / generate will download the Catch2 library as appropriate using the [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) dependency manager. If Catch2 (v3 or greater) is already installed using a different package manager (such as Conan or vcpkg), the `CPM_USE_LOCAL_PACKAGES` variable can be set which results in `find_package` being attempted. Note that v3 (or later) of Catch2 is required.
 
-Wait Queue is a multi-reader, multi-writer FIFO queue for transferring data between threads. It is templatized on the type of data passed through the queue as well as the queue container type. Data is passed with value semantics, either by copying or by moving (as opposed to a queue that transfers data by pointer or reference). The wait queue has both wait and no-wait pop semantics, as well as simple "close" and "open" capabilities (to allow graceful shutdown or restart of thread or process communication). A fixed size container (e.g. a `ring_span`) can be used, eliminating any and all dynamic memory management (useful in embedded or performance constrained environments). Similarly, a circular buffer that only allocates on construction can be used, which eliminates dynamic memory management when pushing or popping values on or off the queue.
+Specific version (or branch) specs for the Catch2 dependency is in `test/CMakeLists.txt`.
 
-Wait Queue is inspired by code from Anthony Williams' Concurrency in Action book (see [References](https://connectivecpp.github.io/doc/references.html)), although heavily modified.
+## Build and Run Unit Tests
 
-A detailed overview is [available here](doc/queue.md).
+To build and run the unit test program:
 
-## Timer Utilities
+First clone the `utility-rack` repository, then create a build directory in parallel to the `utility-rack` directory (this is called "out of source" builds, which is recommended), then `cd` (change directory) into the build directory. The CMake commands:
 
-### Periodic Timer
+```
+cmake -D UTILITY_RACK_BUILD_TESTS:BOOL=ON ../utility-rack
 
-The Periodic Timer class is an asynchronous periodic timer that wraps and simplifies Asio timers (see [References](https://connectivecpp.github.io/doc/references.html)) when periodic callbacks are needed. The periodicity can be based on either a simple duration or on timepoints based on a duration.
+cmake --build .
 
-Asynchronous timers from Asio are relatively easy to use. However, there are no timers that are periodic. This class simplifies the usage, using application supplied function object callbacks. When the timer is started, the application specifies whether each callback is invoked based on a duration (e.g. one second after the last callback), or on timepoints (e.g. a callback will be invoked each second according to the clock).
+ctest
+```
 
-A detailed overview is [available here](doc/timer.md).
+For additional test output, run the unit test individually, for example:
 
-## General Utilities
+```
+test/erase_where_test -s
+test/make_byte_array_test -s
+```
 
-### Repeat
-
-Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo (see [References](https://connectivecpp.github.io/doc/references.html)). The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap.
-
-### Erase Where
-
-A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.html)).
-
-### Make Byte Array
-
-Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes.
-
-### Cast Pointer To
-
-Using `reinterpret_cast` in C++ may mean undefined (even if well understood and executionally correct) behavior. In networking and other types of I/O processing it is a common need to convert a pointer to a `char *`, or in C++ 17 (and later) a `std::byte *`.
-
-The `cast_ptr_to` utility conveniently combines a static cast to `void *` with a static cast to a specified (via function template parameter) type. Typically the destination type is a `std::byte` pointer.
-
-If the destination type is unrelated to the original type (and is not a `void *` or some form of `char *` such as `std::byte *`) undefined behavior will still occur. However, if converting the pointer to a `std::byte` pointer and then back to the original pointer type, the behavior is well defined and safe.
-
-### Overloaded
-
-This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from [C++ Reference](https://en.cppreference.com/w/cpp/utility/variant/visit).
-
-### Forward Capture
-
-Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's blog (see [References](https://connectivecpp.github.io/doc/references.html)).
-
-# C++ Language Requirements and Alternatives
-
-C++ 17 is the primary baseline for this repository. Additional notes on possible alternatives are [available here](https://connectivecpp.github.io/).
-
-# External Dependencies
-
-Production external dependencies:
-
-- Version 1.13 (or later) of Chris Kohlhoff's [`asio`](https://github.com/chriskohlhoff/asio) library is required for the Periodic Timer class. Note that it is the stand-alone Asio library, not the Boost Asio version.
-
-Test external dependencies:
-
-- Version 2.8.0 (or later) of Phil Nash's [`Catch2`](https://github.com/catchorg/Catch2) library is required for all test scenarios.
-
-There are single file headers that have been copied into the `third_party` directory from various GitHub repositories and do not require any external dependency management. These are:
-
-- Martin Moene's [`ring-span-lite`](https://github.com/martinmoene/ring-span-lite) library, required in the Wait Queue unit test.
-- Justas Masiulis' [`circular_buffer`](https://github.com/JustasMasiulis/circular_buffer) library, required in the Wait Queue unit test.
-
-See [References](https://connectivecpp.github.io/doc/references.html) for additional details.
-
-# Supported Compilers and Platforms
-
-Utility Rack has been compiled and tests run on:
-
-- g++ 7.2 thru 7.4, Linux (Ubuntu 17.10 - kernel 4.13, Ubuntu 18.04 - kernel 4.15)
-- (TBD, will include at least clang on linux and vc++ on Windows)
-
-Follow the Travis CI badges for additional build environments.
-
-# Installation
-
-The Utility Rack components are header-only, so installation consists of downloading or cloning and setting compiler include paths appropriately. No compile time configuration macros are defined. CMake builds can be performed for unit test and example applications.
-
-# References
-
-See [References](https://connectivecpp.github.io/doc/references.html) for details on dependencies and inspirations for Utility Rack.
-
-# About
-
-Team member information is [available here](https://connectivecpp.github.io/).
+The example can be built by adding `-D UTILITY_RACK_BUILD_EXAMPLES:BOOL=ON` to the CMake configure / generate step.
 

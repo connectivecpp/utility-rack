@@ -13,6 +13,8 @@ Since `std::byte` pointers are used as a general buffer interface, a small utili
 
 ### Cast Pointer To
 
+__Note__: This utility is mostly or completely outdated due to the C++ 20 `std::bit_cast` function.
+
 Using `reinterpret_cast` in C++ may mean undefined (even if well understood and executionally correct) behavior. In networking and other types of I/O processing it is a common need to convert a pointer to a `char *`, or in C++ 17 (and later) a `std::byte *`.
 
 The `cast_ptr_to` utility conveniently combines a static cast to `void *` with a static cast to a specified (via function template parameter) type. Typically the destination type is a `std::byte` pointer.

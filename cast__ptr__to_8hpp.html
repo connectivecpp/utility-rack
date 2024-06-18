@@ -109,6 +109,7 @@ template&lt;typename Dst , typename Src &gt; </td></tr>
 <div class="textblock"><p>Utility functions for conveniently casting a pointer between types, primarily from some type T to either a <code>char*</code> or <code>std::byte*</code>. </p>
 <p>C++ <code>reinterpret_cast</code> can cast any pointer to another pointer type, but the behaviour can be undefined, depending on the access and usage. C++ guarantees that a pointer can be safely cast to <code>void*</code> and then to a <code>char*</code> (or <code>std::byte*</code>, which is one of the <code>char*</code> types), and that pointer can be cast back to the original pointer type. Casting between two unrelated types (outside of the <code>void*</code> and <code>char*</code> conversions already mentioned) results in undefined behavior (even if functionally the memory layout is the same and execution is successful on a given platform).</p>
 <p>Both const and non-const overloads are available.</p>
+<dl class="section note"><dt>Note</dt><dd>This utility is mostly or completely outdated due to the C++ 20 <code>std::bit_cast</code> function.</dd></dl>
 <dl class="section author"><dt>Authors</dt><dd>Thurman Gillespy, Cliff Green</dd></dl>
 <dl class="section copyright"><dt>Copyright</dt><dd>(c) 2019-2024 by Thurman Gillespy, Cliff Green</dd></dl>
 <p>Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>) </p>

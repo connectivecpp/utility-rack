@@ -13,6 +13,9 @@
  * given platform).
  *  
  * Both const and non-const overloads are available.
+ *
+ * @note This utility is mostly or completely outdated due to the C++ 20 @c std::bit_cast 
+ * function.
  * 
  * @authors Thurman Gillespy, Cliff Green
  * 

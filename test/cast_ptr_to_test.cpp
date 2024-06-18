@@ -18,7 +18,7 @@
 
 #include "utility/cast_ptr_to.hpp"
 
-// the following is a workaround for macOS / clang builds
+// the following is a workaround for Catch2 link failures on macOS / clang builds
 void compare_bytes (std::byte b1, std::byte b2) noexcept {
   REQUIRE (std::to_integer<int>(b1) == std::to_integer<int>(b2));
 }

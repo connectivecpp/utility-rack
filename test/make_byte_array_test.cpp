@@ -16,29 +16,28 @@
 #include "utility/make_byte_array.hpp"
 #include "utility/repeat.hpp"
 
-SCENARIO( "Blitz Rakete's utility function conveniently creates a std::array of std::bytes", 
-           "[make_byte_array]" ) {
-  GIVEN ("Various integers to put into a std::array of std::bytes") {
-    WHEN ("The function is called with five arguments") {
-      auto arr = chops::make_byte_array(0x36, 0xd0, 0x42, 0xbe, 0xef);
-      THEN ("the size and contents should match") {
-        REQUIRE (arr.size() == 5);
-        REQUIRE (arr[0] == std::byte{0x36});
-        REQUIRE (arr[1] == std::byte{0xd0});
-        REQUIRE (arr[2] == std::byte{0x42});
-        REQUIRE (arr[3] == std::byte{0xbe});
-        REQUIRE (arr[4] == std::byte{0xef});
-      }
-    }
-    AND_WHEN ("The function is called with eleven arguments") {
-      constexpr int N = 11;
-      auto arr = chops::make_byte_array(
-        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
-      );
-      THEN ("the size and contents should match") {
-        REQUIRE (arr.size() == N);
-        chops::repeat(N, [&arr] (const int& i) { REQUIRE (arr[i] == std::byte{0x11}); } );
-      }
-    }
-  } // end given
+// the following is a workaround for Catch2 link failures on macOS / clang builds
+void compare_bytes (std::byte b1, std::byte b2) noexcept {
+  REQUIRE (std::to_integer<int>(b1) == std::to_integer<int>(b2));
+}
+
+TEST_CASE ( "Blitz Rakete's utility function conveniently creates a std::array of std::bytes", 
+            "[make_byte_array]" ) {
+  SECTION ( "Various integers to put into a std::array of std::bytes" ) {
+    auto arr = chops::make_byte_array(0x36, 0xd0, 0x42, 0xbe, 0xef);
+    REQUIRE (arr.size() == 5);
+    compare_bytes (arr[0], std::byte{0x36});
+    compare_bytes (arr[1], std::byte{0xd0});
+    compare_bytes (arr[2], std::byte{0x42});
+    compare_bytes (arr[3], std::byte{0xbe});
+    compare_bytes (arr[4], std::byte{0xef});
+  }
+  SECTION ( "The function is called with eleven arguments" ) {
+    constexpr int N = 11;
+    auto arr = chops::make_byte_array(
+      0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
+    );
+    REQUIRE (arr.size() == N);
+    chops::repeat(N, [&arr] (int i) { compare_bytes (arr[i], std::byte{0x11}); } );
+  }
 }

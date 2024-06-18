@@ -38,41 +38,29 @@ int query_variant (const var_t& v) {
 }
 
 
-SCENARIO( "Creating an overloaded function object using template parameter packs", "[overloaded]" ) {
+TEST_CASE ( "Creating an overloaded function object using template parameter packs", "[overloaded]" ) {
 
-  GIVEN ("A std::variant containing a double, int, std::string, and a std::optional<float>") {
-    var_t my_var;
+  var_t my_var;
 
-    WHEN ("setting the variant to a double type") {
-      my_var = 11.0;
-      THEN ("the visitor should select the double overload") {
-        REQUIRE (query_variant(my_var) == double_val);
-      }
-    } // end when
-    AND_WHEN ("setting the variant to an int type") {
-      my_var = 12;
-      THEN ("the visitor should select the int overload") {
-        REQUIRE (query_variant(my_var) == int_val);
-      }
-    } // end when
-    AND_WHEN ("setting the variant to a string type") {
-      my_var = std::string("Howdy!");
-      THEN ("the visitor should select the string overload") {
-        REQUIRE (query_variant(my_var) == string_val);
-      }
-    } // end when
-    AND_WHEN ("setting the variant to an optional float type with a val") {
-      my_var = std::optional<float>(66.0f);
-      THEN ("the visitor should select the optional overload and detect value is present") {
-        REQUIRE (query_variant(my_var) == optional_val_present);
-      }
-    } // end when
-    AND_WHEN ("setting the variant to an optional float type without a val") {
-      my_var = std::optional<float>();
-      THEN ("the visitor should select the optional overload and detect value is not present") {
-        REQUIRE (query_variant(my_var) == optional_val_not_present);
-      }
-    } // end when
-  } // end given
+  SECTION ( "setting the variant to a double type" ) {
+    my_var = 11.0;
+    REQUIRE (query_variant(my_var) == double_val);
+  }
+  SECTION ( "setting the variant to an int type" ) {
+    my_var = 12;
+    REQUIRE (query_variant(my_var) == int_val);
+  }
+  SECTION ( "setting the variant to a string type" ) {
+    my_var = std::string("Howdy!");
+    REQUIRE (query_variant(my_var) == string_val);
+  }
+  SECTION ( "setting the variant to an optional float type with a val" ) {
+    my_var = std::optional<float>(66.0f);
+    REQUIRE (query_variant(my_var) == optional_val_present);
+  }
+  SECTION ( "setting the variant to an optional float type without a val " ) {
+    my_var = std::optional<float>();
+    REQUIRE (query_variant(my_var) == optional_val_not_present);
+  }
 
 }

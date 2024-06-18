@@ -18,31 +18,36 @@
 
 #include "utility/cast_ptr_to.hpp"
 
+// the following is a workaround for macOS / clang builds
+void compare_bytes (std::byte b1, std::byte b2) noexcept {
+  REQUIRE (std::to_integer<int>(b1) == std::to_integer<int>(b2));
+}
+
 TEST_CASE ( "casting unsigned int* to std::byte*", "[cast_ptr_to]" ) {
 
   SECTION ( "casting std::uint16_t* to const std::byte*" ) {
     std::uint16_t x = 0xAABB;
     const std::byte* p = chops::cast_ptr_to<std::byte> (&x);
-    REQUIRE (*(p + 0) == std::byte(0xBB));
-    REQUIRE (*(p + 1) == std::byte(0xAA));
+    compare_bytes (*(p + 0), std::byte(0xBB));
+    compare_bytes (*(p + 1), std::byte(0xAA));
   }
 
   SECTION ( "Casting the address of a 4 byte unsigned int to a const pointer" ) {
     std::uint32_t x = 0xAABBCCDD;
     const std::byte* p = chops::cast_ptr_to<std::byte> (&x);
-    REQUIRE (*(p + 0) == std::byte(0xDD));
-    REQUIRE (*(p + 1) == std::byte(0xCC));
-    REQUIRE (*(p + 2) == std::byte(0xBB));
-    REQUIRE (*(p + 3) == std::byte(0xAA));
+    compare_bytes (*(p + 0), std::byte(0xDD));
+    compare_bytes (*(p + 1), std::byte(0xCC));
+    compare_bytes (*(p + 2), std::byte(0xBB));
+    compare_bytes (*(p + 3), std::byte(0xAA));
   }
 
   SECTION ("Casting the address of a 4 byte signed int to a non-const pointer") {
     std::int32_t x = 0xDEADBEEF;
     std::byte* p = chops::cast_ptr_to<std::byte> (&x);
-    REQUIRE (*(p + 0) == std::byte(0xEF));
-    REQUIRE (*(p + 1) == std::byte(0xBE));
-    REQUIRE (*(p + 2) == std::byte(0xAD));
-    REQUIRE (*(p + 3) == std::byte(0xDE));
+    compare_bytes (*(p + 0), std::byte(0xEF));
+    compare_bytes (*(p + 1), std::byte(0xBE));
+    compare_bytes (*(p + 2), std::byte(0xAD));
+    compare_bytes (*(p + 3), std::byte(0xDE));
   }
   SECTION ("Casting the pointer type to std::byte and back for the same type") {
     std::int32_t x = 0xDEADBEEF;

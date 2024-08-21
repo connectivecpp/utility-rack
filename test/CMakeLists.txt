@@ -10,12 +10,12 @@ project ( utility_test LANGUAGES CXX )
 
 # add dependencies
 include ( ../cmake/download_cpm.cmake )
-CPMAddPackage ( "gh:catchorg/Catch2@3.6.0" )
+CPMAddPackage ( "gh:catchorg/Catch2@3.7.0" )
 
 set ( test_app_names  cast_ptr_to_test
                       erase_where_test
 		      #                      forward_capture_test
-                      make_byte_array_test
+                      byte_array_test
                       overloaded_test
                       repeat_test )
 

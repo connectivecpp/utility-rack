@@ -58,7 +58,7 @@ For additional test output, run the unit test individually, for example:
 
 ```
 test/erase_where_test -s
-test/make_byte_array_test -s
+test/byte_array_test -s
 ```
 
 The example can be built by adding `-D UTILITY_RACK_BUILD_EXAMPLES:BOOL=ON` to the CMake configure / generate step.

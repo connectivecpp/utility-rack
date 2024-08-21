@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Utility Rack: /github/workspace/include/utility/make_byte_array.hpp File Reference</title>
+<title>Utility Rack: /github/workspace/include/utility/byte_array.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,21 +75,21 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
-  <div class="headertitle"><div class="title">make_byte_array.hpp File Reference</div></div>
+  <div class="headertitle"><div class="title">byte_array.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>A utility function that constructs a std::array of std::byte objects.  
+<p>Utility functions to construct and compare a <code>std::array</code> of <code>std::byte</code> objects.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;array&gt;</code><br />
 <code>#include &lt;cstddef&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for make_byte_array.hpp:</div>
+Include dependency graph for byte_array.hpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="make__byte__array_8hpp__incl.png" border="0" usemap="#a_2github_2workspace_2include_2utility_2make__byte__array_8hpp" alt=""/></div>
-<map name="a_2github_2workspace_2include_2utility_2make__byte__array_8hpp" id="a_2github_2workspace_2include_2utility_2make__byte__array_8hpp">
-<area shape="rect" title="A utility function that constructs a std::array of std::byte objects." alt="" coords="21,5,202,46"/>
+<div class="center"><img src="byte__array_8hpp__incl.png" border="0" usemap="#a_2github_2workspace_2include_2utility_2byte__array_8hpp" alt=""/></div>
+<map name="a_2github_2workspace_2include_2utility_2byte__array_8hpp" id="a_2github_2workspace_2include_2utility_2byte__array_8hpp">
+<area shape="rect" title="Utility functions to construct and compare a std::array of std::byte objects." alt="" coords="25,5,198,46"/>
 <area shape="rect" title=" " alt="" coords="5,94,55,120"/>
 <area shape="poly" title=" " alt="" coords="93,48,55,85,52,81,89,44"/>
 <area shape="rect" title=" " alt="" coords="79,94,144,120"/>
@@ -101,30 +101,35 @@ Include dependency graph for make_byte_array.hpp:</div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="make__byte__array_8hpp__dep__incl.png" border="0" usemap="#a_2github_2workspace_2include_2utility_2make__byte__array_8hppdep" alt=""/></div>
-<map name="a_2github_2workspace_2include_2utility_2make__byte__array_8hppdep" id="a_2github_2workspace_2include_2utility_2make__byte__array_8hppdep">
-<area shape="rect" title="A utility function that constructs a std::array of std::byte objects." alt="" coords="5,5,187,46"/>
-<area shape="rect" href="make__byte__array__test_8cpp.html" title="Test scenarios for Blitz Rakete&#39;s utility function." alt="" coords="8,94,184,135"/>
-<area shape="poly" title=" " alt="" coords="99,62,99,94,93,94,93,62"/>
+<div class="center"><img src="byte__array_8hpp__dep__incl.png" border="0" usemap="#a_2github_2workspace_2include_2utility_2byte__array_8hppdep" alt=""/></div>
+<map name="a_2github_2workspace_2include_2utility_2byte__array_8hppdep" id="a_2github_2workspace_2include_2utility_2byte__array_8hppdep">
+<area shape="rect" title="Utility functions to construct and compare a std::array of std::byte objects." alt="" coords="5,5,178,46"/>
+<area shape="rect" href="byte__array__test_8cpp.html" title="Test scenarios for make_byte_array and compare_byte_arrays." alt="" coords="15,94,168,135"/>
+<area shape="poly" title=" " alt="" coords="94,62,94,94,89,94,89,62"/>
 </map>
 </div>
 </div>
-<p><a href="make__byte__array_8hpp_source.html">Go to the source code of this file.</a></p>
+<p><a href="byte__array_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab028a7ba25d3e5b7221502db90a5bb49" id="r_ab028a7ba25d3e5b7221502db90a5bb49"><td class="memTemplParams" colspan="2"><a id="ab028a7ba25d3e5b7221502db90a5bb49" name="ab028a7ba25d3e5b7221502db90a5bb49"></a>
+<tr class="memitem:aa302d591a0c75a7b9f67aff7fd7d1aa0" id="r_aa302d591a0c75a7b9f67aff7fd7d1aa0"><td class="memTemplParams" colspan="2"><a id="aa302d591a0c75a7b9f67aff7fd7d1aa0" name="aa302d591a0c75a7b9f67aff7fd7d1aa0"></a>
 template&lt;typename... Ts&gt; </td></tr>
-<tr class="memitem:ab028a7ba25d3e5b7221502db90a5bb49"><td class="memTemplItemLeft" align="right" valign="top">std::array&lt; std::byte, sizeof...(Ts)&gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>chops::make_byte_array</b> (Ts &amp;&amp;... args) noexcept</td></tr>
-<tr class="separator:ab028a7ba25d3e5b7221502db90a5bb49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa302d591a0c75a7b9f67aff7fd7d1aa0"><td class="memTemplItemLeft" align="right" valign="top">constexpr std::array&lt; std::byte, sizeof...(Ts)&gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>chops::make_byte_array</b> (Ts &amp;&amp;... args) noexcept</td></tr>
+<tr class="separator:aa302d591a0c75a7b9f67aff7fd7d1aa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2da868a238a60fcd2376a978e9d8b983" id="r_a2da868a238a60fcd2376a978e9d8b983"><td class="memTemplParams" colspan="2"><a id="a2da868a238a60fcd2376a978e9d8b983" name="a2da868a238a60fcd2376a978e9d8b983"></a>
+template&lt;typename std::size_t N&gt; </td></tr>
+<tr class="memitem:a2da868a238a60fcd2376a978e9d8b983"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>chops::compare_byte_arrays</b> (const std::array&lt; std::byte, N &gt; &amp;lhs, const std::array&lt; std::byte, N &gt; &amp;rhs)</td></tr>
+<tr class="separator:a2da868a238a60fcd2376a978e9d8b983"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A utility function that constructs a std::array of std::byte objects. </p>
+<div class="textblock"><p>Utility functions to construct and compare a <code>std::array</code> of <code>std::byte</code> objects. </p>
 <p>A <code>std::byte</code> is defined as an enum and there are no implicit conversions from int to an enum class. Instead of writing:</p>
 <div class="fragment"><div class="line">std::array&lt;std::byte, 5&gt; arr = </div>
 <div class="line">  { std::byte{0x36}, std::byte{0xd0}, std::byte{0x42}, std::byte{0xbe}, std::byte{0xef} };</div>
-</div><!-- fragment --><p> it is easier (specially for larger arrays) to write: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> arr = make_byte_array(0x36, 0xd0, 0x42, 0xbe, 0xef);</div>
-</div><!-- fragment --><p>This code is taken from an example by Blitz Rakete from an answer on Stackoverflow (Blitz is user Rakete1111 on SO). The <code>static_cast</code> was added to eliminate "narrowing" warnings (since typically integer values are used to initialize the <code>std::byte</code> values, which would be a narrowing conversion).</p>
+</div><!-- fragment --><p> it is easier (specially for larger arrays) to write: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> arr = chops::make_byte_array(0x36, 0xd0, 0x42, 0xbe, 0xef);</div>
+</div><!-- fragment --><p>The <code>make_byte_array</code> function is taken from an example by Blitz Rakete on Stackoverflow (Blitz is user Rakete1111 on SO). The <code>static_cast</code> was added to eliminate "narrowing" warnings (since typically integer values are used to initialize the <code>std::byte</code> values, which would be a narrowing conversion).</p>
+<p>The <code>compare_byte_arrays</code> function simplifies test code, typically using the Catch2 unit test library.</p>
 <dl class="section author"><dt>Authors</dt><dd>Blitz Rakete, Cliff Green</dd></dl>
 <dl class="section copyright"><dt>Copyright</dt><dd>(c) 2017-2024 by Cliff Green</dd></dl>
 <p>Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>) </p>

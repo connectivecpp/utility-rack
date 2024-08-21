@@ -1,5 +1,5 @@
-<map id="/github/workspace/include/utility/make_byte_array.hpp" name="/github/workspace/include/utility/make_byte_array.hpp">
-<area shape="rect" id="Node000001" title="A utility function that constructs a std::array of std::byte objects." alt="" coords="21,5,202,46"/>
+<map id="/github/workspace/include/utility/byte_array.hpp" name="/github/workspace/include/utility/byte_array.hpp">
+<area shape="rect" id="Node000001" title="Utility functions to construct and compare a std::array of std::byte objects." alt="" coords="25,5,198,46"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,94,55,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,48,55,85,52,81,89,44"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="79,94,144,120"/>

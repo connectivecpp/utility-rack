@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['forward_5fcapture_2ehpp_0',['forward_capture.hpp',['../forward__capture_8hpp.html',1,'']]],
-  ['forward_5fcapture_5ftest_2ecpp_1',['forward_capture_test.cpp',['../forward__capture__test_8cpp.html',1,'']]]
+  ['erase_5fwhere_2ehpp_0',['erase_where.hpp',['../erase__where_8hpp.html',1,'']]],
+  ['erase_5fwhere_5fexample_2ecpp_1',['erase_where_example.cpp',['../erase__where__example_8cpp.html',1,'']]],
+  ['erase_5fwhere_5ftest_2ecpp_2',['erase_where_test.cpp',['../erase__where__test_8cpp.html',1,'']]]
 ];

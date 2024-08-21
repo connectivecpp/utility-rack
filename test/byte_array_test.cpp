@@ -40,6 +40,6 @@ TEST_CASE ( "Blitz Rakete's utility function conveniently creates a std::array o
       0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
     );
     REQUIRE (arr.size() == N);
-    // chops::repeat(N, [&arr] (int i) { REQUIRE (arr[i] == std::byte{0x11}); } );
+    chops::repeat(N, [&arr] (int i) { REQUIRE (std::to_integer(arr[i]) == 0x11); } );
   }
 }

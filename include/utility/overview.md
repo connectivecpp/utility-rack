@@ -7,9 +7,9 @@ Repeat is a function template to abstract and simplify loops that repeat N times
 
 A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.html)).
 
-### Make Byte Array
+### Byte Array
 
-Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes.
+Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes. In addition, a utility function to compare @c std::byte arrays is provided.
 
 ### Cast Pointer To
 

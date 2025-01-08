@@ -9,7 +9,7 @@ A common mistake in C++ is to forget to call `std::erase` after calling `std::re
 
 ### Byte Array
 
-Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes. In addition, a utility function to compare @c std::byte arrays is provided.
+Since `std::byte` pointers are used as a general buffer interface, a small utility function from Blitz Rakete as posted on Stackoverflow (see [References](https://connectivecpp.github.io/doc/references.html)) is useful to simplify creation of byte buffers, specially for testing purposes. In addition, a utility function to compare `std::byte` arrays is provided.
 
 ### Cast Pointer To
 
@@ -19,7 +19,7 @@ Using `reinterpret_cast` in C++ may mean undefined (even if well understood and 
 
 The `cast_ptr_to` utility conveniently combines a static cast to `void *` with a static cast to a specified (via function template parameter) type. Typically the destination type is a `std::byte` pointer.
 
-If the destination type is unrelated to the original type (and is not a `void *` or some form of `char *` such as `std::byte *`) undefined behavior will still occur. However, if converting the pointer to a `std::byte` pointer and then back to the original pointer type, the behavior is well defined and safe.
+If the destination type is unrelated to the original type (and is not a `void *` or some form of `char *` such as `std::byte *`) __undefined behavior__ will still occur. However, if converting the pointer to a `std::byte` pointer and then back to the original pointer type, the behavior is well defined and safe.
 
 ### Overloaded
 

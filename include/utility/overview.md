@@ -1,7 +1,9 @@
 ## Utility Rack Overview
 
 ### Repeat                                                                                                                                                                                                                                            
-Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo. The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap. Vittorio's blog article is [here](https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html).
+__Note__: This utility is outdated due to the C++ 20 `std::ranges::iota_view` and `std::views::iota` facilities.
+
+Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo. The C++ range based `for` doesn't directly allow N repetitions of code. Vittorio's utility fills that gap. Vittorio's blog article is [here](https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html). This u
 
 ### Erase Where
 

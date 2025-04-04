@@ -9,6 +9,8 @@
  *  Copyright (c)2019 by Thurman Gillespy
  *  3/22/19
  *
+ *  Minor update 4/4/2025, adding <cstdint> include.
+ *
  *  Distributed under the Boost Software License, Version 1.0. 
  *  (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
@@ -19,6 +21,7 @@
 #include <iostream>
 #include <cstdlib> // EXIT_SUCCESS
 #include <string>
+#include <cstdint> // std::uint64_t
 
 #include "utility/repeat.hpp"
 

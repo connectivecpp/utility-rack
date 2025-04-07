@@ -25,15 +25,15 @@
  * 
  * @authors Blitz Rakete, Cliff Green
  *
- * @copyright (c) 2017-2024 by Cliff Green
+ * @copyright (c) 2017-2025 by Cliff Green
  *
  * Distributed under the Boost Software License, Version 1.0. 
  * (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  * 
  */
 
-#ifndef MAKE_BYTE_ARRAY_HPP_INCLUDED
-#define MAKE_BYTE_ARRAY_HPP_INCLUDED
+#ifndef BYTE_ARRAY_HPP_INCLUDED
+#define BYTE_ARRAY_HPP_INCLUDED
 
 #include <array>
 #include <cstddef> // std::byte

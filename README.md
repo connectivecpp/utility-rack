@@ -22,7 +22,7 @@ More info on the utilities is [here](include/utility/overview.md). It is also th
 
 The generated Doxygen documentation for these utilities is [here](https://connectivecpp.github.io/utility-rack/).
 
-## Dependencies
+## Library Dependencies
 
 The utilities in `utility-rack` do not have any third-party dependencies. They use C++ standard library headers only. The unit test code does have dependencies as noted below.
 

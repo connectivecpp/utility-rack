@@ -7,6 +7,8 @@ Repeat is a function template to abstract and simplify loops that repeat N times
 
 ### Erase Where
 
+__Note__: This utility is mostly or completely outdated due to the C++ 20 `std::erase_if` function.
+
 A common mistake in C++ is to forget to call `std::erase` after calling `std::remove`. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see [References](https://connectivecpp.github.io/doc/references.html)).
 
 ### Byte Array
@@ -25,7 +27,7 @@ If the destination type is unrelated to the original type (and is not a `void *`
 
 ### Overloaded
 
-This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from [C++ Reference](https://en.cppreference.com/w/cpp/utility/variant/visit).
+This utility creates a class providing a set of function object overloads (`operator()`) from a parameter pack. There is both a class template and a function template (the function template is not needed in C++ 20). This utility is specially useful when calling `std::visit`, allowing a set of lambdas to be created corresponding to the visitation set for a `std::variant`. The code is directly copied from [C++ Reference](https://en.cppreference.com/w/cpp/utility/variant/visit2).
 
 ### Forward Capture
 

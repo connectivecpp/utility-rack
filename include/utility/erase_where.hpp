@@ -5,12 +5,15 @@
  * It's a common error to forget to erase an element from a container after
  * calling @c remove. This wraps the two calls together.
  *
+ * This functionality is mostly (if not completely) obsolete due to the C++ 20
+ * `erase_if` function.
+ *
  * @note Thanks goes to Richard Hodges. Most of this code is copied directly 
  * from a post of his on StackOverflow.
  *
  * @authors Richard Hodges, Cliff Green
  *
- * @copyright (c) 2017-2024 by Cliff Green
+ * @copyright (c) 2017-2025 by Cliff Green
  *
  * Distributed under the Boost Software License, Version 1.0. 
  * (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)

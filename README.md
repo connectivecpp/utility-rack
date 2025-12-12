@@ -14,7 +14,7 @@
 
 ## Overview
 
-The C++ classes and functions in this repository are designed for general purpose use. In addition, many of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library). The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
+The C++ classes and functions in this repository are designed for general purpose use. In addition, some of them are used in the Chops ("C"onnective "H"andcrafted "Op"enwork "S"oftware) libraries (e.g. Chops Net IP, an asynchronous IP networking library), typically in the unit testing or example applications. The Chops libraries provide networking and distributed processing functionality and are specially useful for efficiently connecting multiple types of devices together.
 
 More info on the utilities is [here](include/utility/overview.md). It is also the main page of the generated Doxygen documentation.
 
@@ -22,13 +22,13 @@ More info on the utilities is [here](include/utility/overview.md). It is also th
 
 The generated Doxygen documentation for these utilities is [here](https://connectivecpp.github.io/utility-rack/).
 
-## Dependencies
+## Library Dependencies
 
 The utilities in `utility-rack` do not have any third-party dependencies. They use C++ standard library headers only. The unit test code does have dependencies as noted below.
 
 ## C++ Standard
 
-This software is compiled with the C++ 20 standard, although some of the idioms were written for C++ 17 and may have newer and more modern implementations. C++ 20 features such as `concepts` / `requires` will be added.
+This software is compiled with the C++ 20 standard, although many of the idioms were written for C++ 17 and are obsolete due to C++20 additions to the standard library. C++ 20 features such as `concepts` / `requires` may be added in the future.
 
 ## Supported Compilers
 

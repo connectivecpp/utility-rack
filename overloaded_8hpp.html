@@ -95,14 +95,14 @@ $(function(){ initResizable(false); });
 </div><!--header-->
 <div class="contents">
 
-<p>Overloaded utility function and class, primarily used with <code>std::visit</code>.  
+<p>Overloaded utility function and class, used with <code>std::visit</code>.  
 <a href="#details">More...</a></p>
 <div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="overloaded_8hpp__dep__incl.png" border="0" usemap="#a_2github_2workspace_2include_2utility_2overloaded_8hppdep" alt=""/></div>
 <map name="a_2github_2workspace_2include_2utility_2overloaded_8hppdep" id="a_2github_2workspace_2include_2utility_2overloaded_8hppdep">
-<area shape="rect" title="Overloaded utility function and class, primarily used with std::visit." alt="" coords="5,5,178,46"/>
+<area shape="rect" title="Overloaded utility function and class, used with std::visit." alt="" coords="5,5,178,46"/>
 <area shape="rect" href="overloaded__test_8cpp.html" title="Test scenarios for overloaded utility class and function." alt="" coords="15,94,168,135"/>
 <area shape="poly" title=" " alt="" coords="94,62,94,94,89,94,89,62"/>
 </map>
@@ -123,10 +123,13 @@ template&lt;class... Ts&gt; </td></tr>
 <tr class="separator:a2dfe318bd1288231d8cd76c50b6a7fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Overloaded utility function and class, primarily used with <code>std::visit</code>. </p>
-<p>See <a href="https://en.cppreference.com/w/cpp/utility/variant/visit">https://en.cppreference.com/w/cpp/utility/variant/visit</a> for explanations and usage. This is the basic and simple version of the code as copied and pasted from the cppreference site. There is likely to be a more elaborate <code>std::overload</code> in a future C++ standard (probably post-C++20 - see <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0051r3.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0051r3.pdf</a>).</p>
+<div class="textblock"><p>Overloaded utility function and class, used with <code>std::visit</code>. </p>
+<p>This utility simplifies calling visitor function objects on a <code>std::variant</code> based on the instantiated variant type. The code is explicitly copied from the <em>cppreference</em> website.</p>
+<p>See <a href="https://en.cppreference.com/w/cpp/utility/variant/visit2">https://en.cppreference.com/w/cpp/utility/variant/visit2</a> for the C++ 17 and C++ 20 version of <code>std::visit</code>.</p>
+<p>The <code>overloaded</code> function template is not needed in C++ 20.</p>
+<p>C++ 26 has a <code>visit</code> method as part of the <code>std::variant</code> class that is more flexible, see <a href="https://en.cppreference.com/w/cpp/utility/variant/visit">https://en.cppreference.com/w/cpp/utility/variant/visit</a> for additional info.</p>
 <dl class="section author"><dt>Author</dt><dd>Cliff Green</dd></dl>
-<dl class="section copyright"><dt>Copyright</dt><dd>(c) 2019-2024 by Cliff Green</dd></dl>
+<dl class="section copyright"><dt>Copyright</dt><dd>(c) 2019-2025 by Cliff Green</dd></dl>
 <p>Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>) </p>
 </div></div><!-- contents -->
 <!-- start footer part -->

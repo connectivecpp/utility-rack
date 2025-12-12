@@ -94,6 +94,7 @@ Repeat</h2>
 <p>Repeat is a function template to abstract and simplify loops that repeat N times, from Vittorio Romeo. The C++ range based <code>for</code> doesn't directly allow N repetitions of code. Vittorio's utility fills that gap. Vittorio's blog article is <a href="https://vittorioromeo.info/index/blog/abstraction_design_implementation_repeat.html">here</a>. This u</p>
 <h2><a class="anchor" id="autotoc_md2"></a>
 Erase Where</h2>
+<p><b>Note</b>: This utility is mostly or completely outdated due to the C++ 20 <code>std::erase_if</code> function.</p>
 <p>A common mistake in C++ is to forget to call <code>std::erase</code> after calling <code>std::remove</code>. This utility wraps the two together allowing either a value to be directly removed from a container, or a set of values to be removed using a predicate. This utility code is copied from a StackOverflow post by Richard Hodges (see <a href="https://connectivecpp.github.io/doc/references.html">References</a>).</p>
 <h2><a class="anchor" id="autotoc_md3"></a>
 Byte Array</h2>
@@ -106,7 +107,7 @@ Cast Pointer To</h2>
 <p>If the destination type is unrelated to the original type (and is not a <code>void *</code> or some form of <code>char *</code> such as <code>std::byte *</code>) <b>undefined behavior</b> will still occur. However, if converting the pointer to a <code>std::byte</code> pointer and then back to the original pointer type, the behavior is well defined and safe.</p>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Overloaded</h2>
-<p>This utility creates a class providing a set of function object overloads (<code>operator()</code>) from a parameter pack. There is both a class template and a function template. This utility is specially useful when calling <code>std::visit</code>, allowing a set of lambdas to be created corresponding to the visitation set for a <code>std::variant</code>. The code is directly copied from <a href="https://en.cppreference.com/w/cpp/utility/variant/visit">C++ Reference</a>.</p>
+<p>This utility creates a class providing a set of function object overloads (<code>operator()</code>) from a parameter pack. There is both a class template and a function template (the function template is not needed in C++ 20). This utility is specially useful when calling <code>std::visit</code>, allowing a set of lambdas to be created corresponding to the visitation set for a <code>std::variant</code>. The code is directly copied from <a href="https://en.cppreference.com/w/cpp/utility/variant/visit2">C++ Reference</a>.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Forward Capture</h2>
 <p>Capturing perfectly forwarded references in a lambda is difficult. (Forwarding references are also called universal references, a term coined by Scott Meyers.) This utility eases the task with a level of indirection. The design and code come from Vittorio Romeo's <a href="https://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html">blog article</a>. </p>
